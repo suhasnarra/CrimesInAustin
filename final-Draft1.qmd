@@ -41,18 +41,24 @@ Explain key objective
 
 # Visualizations
 
-## Visualization 1 (rename and give title)
+## Scatterplot
 
-```{r, , message=FALSE, echo = FALSE}
-
+```{r, , message=FALSE}
+plot(econ$Retail.Gasoline.Price.TX, econ$Retail.Diesel.Price.TX,
+     main= "Gas vs Diesel Prices in Texas",
+     xlab = "Gas Price", ylab = "Diesel Price",
+     pch = 19, cex = .7, col = "blue",
+     mgp = c(2, .7, 0),
+     xlim = c(1.5, 5.5), ylim = c(1.5, 5.5))
 
 ```
 
-## Viz 1 Explanation
+## Interpretation
+As gas prices have increased, diesel prices have generally gone with them. There is a moderately strong correlation between diesel and gas prices, allowing us to better understand Texas' economy. By showing this strong correlation, we are better prepared to look at how vehicle crimes have changed over time.
 
 ## Visualization 2 (rename and give title)
 
-```{r, , message=FALSE, echo = FALSE}
+```{r, , message=FALSE}
 
 
 ```
@@ -61,7 +67,7 @@ Explain key objective
 
 ## Visualization 3 (rename and give title)
 
-```{r, , message=FALSE, echo = FALSE}
+```{r, , message=FALSE}
 
 
 ```
@@ -70,7 +76,7 @@ Explain key objective
 
 ## Visualization 4 (rename and give title)
 
-```{r, , message=FALSE, echo = FALSE}
+```{r, , message=FALSE}
 
 
 ```
@@ -79,7 +85,7 @@ Explain key objective
 
 ## Visualization 5 (rename and give title)
 
-```{r, , message=FALSE, echo = FALSE}
+```{r, , message=FALSE}
 
 
 ```
@@ -88,7 +94,7 @@ Explain key objective
 
 ## Visualization 6 (rename and give title)
 
-```{r, , message=FALSE, echo = FALSE}
+```{r, , message=FALSE}
 
 
 ```
