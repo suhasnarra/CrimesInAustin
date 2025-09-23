@@ -1,0 +1,97 @@
+---
+title: "Crime in Austin"
+format: pdf
+---
+
+```{r, message=FALSE, echo = FALSE}
+# Load any libraries used
+
+```
+
+# Group: Suhas, Mert, Carson, Max
+
+# Our Data
+
+## Primary Dataset: Austin Crime Reports 2003-Present
+## Secondary Dataset: Key Economic Indicators in Austin 2007-2025
+### Source: data.gov
+
+```{r, message=FALSE, echo = FALSE}
+
+# Load in data
+crimes <- read.csv("austin.csv")
+econ <- read.csv("austin_econ.csv")
+
+```
+
+# Key Objective
+Explain key objective
+
+## Key Variables
+* __Highest Offense Description__: Tells us what the crime is. Important for us to be able to judge severity and type of crime.
+* __Location Type__: Tells us what type of place the crime occurred. Important to make distinctions between places like homes, stores, etc.
+* __District__: Gives general area of the crime in Austin. Allows us to understand where crimes are occurring in the city.
+* __Occurred Time__: Tells us when the crime occurred so we can determine if crime is more common during certain times of day.
+* __Report Time__: Tells us when the crime was reported and can be combined with occurred time to understand how it takes certain areas to report crimes.
+
+## Pre-Processing
+* Grouping times, so instead of looking at specific times we can analyze times of day.
+* Converting dates as a character objects to datetime object to make data columns that are dates more usable and understandable.
+* 
+
+# Visualizations
+
+## Visualization 1 (rename and give title)
+
+```{r, , message=FALSE, echo = FALSE}
+
+
+```
+
+## Viz 1 Explanation
+
+## Visualization 2 (rename and give title)
+
+```{r, , message=FALSE, echo = FALSE}
+
+
+```
+
+## Viz 2 Explanation
+
+## Visualization 3 (rename and give title)
+
+```{r, , message=FALSE, echo = FALSE}
+
+
+```
+
+## Viz 3 Explanation
+
+## Visualization 4 (rename and give title)
+
+```{r, , message=FALSE, echo = FALSE}
+
+
+```
+
+## Viz 4 Explanation
+
+## Visualization 5 (rename and give title)
+
+```{r, , message=FALSE, echo = FALSE}
+
+
+```
+
+## Viz 5 Explanation
+
+## Visualization 6 (rename and give title)
+
+```{r, , message=FALSE, echo = FALSE}
+
+
+```
+
+## Viz 6 Explanation
+
