@@ -94,14 +94,35 @@ text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "t
 The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11 and a half hours. Additionally, the time needed to report a crime is heavily right-skewed, indicating significant room for study on what crimes are not reported quickly, and why. 
 
 
-## Visualization 3 (rename and give title)
+## Heatmap -- Crime by Month and District
 
 ```{r, , message=FALSE}
+#Pulling Months and labelling as text
+heatmap_crimes <- crimes[,c("Occurred.Date", "APD.District")]
+heatmap_crimes$month <- substr(as.character(heatmap_crimes$Occurred.Date), 0, 2)
+heatmap_crimes$month <- factor(heatmap_crimes$month, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), levels = c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"))
+heatmap_crimes$month <- factor(heatmap_crimes$month, levels = rev(levels(heatmap_crimes$month)))
+heatmap_crimes <- heatmap_crimes[heatmap_crimes$APD.District != "",]
 
+#Turn data into table object
+count_table <- table(heatmap_crimes$month, heatmap_crimes$APD.District)
+count_table <- count_table[rowSums(count_table) >= 1500, 
+               colSums(count_table) >= 1500]
+count_table
 
+par(mar = c(7, 6, 8, 6))  # Increased margins: c(bottom, left, top, right)
+#Plot the table as a heatmap
+heatmap(as.matrix(count_table), 
+        Colv = NA, 
+        Rowv = NA,
+        col = colorRampPalette(c("pink", "red"))(50),
+        ylab = "Month",
+        xlab = "District | Min. 1500 Reported Crimes",
+        main = "Crime by Month and District | Austin, TX (2003-2025)")
 ```
 
-## Viz 3 Explanation
+## Interpretation
+In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it is reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. We can use this information to further explore the interactions crime has with the general economy in these areas. 
 
 ## Visualization 4 (rename and give title)
 
