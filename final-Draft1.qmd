@@ -90,7 +90,7 @@ text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "t
 
 ```
 
-## Boxplot Explanation
+## Interpretation
 The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11 and a half hours. Additionally, the time needed to report a crime is heavily right-skewed, indicating significant room for study on what crimes are not reported quickly, and why. 
 
 
