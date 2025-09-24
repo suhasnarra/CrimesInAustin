@@ -56,10 +56,37 @@ plot(econ$Retail.Gasoline.Price.TX, econ$Retail.Diesel.Price.TX,
 ## Interpretation
 As gas prices have increased, diesel prices have generally gone with them. There is a moderately strong correlation between diesel and gas prices, allowing us to better understand Texas' economy. By showing this strong correlation, we are better prepared to look at how vehicle crimes have changed over time.
 
-## Visualization 2 (rename and give title)
+## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
 
 ```{r, , message=FALSE}
+#PreProcessing
+library(hms)
+crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
 
+#Plot
+bp <- boxplot(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0], outline = FALSE,
+        yaxt = "n", 
+        ylab = "Report Time (HRS:MIN:SEC)", 
+        main = "Average Time to Report Crime in Austin, TX (2003-2025)",
+        sub = "Zero Duration Excluded | Outliers Removed From Plot"
+        )
+
+axis(2, at = axTicks(2), labels = as.hms(time_breaks))
+
+# Add labels for median, Q1, and Q3
+stats <- bp$stats
+rownames(stats) <- c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")
+
+text(x = 0.7, y = stats[2,1], labels = paste("Q1:", as.hms(stats[2,1], 1)), pos = 3, col = "red")
+text(x = 0.7, y = stats[3,1], labels = paste("Median:", as.hms(stats[3,1], 1)), pos = 3, col = "blue")
+text(x = 0.7, y = stats[4,1], labels = paste("Q3:", as.hms(stats[4,1], 1)), pos = 3, col = "darkgreen")
+#line and % at 48 hours
+percentile_48 <- round(ecdf(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0])(60*60*48)*100, 1)
+abline(h = 48 * 60 * 60, col = "red", lwd = 2, lty = 2)
+text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "th Percentile"), 
+     pos = 3, col = "red", offset = 1)
 
 ```
 
