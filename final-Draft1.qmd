@@ -36,7 +36,8 @@ Explain key objective
 
 ## Pre-Processing
 * Grouping times, so instead of looking at specific times we can analyze times of day.
-* Converting dates as a character objects to datetime object to make data columns that are dates more usable and understandable.
+* Converting datetime character vectors to datetime object to make datetime data columns more usable.
+* Create a new column, Net.Response.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported.
 * 
 
 # Visualizations
