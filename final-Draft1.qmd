@@ -193,7 +193,6 @@ lines(smooth.spline(x_value_time, y_values_gasPrice), col = "darkblue", lwd = 2)
 
 lines(smooth.spline(x_value_time, y_values_unemployment), col = "darkred", lwd = 2)
 
-#Legend
 legend("topleft", legend = c("Gasoline Price", "Unemployment Rate"),
        col = c("darkblue", "darkred"), lwd = 2)
 ```
