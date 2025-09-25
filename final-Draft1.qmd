@@ -163,7 +163,36 @@ The distribution of crimes is generally evenly spread across the day, only decre
 ## Visualization 5 (rename and give title)
 
 ```{r, , message=FALSE}
+phrase_freq <- sort(phrase_freq, decreasing = TRUE)
 
+head(phrase_freq, 10)
+
+# Two-way table of crime vs. family violence
+tab <- table(crimes$Highest.Offense.Description, crimes$Family.Violence)
+
+# Keep only the top 10 offenses 
+phrase_freq <- sort(table(crimes$Highest.Offense.Description), decreasing = TRUE)
+top_offenses <- names(head(phrase_freq, 10))
+tab_top <- tab[top_offenses, ]
+
+# Wrap labels
+wrapped_names <- sapply(rownames(tab_top), function(x) {
+  x_clean <- gsub("-", " - ", x)  
+  paste(strwrap(x_clean, width = 12), collapse = "\n")
+})
+rownames(tab_top) <- wrapped_names
+
+# Make Plot
+par(mar = c(2, 2, 2, 2))
+
+mosaicplot(tab_top,
+           main = "Most Frequent Crime Types by Family Violence (Austin, TX)",
+           xlab = "Offense Description",
+           ylab = "Family Violence (Y/N)",
+           col = c("skyblue", "red"),
+           las = 2,
+           cex.axis = 0.5)
+legend("right", legend = c("No", "Yes"), fill = c("red", "skyblue"))
 
 ```
 
@@ -172,14 +201,20 @@ The distribution of crimes is generally evenly spread across the day, only decre
 ## Line Chart -- Unemploymeny & Gas Prices against time since 2007 by month.
 
 ```{r, , message=FALSE}
-#Preprocessing
+# Create data
 x_value_time <- 1:223
 y_values_gasPrice <- econ$Retail.Gasoline.Price.TX[25:247]
 y_values_unemployment <- econ$Unemployment.TX[25:247]
 
+# Plot a simple line graph
+plot(x_value_time, y_values_gasPrice, type = "n",  # "n" means no points, just a blank canvas
+     xlab = "Time", ylab = "Values",
+     main = "Retail Gasoline Price vs Unemployment Rate")
+
 y_min <- min(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
 y_max <- max(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
 
+# Add a margin of 5% to both the top and bottom
 y_margin <- (y_max - y_min) * 0.05
 ylim_range <- c(y_min - y_margin, y_max + y_margin)
 
@@ -189,10 +224,13 @@ plot(x_value_time, y_values_gasPrice, type = "n",  # "n" means no points, just a
      main = "Retail Gasoline Price vs Unemployment Rate",
      ylim = ylim_range)  # Set y-axis range
 
+#Add the smoothed line for Gasoline Price
 lines(smooth.spline(x_value_time, y_values_gasPrice), col = "darkblue", lwd = 2)
 
+#Add the smoothed line for Unemployment Rate
 lines(smooth.spline(x_value_time, y_values_unemployment), col = "darkred", lwd = 2)
 
+#Legend
 legend("topleft", legend = c("Gasoline Price", "Unemployment Rate"),
        col = c("darkblue", "darkred"), lwd = 2)
 ```
