@@ -46,15 +46,16 @@ Explain key objective
 # Linear Regression: predicting gas price given diesel price
 retail_gas <- econ$Retail.Gasoline.Price.TX
 retail_diesel <- econ$Retail.Diesel.Price.TX
-gas_diesel_model <- lm(retail_gas ~ retail_diesel)
+# Extracted gas value in billions
+gas_prod <- econ$Gross.Value.Natural.Gas.Production / 1000
+gas_diesel_model <- lm(retail_gas ~ retail_diesel + gas_prod)
 gas_diesel_model
 
 ```
 
 ## Interpretation
-For every `$`1 increase in diesel price, gas prices increase by `$`0.7395. The purpose of this model is to understand the relationship between diesel and gas prices in Texas. We wanted to see if there was any sort of relationship and determine whether that relationship was positive or negative. From our model, it's clear the relationship is positive as when diesel price increases so does gas price. 
+The model was constructed using linear regression with two independent/predictor variables and one dependent variable. For every `$`1 increase in diesel price, gas prices increase by `$`0.7878. For every one billion dollar increase in diesel price, gas prices decrease by a minimal `$`0.029. The purpose of this model is to understand how diesel prices and the value of the extracted natural gas in a given month are related to gas prices. From our model, it's clear diesel prices changing has a much stronger correlation that the change of value in natural gas extracted (in billions).
 
-The model was constructed using linear regression with one independent/predictor variable and one dependent variable. This means that the model found the linear equation that best minimizes the sum of the squared errors. This makes sure each point is as close as possible to the line without sacrificing significant distance from another point.
 
 # Visualizations
 
@@ -69,7 +70,7 @@ plot(econ$Retail.Diesel.Price.TX, econ$Retail.Gasoline.Price.TX,
      pch = 19, cex = .7, col = "blue",
      mgp = c(2, .7, 0),
      xlim = c(1.5, 5.5), ylim = c(1.5, 5.5))
-abline(gas_diesel_model, col = "red", lwd = 3)
+abline(lm(retail_gas ~ retail_diesel), col = "red", lwd = 3)
 
 ```
 
@@ -79,7 +80,7 @@ As gas prices have increased, diesel prices have generally gone with them. There
 ## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
 
 ```{r, , message=FALSE}
-#PreProcessing
+#Pre Processing
 library(hms)
 crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
 crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
@@ -147,14 +148,12 @@ In general, the displayed districts are the only districts in Austin with any si
 ## Piechahrt -- Amount of crime by time of day
 
 ```{r, , message=FALSE}
-#Preprocessing
 pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
-crimes$timeOfDay <- cut(as.vector(crimes$Occurred.Time), breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
-                         labels = pieBuckets) 
-#Plot
-colors <- c("slateblue","lightsteelblue", "lightyellow","gold", "darkorange", "firebrick","darkred","midnightblue")
+crimes$timeOfDay <- cut(crimes$`Occurred.Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
+                         labels = pieBuckets)
+table(crimes$timeOfDay)
 pie(table(crimes$timeOfDay), label = pieBuckets, 
-    col = colors,
+    col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
     main = "Amount of Crimes by Time of Day")
 ```
 
