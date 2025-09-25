@@ -152,7 +152,7 @@ pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk",
 crimes$timeOfDay <- cut(as.vector(crimes$Occurred.Time), breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
                          labels = pieBuckets) 
 #Plot
-colors <- c("midnightblue", "slateblue","lightsteelblue", "lightyellow","gold", "darkorange", "firebrick","darkred")
+colors <- c("slateblue","lightsteelblue", "lightyellow","gold", "darkorange", "firebrick","darkred","midnightblue")
 pie(table(crimes$timeOfDay), label = pieBuckets, 
     col = colors,
     main = "Amount of Crimes by Time of Day")
