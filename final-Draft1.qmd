@@ -124,14 +124,20 @@ heatmap(as.matrix(count_table),
 ## Interpretation
 In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it is reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. We can use this information to further explore the interactions crime has with the general economy in these areas. 
 
-## Visualization 4 (rename and give title)
+## Piechahrt -- Amount of crime by time of day
 
 ```{r, , message=FALSE}
-
-
+pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
+crimes$timeOfDay <- cut(crimes$`Occurred Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
+                         labels = pieBuckets)
+table(crimes$timeOfDay)
+pie(table(crimes$timeOfDay), label = pieBuckets, 
+    col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
+    main = "Amount of Crimes by Time of Day")
 ```
 
-## Viz 4 Explanation
+## Interpretation
+The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). 
 
 ## Visualization 5 (rename and give title)
 
