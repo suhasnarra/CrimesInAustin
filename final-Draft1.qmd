@@ -39,40 +39,109 @@ Explain key objective
 * Converting dates as a character objects to datetime object to make data columns that are dates more usable and understandable.
 * 
 
+# Model
+
+```{r, message=FALSE}
+# Linear Regression: predicting gas price given diesel price
+retail_gas <- econ$Retail.Gasoline.Price.TX
+retail_diesel <- econ$Retail.Diesel.Price.TX
+gas_diesel_model <- lm(retail_gas ~ retail_diesel)
+gas_diesel_model
+
+```
+
+## Interpretation
+For every `$`1 increase in diesel price, gas prices increase by `$`0.7395. The purpose of this model is to understand the relationship between diesel and gas prices in Texas. We wanted to see if there was any sort of relationship and determine whether that relationship was positive or negative. From our model, it's clear the relationship is positive as when diesel price increases so does gas price. 
+
+The model was constructed using linear regression with one independent/predictor variable and one dependent variable. This means that the model found the linear equation that best minimizes the sum of the squared errors. This makes sure each point is as close as possible to the line without sacrificing significant distance from another point.
+
 # Visualizations
 
 ## Scatterplot
 
 ```{r, , message=FALSE}
-plot(econ$Retail.Gasoline.Price.TX, econ$Retail.Diesel.Price.TX,
-     main= "Gas vs Diesel Prices in Texas",
-     xlab = "Gas Price", ylab = "Diesel Price",
+
+# Create scatter plot
+plot(econ$Retail.Diesel.Price.TX, econ$Retail.Gasoline.Price.TX,
+     main= "Diesel vs Gas Prices in Texas",
+     xlab = "Diesel Price", ylab = "Gas Price",
      pch = 19, cex = .7, col = "blue",
      mgp = c(2, .7, 0),
      xlim = c(1.5, 5.5), ylim = c(1.5, 5.5))
+abline(gas_diesel_model, col = "red", lwd = 3)
 
 ```
 
 ## Interpretation
 As gas prices have increased, diesel prices have generally gone with them. There is a moderately strong correlation between diesel and gas prices, allowing us to better understand Texas' economy. By showing this strong correlation, we are better prepared to look at how vehicle crimes have changed over time.
 
-## Visualization 2 (rename and give title)
+## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
 
 ```{r, , message=FALSE}
+#PreProcessing
+library(hms)
+crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
 
+#Plot
+bp <- boxplot(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0], outline = FALSE,
+        yaxt = "n", 
+        ylab = "Report Time (HRS:MIN:SEC)", 
+        main = "Average Time to Report Crime in Austin, TX (2003-2025)",
+        sub = "Zero Duration Excluded | Outliers Removed From Plot"
+        )
+
+axis(2, at = axTicks(2), labels = as.hms(time_breaks))
+
+# Add labels for median, Q1, and Q3
+stats <- bp$stats
+rownames(stats) <- c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")
+
+text(x = 0.7, y = stats[2,1], labels = paste("Q1:", as.hms(stats[2,1], 1)), pos = 3, col = "red")
+text(x = 0.7, y = stats[3,1], labels = paste("Median:", as.hms(stats[3,1], 1)), pos = 3, col = "blue")
+text(x = 0.7, y = stats[4,1], labels = paste("Q3:", as.hms(stats[4,1], 1)), pos = 3, col = "darkgreen")
+#line and % at 48 hours
+percentile_48 <- round(ecdf(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0])(60*60*48)*100, 1)
+abline(h = 48 * 60 * 60, col = "red", lwd = 2, lty = 2)
+text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "th Percentile"), 
+     pos = 3, col = "red", offset = 1)
 
 ```
 
-## Viz 2 Explanation
+## Interpretation
+The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11 and a half hours. Additionally, the time needed to report a crime is heavily right-skewed, indicating significant room for study on what crimes are not reported quickly, and why. 
 
-## Visualization 3 (rename and give title)
+
+## Heatmap -- Crime by Month and District
 
 ```{r, , message=FALSE}
+#Pulling Months and labelling as text
+heatmap_crimes <- crimes[,c("Occurred.Date", "APD.District")]
+heatmap_crimes$month <- substr(as.character(heatmap_crimes$Occurred.Date), 0, 2)
+heatmap_crimes$month <- factor(heatmap_crimes$month, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), levels = c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"))
+heatmap_crimes$month <- factor(heatmap_crimes$month, levels = rev(levels(heatmap_crimes$month)))
+heatmap_crimes <- heatmap_crimes[heatmap_crimes$APD.District != "",]
 
+#Turn data into table object
+count_table <- table(heatmap_crimes$month, heatmap_crimes$APD.District)
+count_table <- count_table[rowSums(count_table) >= 1500, 
+               colSums(count_table) >= 1500]
+count_table
 
+par(mar = c(7, 6, 8, 6))  # Increased margins: c(bottom, left, top, right)
+#Plot the table as a heatmap
+heatmap(as.matrix(count_table), 
+        Colv = NA, 
+        Rowv = NA,
+        col = colorRampPalette(c("pink", "red"))(50),
+        ylab = "Month",
+        xlab = "District | Min. 1500 Reported Crimes",
+        main = "Crime by Month and District | Austin, TX (2003-2025)")
 ```
 
-## Viz 3 Explanation
+## Interpretation
+In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it is reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. We can use this information to further explore the interactions crime has with the general economy in these areas. 
 
 ## Visualization 4 (rename and give title)
 
