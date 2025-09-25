@@ -40,17 +40,36 @@ Explain key objective
 * Create a new column, Net.Response.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported.
 * Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening.
 
+# Model
+
+```{r, message=FALSE}
+# Linear Regression: predicting gas price given diesel price
+retail_gas <- econ$Retail.Gasoline.Price.TX
+retail_diesel <- econ$Retail.Diesel.Price.TX
+gas_diesel_model <- lm(retail_gas ~ retail_diesel)
+gas_diesel_model
+
+```
+
+## Interpretation
+For every `$`1 increase in diesel price, gas prices increase by `$`0.7395. The purpose of this model is to understand the relationship between diesel and gas prices in Texas. We wanted to see if there was any sort of relationship and determine whether that relationship was positive or negative. From our model, it's clear the relationship is positive as when diesel price increases so does gas price. 
+
+The model was constructed using linear regression with one independent/predictor variable and one dependent variable. This means that the model found the linear equation that best minimizes the sum of the squared errors. This makes sure each point is as close as possible to the line without sacrificing significant distance from another point.
+
 # Visualizations
 
 ## Scatterplot
 
 ```{r, , message=FALSE}
-plot(econ$Retail.Gasoline.Price.TX, econ$Retail.Diesel.Price.TX,
-     main= "Gas vs Diesel Prices in Texas",
-     xlab = "Gas Price", ylab = "Diesel Price",
+
+# Create scatter plot
+plot(econ$Retail.Diesel.Price.TX, econ$Retail.Gasoline.Price.TX,
+     main= "Diesel vs Gas Prices in Texas",
+     xlab = "Diesel Price", ylab = "Gas Price",
      pch = 19, cex = .7, col = "blue",
      mgp = c(2, .7, 0),
      xlim = c(1.5, 5.5), ylim = c(1.5, 5.5))
+abline(gas_diesel_model, col = "red", lwd = 3)
 
 ```
 
