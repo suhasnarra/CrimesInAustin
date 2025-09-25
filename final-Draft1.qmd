@@ -93,7 +93,7 @@ bp <- boxplot(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0], ou
         sub = "Zero Duration Excluded | Outliers Removed From Plot"
         )
 
-axis(2, at = axTicks(2), labels = as.hms(time_breaks))
+axis(2, at = axTicks(2), labels = as.hms(axTicks(2)))
 
 # Add labels for median, Q1, and Q3
 stats <- bp$stats
@@ -147,12 +147,14 @@ In general, the displayed districts are the only districts in Austin with any si
 ## Piechahrt -- Amount of crime by time of day
 
 ```{r, , message=FALSE}
+#Preprocessing
 pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
-crimes$timeOfDay <- cut(crimes$`Occurred Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
-                         labels = pieBuckets)
-table(crimes$timeOfDay)
+crimes$timeOfDay <- cut(as.vector(crimes$Occurred.Time), breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
+                         labels = pieBuckets) 
+#Plot
+colors <- c("midnightblue", "slateblue","lightsteelblue", "lightyellow","gold", "darkorange", "firebrick","darkred")
 pie(table(crimes$timeOfDay), label = pieBuckets, 
-    col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
+    col = colors,
     main = "Amount of Crimes by Time of Day")
 ```
 
