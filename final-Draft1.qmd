@@ -162,11 +162,11 @@ pie(table(crimes$timeOfDay), label = pieBuckets,
 ## Pie Chart Interpretation
 The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occured after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes.
 
-## Mosaic Plot -- Percentage of Family Violence in the Most Frequent Crimes 
+## Mosaic Plot -- Frequent Crimes by Time of Day 
 
 ```{r, message=FALSE, echo = FALSE}
 
-# Two-way table of crime vs. family violence
+# Two-way table of crime type vs. time of day bucket
 tab <- table(crimes$Highest.Offense.Description, crimes$timeOfDay)
 # Keep only the top 10 offenses 
 phrase_freq <- sort(table(crimes$Highest.Offense.Description), decreasing = TRUE)
