@@ -26,7 +26,7 @@ econ <- read.csv("austin_econ.csv")
 ```
 
 # Key Objective
-Explain key objective
+Our goal is to evaluate the properties of Austin crime and their relationships with the Texas economy. We will break this down into many segments as it's not only necessary to learn about crime frequencies and other properties, but the context behind these properties.
 
 ## Key Variables
 * __Highest Offense Description__: Tells us what the crime is. Important for us to be able to judge severity and type of crime.
@@ -42,28 +42,29 @@ Explain key objective
 * Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening. *PRIMARY*
 * Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format. *SECONDARY*
 
-# Model
+# Linear Regression Model -- Predicting Gas Prices
 
-```{r, message=FALSE}
+```{r, message=FALSE, echo = FALSE}
 # Linear Regression: predicting gas price given diesel price
 retail_gas <- econ$Retail.Gasoline.Price.TX
 retail_diesel <- econ$Retail.Diesel.Price.TX
 # Extracted gas value in billions
 gas_prod <- econ$Gross.Value.Natural.Gas.Production / 1000
 gas_diesel_model <- lm(retail_gas ~ retail_diesel + gas_prod)
-gas_diesel_model
+model_sum <- summary(gas_diesel_model)
+model_sum$coefficients
 
 ```
 
-## Interpretation
+## Linear Regression Model Interpretation
 The model was constructed using linear regression with two independent/predictor variables and one dependent variable. For every `$`1 increase in diesel price, gas prices increase by `$`0.7878. For every one billion dollar increase in diesel price, gas prices decrease by a minimal `$`0.029. The purpose of this model is to understand how diesel prices and the value of the extracted natural gas in a given month are related to gas prices. From our model, it's clear diesel prices changing has a much stronger correlation that the change of value in natural gas extracted (in billions).
 
 
 # Visualizations
 
-## Scatterplot
+## Scatterplot -- Diesel vs Gas Prices in Texas
 
-```{r, , message=FALSE}
+```{r, , message=FALSE, echo = FALSE}
 
 # Create scatter plot
 plot(econ$Retail.Diesel.Price.TX, econ$Retail.Gasoline.Price.TX,
@@ -76,12 +77,12 @@ abline(lm(retail_gas ~ retail_diesel), col = "red", lwd = 3)
 
 ```
 
-## Interpretation
+## Scatterplot Interpretation
 As gas prices have increased, diesel prices have generally gone with them. There is a moderately strong correlation between diesel and gas prices, allowing us to better understand Texas' economy. By showing this strong correlation, we are better prepared to look at how vehicle crimes have changed over time.
 
 ## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
 
-```{r, , message=FALSE}
+```{r, , message=FALSE, echo = FALSE, warning = FALSE}
 #Pre Processing
 crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
 crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
@@ -112,13 +113,13 @@ text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "t
 
 ```
 
-## Interpretation
+## Boxplot Interpretation
 The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11 and a half hours. Additionally, the time needed to report a crime is heavily right-skewed, indicating significant room for study on what crimes are not reported quickly, and why. 
 
 
 ## Heatmap -- Crime by Month and District
 
-```{r, , message=FALSE}
+```{r, , message=FALSE, echo = FALSE}
 #Pulling Months and labelling as text
 heatmap_crimes <- crimes[,c("Occurred.Date", "APD.District")]
 heatmap_crimes$month <- substr(as.character(heatmap_crimes$Occurred.Date), 0, 2)
@@ -130,7 +131,6 @@ heatmap_crimes <- heatmap_crimes[heatmap_crimes$APD.District != "",]
 count_table <- table(heatmap_crimes$month, heatmap_crimes$APD.District)
 count_table <- count_table[rowSums(count_table) >= 1500, 
                colSums(count_table) >= 1500]
-count_table
 
 par(mar = c(7, 6, 8, 6))  # Increased margins: c(bottom, left, top, right)
 #Plot the table as a heatmap
@@ -139,34 +139,32 @@ heatmap(as.matrix(count_table),
         Rowv = NA,
         col = colorRampPalette(c("pink", "red"))(50),
         ylab = "Month",
-        xlab = "District | Min. 1500 Reported Crimes",
-        main = "Crime by Month and District | Austin, TX (2003-2025)")
+        xlab = "Austin, TX | District | Min. 1500 Reported Crimes | 2003-2025",
+        main = "Crime by Month and District",
+        cex.main = 0.6)
 ```
 
-## Interpretation
+## Heat Map Interpretation
 In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it is reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. We can use this information to further explore the interactions crime has with the general economy in these areas. 
 
-## Piechahrt -- Amount of crime by time of day
+## Pie Chart -- Amount of crime by time of day
 
-```{r, , message=FALSE}
+```{r, , message=FALSE, echo = FALSE}
 pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
 crimes$timeOfDay <- cut(crimes$`Occurred.Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
                          labels = pieBuckets)
-table(crimes$timeOfDay)
+
 pie(table(crimes$timeOfDay), label = pieBuckets, 
     col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
     main = "Amount of Crimes by Time of Day")
 ```
 
-## Interpretation
+## Pie Chart Interpretation
 The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occured after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes.
 
-## Visualization 5 (rename and give title)
+## Mosaic Plot -- Percentage of Family Violence for the Most Frequent Crimes 
 
-```{r, , message=FALSE}
-phrase_freq <- sort(phrase_freq, decreasing = TRUE)
-
-head(phrase_freq, 10)
+```{r, message=FALSE, echo = FALSE}
 
 # Two-way table of crime vs. family violence
 tab <- table(crimes$Highest.Offense.Description, crimes$Family.Violence)
@@ -191,17 +189,18 @@ mosaicplot(tab_top,
            xlab = "Offense Description",
            ylab = "Family Violence (Y/N)",
            col = c("skyblue", "red"),
-           las = 2,
-           cex.axis = 0.5)
-legend("right", legend = c("No", "Yes"), fill = c("red", "skyblue"))
+           las = 1,
+           cex.axis = 0.2)
 
 ```
 
-## Viz 5 Explanation
+## Mosaic Interpretation
+The majority of the most frequent crimes committed are not classified as family violence, only assault related crimes have a substantial share linked to family violence. Sigh percentage of family violence in one column shows that family violence is occurring a lot relative to other crimes.
+
 
 ## Line Chart -- Unemploymeny & Gas Prices against time since 2007 by month.
 
-```{r, , message=FALSE}
+```{r, , message=FALSE, echo = FALSE}
 #Preprocessing
 econ$date <- as.Date(paste(econ$Year, econ$Month, "01", sep = "-"))
 x_value_time <- econ$date[25:247]
@@ -229,5 +228,5 @@ legend("topleft", legend = c("Gasoline Price", "Unemployment Rate"),
        col = c("darkblue", "darkred"), lwd = 2)
 ```
 
-## Viz 6 Explanation
+## Line Chart Interpretation
 This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
