@@ -162,7 +162,7 @@ pie(table(crimes$timeOfDay), label = pieBuckets,
 ## Pie Chart Interpretation
 The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occured after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes.
 
-## Mosaic Plot -- Percentage of Family Violence for the Most Frequent Crimes 
+## Mosaic Plot -- Percentage of Family Violence in the Most Frequent Crimes 
 
 ```{r, message=FALSE, echo = FALSE}
 
@@ -185,7 +185,7 @@ rownames(tab_top) <- wrapped_names
 par(mar = c(2, 2, 2, 2))
 
 mosaicplot(tab_top,
-           main = "Most Frequent Crime Types by Family Violence (Austin, TX)",
+           main = "Family Violence by Most Frequent Crime Types (Austin, TX)",
            xlab = "Offense Description",
            ylab = "Family Violence (Y/N)",
            col = c("skyblue", "red"),
@@ -195,10 +195,10 @@ mosaicplot(tab_top,
 ```
 
 ## Mosaic Interpretation
-The majority of the most frequent crimes committed are not classified as family violence, only assault related crimes have a substantial share linked to family violence. Sigh percentage of family violence in one column shows that family violence is occurring a lot relative to other crimes.
+The majority of the most frequent crimes committed are not classified as family violence; only assault-related crimes have a substantial share linked to family violence. Further, a high percentage of family violence in assault-related crimes shows that family violence is occurring a lot relative to other crimes.
 
 
-## Line Chart -- Unemploymeny & Gas Prices against time since 2007 by month.
+## Line Chart -- Unemployment & Gas Prices against time since 2007 by month.
 
 ```{r, , message=FALSE, echo = FALSE}
 #Preprocessing
