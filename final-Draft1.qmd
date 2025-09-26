@@ -5,7 +5,7 @@ format: pdf
 
 ```{r, message=FALSE, echo = FALSE}
 # Load any libraries used
-
+library(hms)
 ```
 
 # Group: Suhas, Mert, Carson, Max
@@ -83,7 +83,6 @@ As gas prices have increased, diesel prices have generally gone with them. There
 
 ```{r, , message=FALSE}
 #Pre Processing
-library(hms)
 crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
 crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
 crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
