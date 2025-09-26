@@ -13,8 +13,9 @@ format: pdf
 # Our Data
 
 ## Primary Dataset: Austin Crime Reports 2003-Present
+### Source: https://catalog.data.gov/dataset/crime-reports-bf2b7
 ## Secondary Dataset: Key Economic Indicators in Austin 2007-2025
-### Source: data.gov
+### Source: https://catalog.data.gov/dataset/key-economic-indicators
 
 ```{r, message=FALSE, echo = FALSE}
 
@@ -35,10 +36,11 @@ Explain key objective
 * __Report Time__: Tells us when the crime was reported and can be combined with occurred time to understand how it takes certain areas to report crimes.
 
 ## Pre-Processing
-* Grouping times, so instead of looking at specific times we can analyze times of day.
-* Converting datetime character vectors to datetime object to make datetime data columns more usable.
-* Create a new column, Net.Response.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported.
-* Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening.
+* Grouping times, so instead of looking at specific times we can analyze times of day. *PRIMARY*
+* Converting datetime character vectors to datetime object to make datetime data columns more usable. *PRIMARY*
+* Create a new column, Net.Response.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported. *PRIMARY*
+* Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening. *PRIMARY*
+* Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format. *SECONDARY*
 
 # Model
 
@@ -158,7 +160,7 @@ pie(table(crimes$timeOfDay), label = pieBuckets,
 ```
 
 ## Interpretation
-The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). 
+The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occured after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes.
 
 ## Visualization 5 (rename and give title)
 
@@ -201,39 +203,32 @@ legend("right", legend = c("No", "Yes"), fill = c("red", "skyblue"))
 ## Line Chart -- Unemploymeny & Gas Prices against time since 2007 by month.
 
 ```{r, , message=FALSE}
-# Create data
-x_value_time <- 1:223
+#Preprocessing
+econ$date <- as.Date(paste(econ$Year, econ$Month, "01", sep = "-"))
+x_value_time <- econ$date[25:247]
+
 y_values_gasPrice <- econ$Retail.Gasoline.Price.TX[25:247]
 y_values_unemployment <- econ$Unemployment.TX[25:247]
 
-# Plot a simple line graph
-plot(x_value_time, y_values_gasPrice, type = "n",  # "n" means no points, just a blank canvas
-     xlab = "Time", ylab = "Values",
-     main = "Retail Gasoline Price vs Unemployment Rate")
-
+#Plot
 y_min <- min(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
 y_max <- max(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
 
-# Add a margin of 5% to both the top and bottom
 y_margin <- (y_max - y_min) * 0.05
 ylim_range <- c(y_min - y_margin, y_max + y_margin)
 
-#Plot
 plot(x_value_time, y_values_gasPrice, type = "n",  # "n" means no points, just a blank canvas
      xlab = "Time", ylab = "Values",
      main = "Retail Gasoline Price vs Unemployment Rate",
-     ylim = ylim_range)  # Set y-axis range
+     ylim = ylim_range)  
 
-#Add the smoothed line for Gasoline Price
 lines(smooth.spline(x_value_time, y_values_gasPrice), col = "darkblue", lwd = 2)
 
-#Add the smoothed line for Unemployment Rate
 lines(smooth.spline(x_value_time, y_values_unemployment), col = "darkred", lwd = 2)
 
-#Legend
 legend("topleft", legend = c("Gasoline Price", "Unemployment Rate"),
        col = c("darkblue", "darkred"), lwd = 2)
 ```
 
 ## Viz 6 Explanation
-
+This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
