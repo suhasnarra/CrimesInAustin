@@ -167,35 +167,34 @@ The distribution of crimes is generally evenly spread across the day, only decre
 ```{r, message=FALSE, echo = FALSE}
 
 # Two-way table of crime vs. family violence
-tab <- table(crimes$Highest.Offense.Description, crimes$Family.Violence)
-
+tab <- table(crimes$Highest.Offense.Description, crimes$timeOfDay)
 # Keep only the top 10 offenses 
 phrase_freq <- sort(table(crimes$Highest.Offense.Description), decreasing = TRUE)
 top_offenses <- names(head(phrase_freq, 10))
 tab_top <- tab[top_offenses, ]
-
 # Wrap labels
 wrapped_names <- sapply(rownames(tab_top), function(x) {
   x_clean <- gsub("-", " - ", x)  
   paste(strwrap(x_clean, width = 12), collapse = "\n")
 })
 rownames(tab_top) <- wrapped_names
-
+rownames(tab_top)[rownames(tab_top) == "ASSAULT\nW/INJURY -\nFAM/DATE\nVIOL"] <- "ASSAULT"
 # Make Plot
-par(mar = c(2, 2, 2, 2))
+par(mar = c(6, 6, 6, 6))
 
 mosaicplot(tab_top,
-           main = "Family Violence by Most Frequent Crime Types (Austin, TX)",
-           xlab = "Offense Description",
-           ylab = "Family Violence (Y/N)",
-           col = c("skyblue", "red"),
-           las = 1,
-           cex.axis = 0.2)
+           main = "Most Frequent Crime Types by Time of Day (Austin, TX)",
+           xlab = "",
+           ylab = "",
+           col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
+           las = 2,
+           cex.axis = 1.25,
+           line = 0.5)
 
 ```
 
 ## Mosaic Interpretation
-The majority of the most frequent crimes committed are not classified as family violence; only assault-related crimes have a substantial share linked to family violence. Further, a high percentage of family violence in assault-related crimes shows that family violence is occurring a lot relative to other crimes.
+Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burgalry or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case. 
 
 
 ## Line Chart -- Unemployment & Gas Prices against time since 2007 by month.
