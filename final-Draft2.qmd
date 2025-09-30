@@ -11,6 +11,7 @@ format:
 ```{r, message=FALSE, echo = FALSE}
 # Load any libraries used
 library(hms)
+library(ggplot2)
 ```
 
 # Group: Suhas, Mert, Carson, Max
@@ -21,9 +22,13 @@ library(hms)
 
 ### Source: https://catalog.data.gov/dataset/crime-reports-bf2b7
 
+This dataset is sourced directly from the Austin Police Department (APD) and is updated weekly. It is a record of every crime report filed by APD officers, with the data being entered online by the officers and subsequently stored in this database.
+
 ## Secondary Dataset: Key Economic Indicators in Austin 2007-2025
 
 ### Source: https://catalog.data.gov/dataset/key-economic-indicators
+
+This data set is a compilation that pulls from various external sources and integrates them into a single data frame. Specifically, the presence of data for the United States and regions other than Texas confirms that it was compiled from a variety of sources to provide a broader economic context. The inclusion of data beyond Texas simply means there are extra fields in the table that we don't need for a Texas-only analysis.
 
 ```{r, message=FALSE, echo = FALSE}
 
@@ -35,7 +40,9 @@ econ <- read.csv("austin_econ.csv")
 
 # Key Objective
 
-Our goal is to evaluate the properties of Austin crime and their relationships with the Texas economy. We will break this down into many segments as it's not only necessary to learn about crime frequencies and other properties, but the context behind these properties.
+Our goal is to evaluate the properties of Austin crime and their relationships with the Texas economy. Our main focus will be on key crime characteristics, including the time of day and year, types and categories of offenses, and geographic location. We will look for patterns and relationships among these characteristics to gain a deeper, more informed understanding of crime within Austin.
+
+A significant part of our work will involve grouping key variables to simplify data visualization and ensure our evaluation captures general patterns. Instead of analyzing time by the minute, for example, we'll focus on specific times of day, and we'll likewise group various crime types into broader categories. These strategic groupings will allow us to draw meaningful connections between different crime cohorts, providing the city of Austin with actionable insights into the crime patterns within its jurisdiction.
 
 ## Key Variables
 
@@ -44,16 +51,20 @@ Our goal is to evaluate the properties of Austin crime and their relationships w
 -   **District**: Gives general area of the crime in Austin. Allows us to understand where crimes are occurring in the city.
 -   **Occurred Time**: Tells us when the crime occurred so we can determine if crime is more common during certain times of day.
 -   **Report Time**: Tells us when the crime was reported and can be combined with occurred time to understand how it takes certain areas to report crimes.
+-   **Unemployment in Texas**: Informs on the state of the economy in Texas, allowing us to search for patterns in how crime changes when the economy does.
+-   **Retail Gas Price**: Another economic indicator allowing us to understand how crime changes when the economy does.
 
 ## Pre-Processing
 
--   Grouping times, so instead of looking at specific times we can analyze times of day. *PRIMARY*
--   Converting datetime character vectors to datetime object to make datetime data columns more usable. *PRIMARY*
--   Create a new column, Net.Response.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported. *PRIMARY*
--   Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening. *PRIMARY*
--   Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format. *SECONDARY*
+-   Grouping times, so instead of looking at specific times we can analyze times of day.
+-   Converting datetime character vectors to datetime object to make datetime data columns more usable.
+-   Create a new column, Net.Response.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported.
+-   Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening.
+-   Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format.
 
 # Linear Regression Model -- Predicting Gas Prices
+
+To better understand the Texas economy we will create a simple model that uses linear regression to show the relationship between produced gas, gas prices, and diesel prices. It's important for us to be well informed on the Texas economy to understand any patterns that may exist between economic changes and frequency of crime.
 
 ```{r, message=FALSE, echo = FALSE}
 # Linear Regression: predicting gas price given diesel price
@@ -73,26 +84,55 @@ The model was constructed using linear regression with two independent/predictor
 
 # Visualizations
 
-## Scatterplot -- Diesel vs Gas Prices in Texas
+## Jitter Plot -- District vs Response Time in Texas
+
+Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or no there are certain districts that have significantly faster or slower response times
 
 ```{r, , message=FALSE, echo = FALSE}
+crimes$Response.Duration.Seconds <- as.numeric(
+  gsub(" secs", "", crimes$NetResponse.Date.Time)
+)
 
-# Create scatter plot
-plot(econ$Retail.Diesel.Price.TX, econ$Retail.Gasoline.Price.TX,
-     main= "Diesel vs Gas Prices in Texas",
-     xlab = "Diesel Price", ylab = "Gas Price",
-     pch = 19, cex = .7, col = "blue",
-     mgp = c(2, .7, 0),
-     xlim = c(1.5, 5.5), ylim = c(1.5, 5.5))
-abline(lm(retail_gas ~ retail_diesel), col = "red", lwd = 3)
+crimes$Response.Duration.Minutes <- crimes$Response.Duration.Seconds / 60
+
+crimes_summary <- aggregate(
+  x = crimes$Response.Duration.Minutes, 
+  by = list(District = crimes$Council.District),
+  FUN = mean,
+  na.rm = TRUE
+)
+
+names(crimes_summary)[2] <- "Average.Response.Time"
+
+ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Time)) +
+  geom_col(fill = "skyblue") +
+  
+  geom_text(
+    aes(label = round(Average.Response.Time, 1)), 
+    vjust = -0.5, 
+    size = 3.5
+  ) +
+    labs(
+    title = "Average Incident Response Time by Council District",
+    x = "Council District",
+    y = "Average Response Time (Minutes)"
+  ) +  scale_x_discrete(breaks = as.character(1:10)) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title.y = element_text(margin = margin(r = 15)),
+    panel.grid.major.x = element_blank()
+  )
 
 ```
 
 ## Scatterplot Interpretation
 
-As gas prices have increased, diesel prices have generally gone with them. There is a moderately strong correlation between diesel and gas prices, allowing us to better understand Texas' economy. By showing this strong correlation, we are better prepared to look at how vehicle crimes have changed over time.
+
 
 ## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
+
+Not all crimes get solved, but the ones that do start with the crime being reported. This takes someone witnessing the crime or finding something related to the crime scene like the victim or perpetrator. Whether people witnessed the crime or not, reporting can be anywhere from immediate to months and this boxplot will visualize, in general, how long it takes for crimes to get reported.
 
 ```{r, , message=FALSE, echo = FALSE, warning = FALSE}
 #Pre Processing
@@ -127,9 +167,11 @@ text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "t
 
 ## Boxplot Interpretation
 
-The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11 and a half hours. Additionally, the time needed to report a crime is heavily right-skewed, indicating significant room for study on what crimes are not reported quickly, and why.
+The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11 and a half hours. Additionally, the time needed to report a crime is heavily right-skewed, indicating significant room for study on what crimes are not reported quickly, and why. This investigation could focus on a variety of aspects such as analyzing what crime types take the longest to report.
 
 ## Heatmap -- Crime by Month and District
+
+Just because our data looks at a relatively small area doesn't mean that crime doesn't vary in different parts of the city. By using the district breakdown of Austin we can investigate the amount of crime occurring in each district while also potentially finding times of the year that are more prone to prevalent crime.
 
 ```{r, , message=FALSE, echo = FALSE}
 #Pulling Months and labelling as text
@@ -162,6 +204,8 @@ In general, the displayed districts are the only districts in Austin with any si
 
 ## Pie Chart -- Amount of crime by time of day
 
+It's easy to think that most crimes would be committed at night when less people will see. This pie chart allows us to visualize this and see if that assumption really is true. We want to use this pie chart to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
+
 ```{r, , message=FALSE, echo = FALSE}
 pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
 crimes$timeOfDay <- cut(crimes$`Occurred.Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
@@ -177,6 +221,8 @@ pie(table(crimes$timeOfDay), label = pieBuckets,
 The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occured after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes.
 
 ## Mosaic Plot -- Frequent Crimes by Time of Day
+
+This plot will build on the pie chart and breakdown when crimes are occurring by the most frequent crime types. The pie chart is a good start and gives us general information, but in this mosaic plot we can see when the most common crime types are occurring.
 
 ```{r, message=FALSE, echo = FALSE}
 
@@ -212,8 +258,10 @@ Most of the frequent crime types occur during the daytime, which is consistent w
 
 ## Line Chart -- Unemployment & Gas Prices against time since 2007 by month.
 
+These are our main economic indicators so it's critical we visualize how they are related, if they are related at all. By understanding this relationship we can better utilize each piece of information when we look to connect them to information on crimes.
+
 ```{r, , message=FALSE, echo = FALSE}
-#Preprocessing
+#Pre processing
 econ$date <- as.Date(paste(econ$Year, econ$Month, "01", sep = "-"))
 x_value_time <- econ$date[25:247]
 
