@@ -12,6 +12,7 @@ format:
 # Load any libraries used
 library(hms)
 library(ggplot2)
+library(scales)
 ```
 
 # Group: Suhas, Mert, Carson, Max
