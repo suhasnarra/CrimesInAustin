@@ -89,12 +89,16 @@ The model was constructed using linear regression with two independent/predictor
 Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or no there are certain districts that have significantly faster or slower response times
 
 ```{r, , message=FALSE, echo = FALSE}
+
+# get numeric value in seconds
 crimes$Response.Duration.Seconds <- as.numeric(
   gsub(" secs", "", crimes$NetResponse.Date.Time)
 )
 
+# Convert to minutes
 crimes$Response.Duration.Minutes <- crimes$Response.Duration.Seconds / 60
 
+# Get average for each district
 crimes_summary <- aggregate(
   x = crimes$Response.Duration.Minutes, 
   by = list(District = crimes$Council.District),
@@ -102,8 +106,10 @@ crimes_summary <- aggregate(
   na.rm = TRUE
 )
 
+# Name average time column
 names(crimes_summary)[2] <- "Average.Response.Time"
 
+# Create plot
 ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Time)) +
   geom_col(fill = "skyblue") +
   
@@ -128,7 +134,7 @@ ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Tim
 
 ## Scatterplot Interpretation
 
-
+There are significant disparities in average response time across the districts. District 9 stands out, reporting crimes significantly faster than any other. Conversely, Districts 7 and 10 consistently exhibit the longest response times. External research strongly correlates faster response times with a much higher crime resolution rate. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes.
 
 ## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
 
@@ -260,7 +266,7 @@ Most of the frequent crime types occur during the daytime, which is consistent w
 
 These are our main economic indicators so it's critical we visualize how they are related, if they are related at all. By understanding this relationship we can better utilize each piece of information when we look to connect them to information on crimes.
 
-```{r, , message=FALSE, echo = FALSE}
+```{r, message=FALSE, echo = FALSE}
 #Pre processing
 econ$date <- as.Date(paste(econ$Year, econ$Month, "01", sep = "-"))
 x_value_time <- econ$date[25:247]
@@ -291,3 +297,72 @@ legend("topleft", legend = c("Gasoline Price ($)", "Unemployment Rate (%)"),
 ## Line Chart Interpretation
 
 This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
+
+
+## Viz 7
+
+
+
+```{r,  message=FALSE, echo = FALSE}
+
+
+```
+
+## Interpretation
+
+
+## Viz 8
+
+
+
+```{r,  message=FALSE, echo = FALSE}
+
+
+```
+
+## Interpretation
+
+
+## Viz 9
+
+
+
+```{r,  message=FALSE, echo = FALSE}
+
+
+```
+
+## Interpretation
+
+## Viz 10
+
+
+
+```{r,  message=FALSE, echo = FALSE}
+
+
+```
+
+## Interpretation
+
+## Viz 11
+
+
+
+```{r,  message=FALSE, echo = FALSE}
+
+
+```
+
+## Interpretation
+
+## Viz 12
+
+
+
+```{r,  message=FALSE, echo = FALSE}
+
+
+```
+
+## Interpretation
