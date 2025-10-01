@@ -310,7 +310,7 @@ This was secondary data that we wanted to analyze to help us understand the tren
 #we made our boxplot), which is only the year
 crimes$year <- format(as.POSIXct(crimes$Occurred.Date.Time), "%Y")
 
-#These are the relevant locations we will be examining
+# These are the relevant locations we will be examining
 relevant_location_types <- c(
   "GROCERY / SUPERMARKET",
   "CONVENIENCE STORE",
@@ -324,40 +324,54 @@ relevant_location_types <- c(
   "RESTAURANT"
 )
 
-#Filtering the crimes to include only the ones that are relevant
+#Gets the total crimes per year from the full dataset
+total_crimes_per_year <- table(crimes$year)
+
+# Filtering the crimes to include only the ones that are relevant
 crimes_filtered <- subset(crimes, Location.Type %in% relevant_location_types)
 
-#Create a table containing the year and how many of each different type of crim
+#Create a table containing the year and how many of each different type of crime
 #happened that year.
 crime_counts_table <- table(crimes_filtered$year, crimes_filtered$Location.Type)
 
-#Convert to data frame
+# Convert to data frame
 crime_counts_df <- as.data.frame(crime_counts_table)
 colnames(crime_counts_df) <- c("year", "Location.Type", "count")
 
-#Ensure that the years will be treated as numbers instead of date variables.
+#Calculates percentages based on total crimes 
+#(not just based on the crime locations we're focusing on)
+years <- unique(crime_counts_df$year)
+crime_counts_df$percentage <- 0
+
+for(yr in years) {
+  year_mask <- crime_counts_df$year == yr
+  #Uses total crimes from all data to calculate percentage
+  year_total <- total_crimes_per_year[yr]
+  crime_counts_df$percentage[year_mask] <- (crime_counts_df$count[year_mask] / as.numeric(year_total)) * 100
+}
+
+# Ensure that the years will be treated as numbers instead of date variables.
 crime_counts_df$year <- as.numeric(as.character(crime_counts_df$year))
 
-#Plot
-ggplot(crime_counts_df, aes(x = year, y = count, fill = Location.Type)) +
+# Plot with percentages
+ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
   geom_area(alpha = 1) +  
   theme_minimal() +
-  labs(title = "Crime Locations Over Time",
+  labs(title = "Selected Crime Locations as Percentage of All Crimes",
        x = "Year",
-       y = "Number of Crimes",
+       y = "Percentage of Total Crimes (%)",
        fill = "Location Type") +
-  #Show every other year in the x-label for a cleaner look.
+  # Shows every other year in the x-label for a cleaner look.
   scale_x_continuous(breaks = seq(min(crime_counts_df$year), 
                                   max(crime_counts_df$year), 
-                                  by = 2)) +  # Show every 2 years
-  #Gets rid of scientific notation in the label
-  scale_y_continuous(labels = comma) +
+                                  by = 2)) +
+  # Format y-axis as percentage
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
   scale_fill_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
                                "#FF7F00", "#FFFF33", "#A65628", "#F781BF",
                                "#999999", "#66C2A5")) +
-  #Fix the x-axis label
+  # Fix the x-axis label
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
 ```
 
 ## Interpretation
