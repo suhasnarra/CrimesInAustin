@@ -299,12 +299,62 @@ legend("topleft", legend = c("Gasoline Price ($)", "Unemployment Rate (%)"),
 This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
 
 
-## Viz 7
+## Area Chart
 
 
 
 ```{r,  message=FALSE, echo = FALSE}
+#Make a new column based off the Occured.Date.Time column (already formatted when
+#we made our boxplot), which is only the year
+crimes$year <- format(as.POSIXct(crimes$Occurred.Date.Time), "%Y")
 
+#These are the relevant locations we will be examining
+relevant_location_types <- c(
+  "GROCERY / SUPERMARKET",
+  "CONVENIENCE STORE",
+  "RESIDENCE / HOME",
+  "HWY / ROAD / ALLEY/ STREET/ SIDEWALK",
+  "PARKING /DROP LOT/ GARAGE",
+  "HOTEL / MOTEL / ETC.",
+  "DRUG STORE / DOCTOR'S OFFICE / HOSPITAL",
+  "COMMERCIAL / OFFICE BUILDING",
+  "BAR / NIGHTCLUB",
+  "RESTAURANT"
+)
+
+#Filtering the crimes to include only the ones that are relevant
+crimes_filtered <- subset(crimes, Location.Type %in% relevant_location_types)
+
+#Create a table containing the year and how many of each different type of crim
+#happened that year.
+crime_counts_table <- table(crimes_filtered$year, crimes_filtered$Location.Type)
+
+#Convert to data frame
+crime_counts_df <- as.data.frame(crime_counts_table)
+colnames(crime_counts_df) <- c("year", "Location.Type", "count")
+
+#Ensure that the years will be treated as numbers instead of date variables.
+crime_counts_df$year <- as.numeric(as.character(crime_counts_df$year))
+
+#Plot
+ggplot(crime_counts_df, aes(x = year, y = count, fill = Location.Type)) +
+  geom_area(alpha = 1) +  
+  theme_minimal() +
+  labs(title = "Crime Locations Over Time",
+       x = "Year",
+       y = "Number of Crimes",
+       fill = "Location Type") +
+  #Show every other year in the x-label for a cleaner look.
+  scale_x_continuous(breaks = seq(min(crime_counts_df$year), 
+                                  max(crime_counts_df$year), 
+                                  by = 2)) +  # Show every 2 years
+  #Gets rid of scientific notation in the label
+  scale_y_continuous(labels = comma) +
+  scale_fill_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
+                               "#FF7F00", "#FFFF33", "#A65628", "#F781BF",
+                               "#999999", "#66C2A5")) +
+  #Fix the x-axis label
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
 
