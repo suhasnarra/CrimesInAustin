@@ -62,14 +62,6 @@ A significant part of our work will involve grouping key variables to simplify d
 -   Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening.
 -   Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format.
 
-```{r, message = FALSE, echo = FALSE}
-#Pre Processing
-crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
-crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
-crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
-
-```
-
 # Linear Regression Model -- Predicting Gas Prices
 
 To better understand the Texas economy we will create a simple model that uses linear regression to show the relationship between produced gas, gas prices, and diesel prices. It's important for us to be well informed on the Texas economy to understand any patterns that may exist between economic changes and frequency of crime.
@@ -140,7 +132,7 @@ ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Tim
 
 ```
 
-## Scatterplot Interpretation
+## Jitterplot Interpretation
 
 There are significant disparities in average response time across the districts. District 9 stands out, reporting crimes significantly faster than any other. Conversely, Districts 7 and 10 consistently exhibit the longest response times. External research strongly correlates faster response times with a much higher crime resolution rate. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes.
 
@@ -149,6 +141,10 @@ There are significant disparities in average response time across the districts.
 Not all crimes get solved, but the ones that do start with the crime being reported. This takes someone witnessing the crime or finding something related to the crime scene like the victim or perpetrator. Whether people witnessed the crime or not, reporting can be anywhere from immediate to months and this boxplot will visualize, in general, how long it takes for crimes to get reported.
 
 ```{r, , message=FALSE, echo = FALSE, warning = FALSE}
+#Pre Processing
+crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
 
 #Plot
 bp <- boxplot(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0], outline = FALSE,
@@ -303,17 +299,46 @@ legend("topleft", legend = c("Gasoline Price ($)", "Unemployment Rate (%)"),
 This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
 
 
-## Viz 7
+## Family Violence Reports over Time
 
-
+To better understand the prevalence of family violence in crimes, we wanted to study how the proportion of crimes reported as family violence changed over time. This study may also inform us on reporting practices, and whether people became more willing to report family violence over time. 
 
 ```{r,  message=FALSE, echo = FALSE}
+crime_table <- table(crimes$Family.Violence, crimes$ReportMonth)
+crime_table <- crime_table[rowSums(crime_table) > 100,]
+crime_df <- as.data.frame(t(crime_table))
+crime_df$ReportMonth <- rownames(crime_df)
+crime_df <- as.data.frame(crime_table)
+colnames(crime_df) <- c("Family.Violence", "ReportMonth", "Freq")
+crime_wide <- reshape(crime_df, 
+                     idvar = "ReportMonth",
+                     timevar = "Family.Violence",
+                     direction = "wide")
+colnames(crime_wide) <- c("ReportMonth", "No", "Yes")
+colnames(crime_wide) <- gsub("Freq\\.", "", colnames(crime_wide))
+crime_table <- crime_wide[, c("ReportMonth", "Yes", "No")]
+crime_table$Total <- crime_table$Yes + crime_table$No
+crime_table$Pct_Yes <- (crime_table$Yes / crime_table$Total) * 100
+crime_table$Pct_No <- (crime_table$No / crime_table$Total) * 100
+crime_pct <- crime_table[, c("ReportMonth", "Pct_Yes", "Pct_No")]
 
+selected_months <- crime_pct$ReportMonth[seq(1, nrow(crime_pct), by = 24)]
 
+ggplot(crime_pct, aes(x=ReportMonth, y=Pct_Yes)) +
+  geom_segment( aes(x=ReportMonth, xend=ReportMonth, y=0, yend=Pct_Yes), color = "skyblue") +
+  geom_point(color = "blue") +
+  labs(
+    title = "Family Violence Cases Reported Over Time",
+    x = "",
+    y = "Cases Reported as Family Violence (%)",
+    subtitle = "Austin, TX (2003-2025)"
+  ) +
+  scale_x_discrete(breaks = selected_months) +
+  theme_minimal()
 ```
 
 ## Interpretation
-
+From 2003 through 2025, the proportion of reported crimes that were family violence cases increased by over 50%. Logically, this increase can be attributed to increase in family violence cases, an increase in reporting of these cases, and the general decrease of crime which increases the proportion of stable family violence cases. While it is possible that one of these cases makes up the majority of the increase, such a drastic change in reports is likely due to some combination of the three.  
 
 ## Viz 8
 
