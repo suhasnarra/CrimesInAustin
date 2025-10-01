@@ -12,7 +12,6 @@ format:
 # Load any libraries used
 library(hms)
 library(ggplot2)
-library(scales)
 ```
 
 # Group: Suhas, Mert, Carson, Max
@@ -57,12 +56,19 @@ A significant part of our work will involve grouping key variables to simplify d
 
 ## Pre-Processing
 
--   Grouping times, so instead of looking at specific times we can analyze times of day. This is for the main dataset.
--   Converting datetime character vectors to datetime object to make datetime data columns more usable. This is for the main dataset.
--   Create a new column, Net.Response.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported. This is for the main dataset.
--   Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening. This is for the main dataset.
--   Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format. This is for the secondary dataset.
--   Created a new column, Year, which takes Occurred.Date.Time and extracts the year from it as a date variable. This is for the main dataset.
+-   Grouping times, so instead of looking at specific times we can analyze times of day.
+-   Converting datetime character vectors to datetime object to make datetime data columns more usable.
+-   Create a new column, Net.Response.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported.
+-   Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening.
+-   Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format.
+
+```{r, message = FALSE, echo = FALSE}
+#Pre Processing
+crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
+
+```
 
 # Linear Regression Model -- Predicting Gas Prices
 
@@ -143,10 +149,6 @@ There are significant disparities in average response time across the districts.
 Not all crimes get solved, but the ones that do start with the crime being reported. This takes someone witnessing the crime or finding something related to the crime scene like the victim or perpetrator. Whether people witnessed the crime or not, reporting can be anywhere from immediate to months and this boxplot will visualize, in general, how long it takes for crimes to get reported.
 
 ```{r, , message=FALSE, echo = FALSE, warning = FALSE}
-#Pre Processing
-crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
-crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
-crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
 
 #Plot
 bp <- boxplot(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0], outline = FALSE,
@@ -301,77 +303,13 @@ legend("topleft", legend = c("Gasoline Price ($)", "Unemployment Rate (%)"),
 This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
 
 
-## Area Chart
+## Viz 7
 
 
 
 ```{r,  message=FALSE, echo = FALSE}
-#Make a new column based off the Occured.Date.Time column (already formatted when
-#we made our boxplot), which is only the year
-crimes$year <- format(as.POSIXct(crimes$Occurred.Date.Time), "%Y")
 
-# These are the relevant locations we will be examining
-relevant_location_types <- c(
-  "GROCERY / SUPERMARKET",
-  "CONVENIENCE STORE",
-  "RESIDENCE / HOME",
-  "HWY / ROAD / ALLEY/ STREET/ SIDEWALK",
-  "PARKING /DROP LOT/ GARAGE",
-  "HOTEL / MOTEL / ETC.",
-  "DRUG STORE / DOCTOR'S OFFICE / HOSPITAL",
-  "COMMERCIAL / OFFICE BUILDING",
-  "BAR / NIGHTCLUB",
-  "RESTAURANT"
-)
 
-#Gets the total crimes per year from the full dataset
-total_crimes_per_year <- table(crimes$year)
-
-# Filtering the crimes to include only the ones that are relevant
-crimes_filtered <- subset(crimes, Location.Type %in% relevant_location_types)
-
-#Create a table containing the year and how many of each different type of crime
-#happened that year.
-crime_counts_table <- table(crimes_filtered$year, crimes_filtered$Location.Type)
-
-# Convert to data frame
-crime_counts_df <- as.data.frame(crime_counts_table)
-colnames(crime_counts_df) <- c("year", "Location.Type", "count")
-
-#Calculates percentages based on total crimes 
-#(not just based on the crime locations we're focusing on)
-years <- unique(crime_counts_df$year)
-crime_counts_df$percentage <- 0
-
-for(yr in years) {
-  year_mask <- crime_counts_df$year == yr
-  #Uses total crimes from all data to calculate percentage
-  year_total <- total_crimes_per_year[yr]
-  crime_counts_df$percentage[year_mask] <- (crime_counts_df$count[year_mask] / as.numeric(year_total)) * 100
-}
-
-# Ensure that the years will be treated as numbers instead of date variables.
-crime_counts_df$year <- as.numeric(as.character(crime_counts_df$year))
-
-# Plot with percentages
-ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
-  geom_area(alpha = 1) +  
-  theme_minimal() +
-  labs(title = "Selected Crime Locations as Percentage of All Crimes",
-       x = "Year",
-       y = "Percentage of Total Crimes (%)",
-       fill = "Location Type") +
-  # Shows every other year in the x-label for a cleaner look.
-  scale_x_continuous(breaks = seq(min(crime_counts_df$year), 
-                                  max(crime_counts_df$year), 
-                                  by = 2)) +
-  # Format y-axis as percentage
-  scale_y_continuous(labels = function(x) paste0(x, "%")) +
-  scale_fill_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
-                               "#FF7F00", "#FFFF33", "#A65628", "#F781BF",
-                               "#999999", "#66C2A5")) +
-  # Fix the x-axis label
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ## Interpretation
