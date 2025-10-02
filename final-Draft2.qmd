@@ -68,8 +68,6 @@ A significant part of our work will involve grouping key variables to simplify d
 crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
 crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
 crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
-crimes$OccurMonth <- format(crimes$Occurred.Date.Time, "%Y-%m")
-crimes$ReportMonth <- format(crimes$Report.Date.Time, "%Y-%m")
 
 ```
 
@@ -469,24 +467,24 @@ top_7_theft_types <- names(sort(all_time_counts, decreasing = TRUE))[1:7]
 filtered_theft_summary <- theft_summary[theft_summary$theft_type %in% top_7_theft_types, ]
 
 
-# # Get average consumer confidence by year
-# avg_confidence_by_year <- aggregate(
-#     x = econ$Consumer.Confidence.Index.TX,
-#     by = list(year = econ$Year),
-#     FUN = mean,
-#     na.rm = TRUE 
-# )
-# avg_confidence_by_year <- na.omit(avg_confidence_by_year)
-# colnames(avg_confidence_by_year)[colnames(avg_confidence_by_year) == "x"] <- "Consumer.Index"
-# 
-# 
-# # Join confidence and crimes
-# theft_type_consumer_confidence <- merge(
-#     x = theft_summary,
-#     y = avg_confidence_by_year,
-#     by = "year",
-#     all = FALSE
-# )
+# Get average consumer confidence by year
+avg_confidence_by_year <- aggregate(
+    x = econ$Consumer.Confidence.Index.TX,
+    by = list(year = econ$Year),
+    FUN = mean,
+    na.rm = TRUE
+)
+avg_confidence_by_year <- na.omit(avg_confidence_by_year)
+colnames(avg_confidence_by_year)[colnames(avg_confidence_by_year) == "x"] <- "Consumer.Index"
+
+
+# Join confidence and crimes
+theft_type_consumer_confidence <- merge(
+    x = theft_summary,
+    y = avg_confidence_by_year,
+    by = "year",
+    all = FALSE
+)
 
 # Create slope chart
 filtered_theft_summary$year <- as.factor(filtered_theft_summary$year)
@@ -515,6 +513,8 @@ ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_typ
 ```
 
 ## Slope Chart Interpretation
+
+The drop in General Theft (unspecified) could be because reports are more detailed now, total thefts have declined, or both simultaneously. A key trend shows shoplifting has steadily dropped since 2013, while auto theft surged from 2017 to 2023 but has since fallen even faster. It's notable that two of the most common types of theft are specific crimes: bicycle theft and license plate theft. This indicates that many theft issues stem from people stealing lower-value items that are nonetheless essential for daily life.
 
 ## Viz 11
 
