@@ -63,6 +63,14 @@ A significant part of our work will involve grouping key variables to simplify d
 -   Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format. This is for the secondary dataset.
 -   Created a new column, Year, which takes Occurred.Date.Time and extracts the year from it as a date variable. This is for the main dataset.
 
+```{r, message=FALSE, echo=FALSE}
+#Pre Processing
+crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
+
+```
+
 # Linear Regression Model -- Predicting Gas Prices
 
 To better understand the Texas economy we will create a simple model that uses linear regression to show the relationship between produced gas, gas prices, and diesel prices. It's important for us to be well informed on the Texas economy to understand any patterns that may exist between economic changes and frequency of crime.
@@ -85,9 +93,9 @@ The model was constructed using linear regression with two independent/predictor
 
 # Visualizations
 
-## Jitter Plot -- District vs Response Time in Texas
+## Bar Graph -- Average Response Time by Council District
 
-Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or no there are certain districts that have significantly faster or slower response times
+Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or not there are certain districts that have significantly faster or slower response times.
 
 ```{r, , message=FALSE, echo = FALSE}
 
@@ -133,19 +141,15 @@ ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Tim
 
 ```
 
-## Jitterplot Interpretation
+## Bar Graph Interpretation
 
-There are significant disparities in average response time across the districts. District 9 stands out, reporting crimes significantly faster than any other. Conversely, Districts 7 and 10 consistently exhibit the longest response times. External research strongly correlates faster response times with a much higher crime resolution rate. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes.
+There are some significant disparities in average response time across the districts. District 9 stands out, reporting crimes significantly faster than any other. On the other hand, Districts 7 and 10 consistently exhibit the longest response times. External research strongly correlates faster response times with a much higher crime resolution rate. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes.
 
 ## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
 
 Not all crimes get solved, but the ones that do start with the crime being reported. This takes someone witnessing the crime or finding something related to the crime scene like the victim or perpetrator. Whether people witnessed the crime or not, reporting can be anywhere from immediate to months and this boxplot will visualize, in general, how long it takes for crimes to get reported.
 
 ```{r, , message=FALSE, echo = FALSE, warning = FALSE}
-#Pre Processing
-crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
-crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
-crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
 
 #Plot
 bp <- boxplot(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0], outline = FALSE,
@@ -300,7 +304,7 @@ legend("topleft", legend = c("Gasoline Price ($)", "Unemployment Rate (%)"),
 This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
 
 
-## Family Violence Reports over Time
+## Lollipop Chart -- Family Violence Reports over Time
 
 To better understand the prevalence of family violence in crimes, we wanted to study how the proportion of crimes reported as family violence changed over time. This study may also inform us on reporting practices, and whether people became more willing to report family violence over time. 
 
@@ -338,10 +342,10 @@ ggplot(crime_pct, aes(x=ReportMonth, y=Pct_Yes)) +
   theme_minimal()
 ```
 
-## Interpretation
+## Lollipop Chart Interpretation
 From 2003 through 2025, the proportion of reported crimes that were family violence cases increased by over 50%. Logically, this increase can be attributed to increase in family violence cases, an increase in reporting of these cases, and the general decrease of crime which increases the proportion of stable family violence cases. While it is possible that one of these cases makes up the majority of the increase, such a drastic change in reports is likely due to some combination of the three.  
 
-## Area Chart
+## Area Chart -- Occurrence of Crime at Key Locations
 
 
 
@@ -414,21 +418,10 @@ ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-## Interpretation
+## Area Chart Interpretation
 
 
-## Viz 9
-
-
-
-```{r,  message=FALSE, echo = FALSE}
-
-
-```
-
-## Interpretation
-
-## Viz 10
+## Word Cloud -- Most Common Types of Crime
 
 
 
@@ -437,7 +430,92 @@ ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
 
 ```
 
-## Interpretation
+## Word Cloud Interpretation
+
+## Slope Chart -- Total Thefts by Type & Year
+
+Of all the crimes, theft occurs quite frequently, leading to a variety of types of theft occurring. In this graph we look to better understand the most common types of theft, how often they occur, and if there are any patterns over time.
+
+```{r,  message=FALSE, echo = FALSE}
+# Get all theft rows
+theft_rows <- grepl("THEFT", crimes$Highest.Offense.Description, ignore.case = TRUE)
+
+
+# Create df with thefts, year
+theft_crimes_df <- crimes[theft_rows, c("Highest.Offense.Description", "year")]
+
+# Get Amount of thefts in each year
+theft_summary <- aggregate(
+    x = theft_crimes_df$Highest.Offense.Description,
+    by = list(year = theft_crimes_df$year, theft_type = theft_crimes_df$Highest.Offense.Description),
+    FUN = length
+)
+colnames(theft_summary) <- c("year", "theft_type", "total_thefts")
+
+# Find Most Common Types of Theft
+all_time_counts <- tapply(
+    X = theft_summary$total_thefts,
+    INDEX = theft_summary$theft_type,
+    FUN = sum
+)
+top_7_theft_types <- names(sort(all_time_counts, decreasing = TRUE))[1:7]
+
+# Only keep top 7 most common types of theft
+filtered_theft_summary <- theft_summary[theft_summary$theft_type %in% top_7_theft_types, ]
+
+
+# # Get average consumer confidence by year
+# avg_confidence_by_year <- aggregate(
+#     x = econ$Consumer.Confidence.Index.TX,
+#     by = list(year = econ$Year),
+#     FUN = mean,
+#     na.rm = TRUE 
+# )
+# avg_confidence_by_year <- na.omit(avg_confidence_by_year)
+# colnames(avg_confidence_by_year)[colnames(avg_confidence_by_year) == "x"] <- "Consumer.Index"
+# 
+# 
+# # Join confidence and crimes
+# theft_type_consumer_confidence <- merge(
+#     x = theft_summary,
+#     y = avg_confidence_by_year,
+#     by = "year",
+#     all = FALSE
+# )
+
+# Create slope chart
+filtered_theft_summary$year <- as.factor(filtered_theft_summary$year)
+theft_type_label_data <- do.call(rbind, lapply(split(filtered_theft_summary, filtered_theft_summary$theft_type), 
+                                               function(x) x[which.max(as.numeric(as.character(x$year))), ]))
+
+ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_type, color = theft_type)) +
+  geom_line(size = 1.2, alpha = 0.8) +
+  geom_point(size = 3) +
+  scale_y_continuous(
+    trans = 'log10', 
+    breaks = scales::log_breaks(n = 6),
+    labels = scales::comma
+  ) +
+  coord_cartesian(clip = "off") + 
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_text(face = "bold", size = 18),
+    panel.grid.major.x = element_blank(),
+    legend.position = "right", 
+    plot.margin = margin(10, 10, 10, 10) 
+  ) +
+  labs(
+    title = "Total Thefts by Type (2003 - 2023)",
+    subtitle = "y-axis uses a log scale to show trends clearly",
+    x = "Year",
+    y = "Total Thefts (Log Scale)",
+    color = "Theft Type"
+  )
+
+```
+
+## Slope Chart Interpretation
 
 ## Viz 11
 
