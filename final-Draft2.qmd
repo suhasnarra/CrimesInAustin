@@ -68,6 +68,8 @@ A significant part of our work will involve grouping key variables to simplify d
 crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
 crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
 crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
+crimes$OccurMonth <- format(crimes$Occurred.Date.Time, "%Y-%m")
+crimes$ReportMonth <- format(crimes$Report.Date.Time, "%Y-%m")
 
 ```
 
