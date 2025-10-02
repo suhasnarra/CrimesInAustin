@@ -348,7 +348,7 @@ From 2003 through 2025, the proportion of reported crimes that were family viole
 
 ## Area Chart -- Occurrence of Crime at Key Locations
 
-
+To better understand the change in where crimes occur, we wanted to study the change in the proportions of the locations of crimes. This study, along with analysis of other charts and our secondary dataset that provides economic backdrop will allow us to better understand the properties of Austin crimes along with possible correlations to change in economic conditions. There are over 30 different crime locations that the crimes dataset provides. However, to ensure that the graph is legible, we chose to focus only on the top 10 crime locations, compromising around 80% of the crimes in Austin. 
 
 ```{r,  message=FALSE, echo = FALSE}
 #Make a new column based off the Occured.Date.Time column (already formatted when
