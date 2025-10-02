@@ -344,6 +344,7 @@ ggplot(crime_pct, aes(x=ReportMonth, y=Pct_Yes)) +
 ```
 
 ## Lollipop Chart Interpretation
+
 From 2003 through 2025, the proportion of reported crimes that were family violence cases increased by over 50%. Logically, this increase can be attributed to increase in family violence cases, an increase in reporting of these cases, and the general decrease of crime which increases the proportion of stable family violence cases. While it is possible that one of these cases makes up the majority of the increase, such a drastic change in reports is likely due to some combination of the three.  
 
 ## Area Chart -- Occurrence of Crime at Key Locations
@@ -421,6 +422,7 @@ ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
 
 ## Area Chart Interpretation
 
+The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on Residences / Homes and Parking Lots / Garages, while the relative percentage of crime occurring on HWY / Road / Alley / Street / Sidewalk has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas, with little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
 
 ## Word Cloud -- Most Common Types of Crime
 
@@ -538,3 +540,8 @@ The drop in General Theft (unspecified) could be because reports are more detail
 ```
 
 ## Interpretation
+
+
+# Key Findings
+
+Our analysis made significant progress in better understanding crime in Austin. We found it's a misconception in Austin that crime occurs more after sundown, as occurrences were close to evenly split between day and night. An overwhelming majority of all crimes are occurring at residences and on the streets. While we found that report times are generally fast, District 9 proved to have the best response time to these reports, allowing crimes that occur there to have a higher chance of being solved. Both family violence and auto theft have surged recently. However, in the past two years, auto theft has rapidly declined. Shoplifting has also declined but much more steadily over the last 12 years. Our economic analysis informed us of key indicators in Texas that prompt questions like: Do certain types of crimes happen more often when the economy is doing worse? Overall, our analysis has yielded many interesting findings and prompted many more questions.
