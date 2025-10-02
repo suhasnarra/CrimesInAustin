@@ -12,6 +12,7 @@ format:
 # Load any libraries used
 library(hms)
 library(ggplot2)
+library(ggwordcloud)
 ```
 
 # Group: Suhas, Mert, Carson, Max
@@ -426,14 +427,115 @@ The data clearly shows that most crime is happening at people's houses and on th
 
 ## Word Cloud -- Most Common Types of Crime
 
+The word cloud provides a visual overview of the relative frequency of different crime categories in Austin, allowing us to see which offenses dominate the city’s crime landscape. By scaling the size of each label to its frequency, the visualization highlights priority areas for further analysis.
 
 
 ```{r,  message=FALSE, echo = FALSE}
 
+# Create grouping column
+crimes$Group <- NA
+
+### PROPERTY & THEFT
+crimes$Group[grepl("AUTO THEFT", crimes$Var1, ignore.case = TRUE)] <- "Auto Theft"
+crimes$Group[grepl("BURGLARY", crimes$Var1, ignore.case = TRUE)] <- "Burglary - Residence/Building"
+crimes$Group[grepl("SHOPLIFT|THEFT|PACKAGE", crimes$Var1, ignore.case = TRUE)] <- "General Theft"
+crimes$Group[grepl("ROBBERY.*INDIVIDUAL|ROBBERY", crimes$Var1, ignore.case = TRUE)] <- "Robbery - Individual"
+crimes$Group[grepl("FRAUD|FORGERY|IDENTITY", crimes$Var1, ignore.case = TRUE)] <- "Fraud / Identity Theft"
+crimes$Group[grepl("ARSON", crimes$Var1, ignore.case = TRUE)] <- "Arson"
+crimes$Group[grepl("TRESPASS", crimes$Var1, ignore.case = TRUE)] <- "Trespass"
+crimes$Group[grepl("STOLEN", crimes$Var1, ignore.case = TRUE)] <- "Possession of Stolen Property"
+
+### VIOLENCE & DISTURBANCE
+crimes$Group[grepl("ASSAULT.*FAM|FAMILY VIOLENCE|DATE VIOL", crimes$Var1, ignore.case = TRUE)] <- "Assault - Family/Domestic"
+crimes$Group[grepl("ASSAULT", crimes$Var1, ignore.case = TRUE)] <- "Assault - Non-Family"
+crimes$Group[grepl("AGG ASSAULT|DEADLY CONDUCT", crimes$Var1, ignore.case = TRUE)] <- "Aggravated Assault"
+crimes$Group[grepl("HOMICIDE|MURDER", crimes$Var1, ignore.case = TRUE)] <- "Homicide"
+crimes$Group[grepl("DISTURBANCE.*FAM", crimes$Var1, ignore.case = TRUE)] <- "Disturbance - Family"
+crimes$Group[grepl("DISTURBANCE", crimes$Var1, ignore.case = TRUE)] <- "Disturbance - Other"
+crimes$Group[grepl("HARASSMENT|THREAT", crimes$Var1, ignore.case = TRUE)] <- "Harassment / Threats"
+crimes$Group[grepl("RESIST|INTERFERE|OBSTRUCT", crimes$Var1, ignore.case = TRUE)] <- "Interference / Obstruction"
+
+### DRUGS, ALCOHOL & WEAPONS
+crimes$Group[grepl("DRUG|NARCOTIC|MANUF|DELIV", crimes$Var1, ignore.case = TRUE)] <- "Drug Offenses"
+crimes$Group[grepl("DWI|DUI|INTOX", crimes$Var1, ignore.case = TRUE)] <- "DWI / Alcohol"
+crimes$Group[grepl("WEAPON.*DISCHARGE", crimes$Var1, ignore.case = TRUE)] <- "Weapons - Discharge"
+crimes$Group[grepl("WEAPON|UNLAWFUL CARRY", crimes$Var1, ignore.case = TRUE)] <- "Weapons - Other"
+
+### SEXUAL & SENSITIVE
+crimes$Group[grepl("SEXUAL ASSAULT|RAPE", crimes$Var1, ignore.case = TRUE)] <- "Sexual Assault"
+crimes$Group[grepl("INDECENT", crimes$Var1, ignore.case = TRUE)] <- "Indecent Exposure"
+crimes$Group[grepl("CHILD", crimes$Var1, ignore.case = TRUE)] <- "Child-Related Offenses"
+crimes$Group[grepl("KIDNAP", crimes$Var1, ignore.case = TRUE)] <- "Kidnapping"
+
+### PUBLIC ORDER / OTHER
+crimes$Group[grepl("DISORDERLY|CURFEW|NOISE", crimes$Var1, ignore.case = TRUE)] <- "Public Disorder"
+crimes$Group[grepl("MISSING PERSON|RUNAWAY", crimes$Var1, ignore.case = TRUE)] <- "Missing Person / Runaway"
+crimes$Group[grepl("TRAFFIC|ACCIDENT", crimes$Var1, ignore.case = TRUE)] <- "Traffic Offense"
+crimes$Group[grepl("ESCAPE|FAIL TO APPEAR|WARRANT", crimes$Var1, ignore.case = TRUE)] <- "Justice System Offenses"
+
+### EXTRA PROMOTIONS FROM MISC 
+crimes$Group[grepl("^FAMILY DISTURBANCE", crimes$Var1, ignore.case = TRUE)] <- "Family Disturbance"
+crimes$Group[grepl("^CRIMINAL MISCHIEF", crimes$Var1, ignore.case = TRUE)] <- "Criminal Mischief"
+crimes$Group[grepl("^DWI", crimes$Var1, ignore.case = TRUE)] <- "DWI / Alcohol"
+crimes$Group[grepl("^HARASSMENT", crimes$Var1, ignore.case = TRUE)] <- "Harassment / Threats"
+crimes$Group[grepl("CRUELTY TO ANIMALS|DOG FIGHTING", crimes$Var1, ignore.case=TRUE)] <- "Animal Cruelty / Fighting"
+
+crimes$Group[grepl("POSSESSION OF MARIJUANA", crimes$Var1, ignore.case=TRUE)] <- "Possession of Marijuana"
+crimes$Group[grepl("VIOL CITY ORDINANCE", crimes$Var1, ignore.case=TRUE)] <- "City Ordinance Violation"
+crimes$Group[grepl("CRED CARD ABUSE|DEBIT CARD ABUSE", crimes$Var1, ignore.case=TRUE)] <- "Credit/Debit Card Abuse"
+crimes$Group[grepl("GRAFFITI", crimes$Var1, ignore.case=TRUE)] <- "Graffiti / Vandalism"
+crimes$Group[grepl("PROTECTIVE ORDER", crimes$Var1, ignore.case=TRUE)] <- "Protective Order"
+crimes$Group[grepl("VOCO - ALCOHOL", crimes$Var1, ignore.case=TRUE)] <- "Alcohol Violation"
+crimes$Group[grepl("FAILURE TO IDENTIFY", crimes$Var1, ignore.case=TRUE)] <- "Failure to Identify"
+crimes$Group[grepl("AGG ASLT STRANGLE|FELONY ENHANCEMENT/ASSLT", crimes$Var1, ignore.case=TRUE)] <- "Aggravated Assault"
+crimes$Group[grepl("CRASH/FAIL STOP AND RENDER AID", crimes$Var1, ignore.case=TRUE)] <- "Fail to Stop/Render Aid"
+crimes$Group[grepl("VIOL STATE LAW", crimes$Var1, ignore.case=TRUE)] <- "State Law Violation"
+crimes$Group[grepl("DAMAGE CITY PROP", crimes$Var1, ignore.case=TRUE)] <- "Damage to City Property"
+crimes$Group[grepl("VOCO SOLICITATION", crimes$Var1, ignore.case=TRUE)] <- "Solicitation Violation"
+crimes$Group[grepl("CAMPING IN PARK", crimes$Var1, ignore.case=TRUE)] <- "Camping in Park"
+crimes$Group[grepl("DOC FIGHTING", crimes$Var1, ignore.case=TRUE)] <- "Disorderly Conduct - Fighting"
+crimes$Group[grepl("CRUELTY TO ANIMALS", crimes$Var1, ignore.case=TRUE)] <- "Cruelty to Animals"
+crimes$Group[grepl("VOCO AMPLIFIED MUSIC", crimes$Var1, ignore.case=TRUE)] <- "Noise Violation"
+crimes$Group[grepl("EVADING / FOOT", crimes$Var1, ignore.case=TRUE)] <- "Evading Arrest (Foot)"
+crimes$Group[grepl("URINATING IN PUBLIC PLACE", crimes$Var1, ignore.case=TRUE)] <- "Public Urination"
+
+crimes$Group[grepl("ROBBERY", crimes$Var1, ignore.case = TRUE)] <- "Robbery"
+crimes$Group[grepl("BURGLARY.*VEHICLE", crimes$Var1, ignore.case = TRUE)] <- "Burglary - Vehicle"
+
+small_groups <- c("Homicide",
+                  "Kidnapping",
+                  "Possession of Stolen Property",
+                  "Missing Person / Runaway",
+                  "Arson",
+                  "Assault - Family/Domestic")
+
+# THIS IS WHAT NEEDS FIXING
+crimes$Group[crimes$Group !%in% small_groups] <- "Other / Misc"
+crimes$Group[is.na(crimes$Group)] <- "Other / Misc"
+
+crimes$N <- 1
+grouped_counts <- aggregate(N ~ Group, data = crimes, sum)
+crimes$N <- NULL 
+
+
+names(grouped_counts)[names(grouped_counts) == "N"] <- "Count"
+
+names(grouped_counts)[names(grouped_counts) == "Group"] <- "Category"
+grouped_counts <- grouped_counts[order(-grouped_counts$Count), ]
+
+
+ggplot(grouped_counts, aes(label = Category, size = Count)) +
+  geom_text_wordcloud_area() +
+  scale_size_area(max_size = 40) +
+  theme_minimal() + 
+  ggtitle("Word Cloud of Crime Types in Austin")
 
 ```
 
 ## Word Cloud Interpretation
+
+The word cloud condenses over 440 original crime categories into about 40 broader groups, making the data easier to interpret and compare. It shows that General Theft, Burglary – Vehicle, and Family Disturbance are by far the most common reported offenses in Austin. This suggests that property-related and domestic conflicts are the most pressing daily crime concerns for the city. Offenses tied to drugs, alcohol, and fraud also appear prominently, reflecting broader social and economic dimensions of crime. Overall, the word cloud shows the diversity of crime in Austin while drawing attention to a handful of categories that may be most influential when considering their relationship with the Texas economy.
+
 
 ## Slope Chart -- Total Thefts by Type & Year
 
@@ -521,60 +623,13 @@ The drop in General Theft (unspecified) could be because reports are more detail
 
 ## Viz 11
 
-Certain crimes are more severe than others, which results in variance in crime solve rate and how the crime is dealt with after it is solved. We use this graph to study how the most common crimes are solved and prosecuted over a long period of time. 
+
 
 ```{r,  message=FALSE, echo = FALSE}
-clearance_df <- subset(crimes, select = c(Clearance.Status, Highest.Offense.Description))
-# Create a frequency table of offenses
-offense_freq <- table(clearance_df$Highest.Offense.Description)
-# Get the top 10 offense names
-top_offense_names <- names(sort(offense_freq, decreasing = TRUE)[1:10])
-# Subset the original dataframe to only include top 10 offenses
-clearance_top10 <- clearance_df[clearance_df$Highest.Offense.Description %in% top_offense_names, ]
-offense_clearance_counts <- as.data.frame(table(
-  clearance_top10$Highest.Offense.Description,
-  clearance_top10$Clearance.Status))
 
-offense_totals <- aggregate(Freq ~ Var1, data = offense_clearance_counts, sum)
-
-# Merge to calculate percentages
-plot_data <- merge(offense_clearance_counts, offense_totals, by = "Var1", suffixes = c("", "_Total"))
-plot_data$Percentage <- plot_data$Freq / plot_data$Freq_Total
-
-# Order offenses by total frequency (optional)
-offense_order <- offense_totals[order(-offense_totals$Freq), "Var1"]
-plot_data$Offense <- factor(plot_data$Var1, levels = offense_order)
-
-# Replace empty strings with a descriptive label in the data
-plot_data$Var2 <- as.character(plot_data$Var2)
-plot_data$Var2[plot_data$Var2 == ""] <- "Open"
-plot_data$Var2 <- factor(plot_data$Var2)
-
-# Create the stacked barplot
-ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
-  geom_bar(stat = "identity", position = "fill") +
-  scale_y_continuous(labels = scales::percent_format()) +
-  scale_x_discrete(
-    label = function(x) stringr::str_wrap(x, width = 10)
-  ) +
-  scale_fill_discrete(
-    name = "Clearance Status",
-    labels = c(
-      "N" = "Exceptional Clearance",
-      "O" = "Cleared by Arrest", 
-      "C" = "Cleared by Citation",
-      "Open" = "Open/Not Cleared"
-    )
-  ) +
-  labs(
-    title = "Clearance Status as Percentage of Common Offenses",
-    x = "Offense",
-    y = "Percentage",
-    subtitle = "Austin, TX (2003-2025)"
-  ) +
-  theme_minimal()
 
 ```
+
 ## Interpretation
 
 ## Viz 12
