@@ -521,13 +521,60 @@ The drop in General Theft (unspecified) could be because reports are more detail
 
 ## Viz 11
 
-
+Certain crimes are more severe than others, which results in variance in crime solve rate and how the crime is dealt with after it is solved. We use this graph to study how the most common crimes are solved and prosecuted over a long period of time. 
 
 ```{r,  message=FALSE, echo = FALSE}
+clearance_df <- subset(crimes, select = c(Clearance.Status, Highest.Offense.Description))
+# Create a frequency table of offenses
+offense_freq <- table(clearance_df$Highest.Offense.Description)
+# Get the top 10 offense names
+top_offense_names <- names(sort(offense_freq, decreasing = TRUE)[1:10])
+# Subset the original dataframe to only include top 10 offenses
+clearance_top10 <- clearance_df[clearance_df$Highest.Offense.Description %in% top_offense_names, ]
+offense_clearance_counts <- as.data.frame(table(
+  clearance_top10$Highest.Offense.Description,
+  clearance_top10$Clearance.Status))
 
+offense_totals <- aggregate(Freq ~ Var1, data = offense_clearance_counts, sum)
+
+# Merge to calculate percentages
+plot_data <- merge(offense_clearance_counts, offense_totals, by = "Var1", suffixes = c("", "_Total"))
+plot_data$Percentage <- plot_data$Freq / plot_data$Freq_Total
+
+# Order offenses by total frequency (optional)
+offense_order <- offense_totals[order(-offense_totals$Freq), "Var1"]
+plot_data$Offense <- factor(plot_data$Var1, levels = offense_order)
+
+# Replace empty strings with a descriptive label in the data
+plot_data$Var2 <- as.character(plot_data$Var2)
+plot_data$Var2[plot_data$Var2 == ""] <- "Open"
+plot_data$Var2 <- factor(plot_data$Var2)
+
+# Create the stacked barplot
+ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_x_discrete(
+    label = function(x) stringr::str_wrap(x, width = 10)
+  ) +
+  scale_fill_discrete(
+    name = "Clearance Status",
+    labels = c(
+      "N" = "Exceptional Clearance",
+      "O" = "Cleared by Arrest", 
+      "C" = "Cleared by Citation",
+      "Open" = "Open/Not Cleared"
+    )
+  ) +
+  labs(
+    title = "Clearance Status as Percentage of Common Offenses",
+    x = "Offense",
+    y = "Percentage",
+    subtitle = "Austin, TX (2003-2025)"
+  ) +
+  theme_minimal()
 
 ```
-
 ## Interpretation
 
 ## Viz 12
