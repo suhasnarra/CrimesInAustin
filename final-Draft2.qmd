@@ -17,7 +17,7 @@ library(scales)
 library(stargazer)
 ```
 
-# Group: Suhas, Mert, Carson, Max
+# Group: Suhas Narra, Mert Esat Yercel, Max Basurto, Carson Khun
 
 # Our Data
 
@@ -85,7 +85,7 @@ crimes$ReportMonth <- format(crimes$Report.Date.Time, "%Y-%m")
 
 ## Word Cloud -- Most Common Types of Crime
 
-The word cloud provides a visual overview of the relative frequency of different crime categories in Austin, allowing us to see which offenses dominate the city’s crime landscape. By scaling the size of each label to its frequency, the visualization highlights priority areas for further analysis.
+The first property we will be evaluating is the type of crimes that are most prevalent. This is a crucial factor that we must analyze as it gives us insight into what types of crimes we must analyze further. This will allow us to identify the most critical areas that the Austin Police Department needs to focus on to mitigate and respond to crime in a more timely and efficient manner.
 
 
 ```{r,  message=FALSE, echo = FALSE}
@@ -184,11 +184,13 @@ ggplot(grouped_counts, aes(label = Category, size = Count)) +
 
 ## Word Cloud Interpretation
 
-The word cloud condenses over 440 original crime categories into about 40 broader groups, making the data easier to interpret and compare. It shows that General Theft, Burglary – Vehicle, and Family Disturbance are by far the most common reported offenses in Austin. This suggests that property-related and domestic conflicts are the most pressing daily crime concerns for the city. Offenses tied to drugs, alcohol, and fraud also appear prominently, reflecting broader social and economic dimensions of crime. Overall, the word cloud shows the diversity of crime in Austin while drawing attention to a handful of categories that may be most influential when considering their relationship with the Texas economy.
+The word cloud condenses over 440 original crime categories into about 40 broader groups, making the data easier to interpret and compare. It shows that General Theft, Burglary – Vehicle, and Family Disturbance are by far the most common reported offenses in Austin. This suggests that property-related and domestic conflicts are the most pressing daily crime concerns for the city. Offenses tied to drugs, alcohol, and fraud also appear prominently, reflecting broader social and economic dimensions of crime. Overall, the word cloud shows the diversity of crime in Austin while drawing attention to a handful of categories that may be most influential when considering their relationship with the Texas economy. This graph is a crucial starting point as our future analyses of the crimes dataset will now have in context the most common types of crimes committed, and draw better conclusions as a result.
+
 
 ## Area Chart -- Occurrence of Crime at Key Locations
 
-To better understand where these crimes occur, we wanted to study the change in the proportions of the locations of crimes. There are over 30 different crime locations that the crimes dataset provides. However, to ensure that the graph is legible, we chose to focus only on the top 10 crime locations, compromising around 80% of the crimes in Austin. By understanding where crimes occur, the Austin Police force can concentrate personnel in high-risk areas to help mitigate incidents. 
+To better understand where these crimes occur, we wanted to study the change in the proportions of the locations of crimes. There are over 30 different crime locations that the crimes dataset provides. However, to ensure that the graph is legible, we chose to focus only on the top 10 crime locations, comprising around 80% of the crimes in Austin. By understanding where crimes occur, the Austin Police force can concentrate personnel in high-risk areas to help mitigate incidents.
+
 
 ```{r,  message=FALSE, echo = FALSE}
 #Make a new column based off the Occured.Date.Time column (already formatted when
@@ -261,12 +263,11 @@ ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
 
 ## Area Chart Interpretation
 
-The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on Residences / Homes and Parking Lots / Garages, while the relative percentage of crime occurring on HWY / Road / Alley / Street / Sidewalk has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas, with little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
-
+The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on residences, homes, parking lots, and garages, while the relative percentage of crime occurring on highways, roads, alleys, streets, and sidewalks has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas. There's little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
 
 ## Violin Chart -- The Difference In When Crime Was Reported Versus When It Was Closed
 
-Understanding the temporal dynamics between when crimes are reported and when cases are closed is essential for evaluating police department efficiency and resource allocation. Net response time measures the delay between when a crime occurs and when it's reported to authorities, while net clearance time captures how long it takes to close a case after it's been reported. We had to remove about 14% of the data due to it containing negative time differentials, which is impossible, and due to containing NA values. However, the ~86% of the data that we observe still provide wholly accurate results, as we simply remove outliers and missing values.These metrics provide critical insights into both community engagement with law enforcement and the department's investigative capacity. By analyzing the distribution and relationship between these two timeframes, we can identify bottlenecks in the crime resolution process and opportunities to improve both public reporting mechanisms and case management strategies.
+Understanding the temporal dynamics between when crimes are reported and when cases are closed is essential for evaluating police department efficiency and resource allocation. Net response time measures the delay between when a crime occurs and when it's reported to authorities, while net clearance time captures how long it takes to close a case after it's been reported. We had to remove about 14% of the data due to it containing negative time differentials, which is impossible, and due to rows containing NA values. However, the ~86% of the data that we observe still provide wholly accurate results, as we simply remove outliers and missing values. These metrics provide critical insights into both community engagement with law enforcement and the department's investigative capacity.
 
 
 ```{r,  message=FALSE, echo = FALSE}
@@ -314,12 +315,13 @@ p
 ```
 
 ## Interpretation
-The violin plot reveals a highly concentrated distribution for both metrics, with the vast majority of cases clustering near zero on both axes. This indicates that most crimes are reported very quickly after they occur (within a day) and are also resolved relatively quickly after being reported. The violin's narrow waist and wide middle section around 30-35 days for net clearance time suggests a common resolution timeframe of approximately one month for typical cases. However, the extended tails reaching beyond 50 days indicate a subset of complex cases that require significantly longer investigation periods. The symmetrical shape of the distribution suggests consistent processing patterns across different crime types. Notably, the concentration near zero for net response time demonstrates strong community-police engagement, with victims promptly reporting crimes. This pattern provides valuable baseline metrics for the Austin Police Department to identify cases that deviate from normal resolution timelines and may require additional resources or alternative investigative approaches. The department can use these insights to set realistic case closure expectations and allocate investigative resources more effectively based on typical case progression patterns.
+The violin plot reveals a highly concentrated distribution for both metrics, with the vast majority of cases clustering near zero on both axes. This indicates that most crimes are reported very quickly after they occur (within a day) and are also resolved relatively quickly after being reported. The violin's narrow waist and wide middle section around 30-35 days for net clearance time suggests a common resolution timeframe of approximately one month for typical cases. However, the extended tails reaching beyond 50 days indicate a subset of complex cases that require significantly longer investigation periods. The symmetrical shape of the distribution suggests consistent processing patterns across different crime types. Notably, the concentration near zero for net response time demonstrates strong community-police engagement, with victims promptly reporting crimes. The department can use these insights to set realistic case closure expectations and allocate investigative resources more effectively based on typical case progression patterns.
 
 
 ## Stacked Barplot -- Crime Solve Rate for Common Crimes
 
-Certain crimes are more severe than others, which results in variance in crime solve rate and how the crime is dealt with after it is solved. We use this graph to study how the most common crimes are solved and prosecuted over a long period of time. Such a study can help inform the Austin Police on what crimes they prosecute, and where to exert more energy to yield prosecution.  
+Certain crimes are more severe than others, which results in a variance in crime solving rate and how the crime is dealt with after it is solved. We use this graph to study how the most common crimes are solved and prosecuted over a long period of time. Such a study can help inform the Austin Police on what crimes they prosecute and where to exert more energy to yield prosecutions.
+  
 
 ```{r,  message=FALSE, echo = FALSE}
 clearance_df <- subset(crimes, select = c(Clearance.Status, Highest.Offense.Description))
@@ -378,12 +380,14 @@ ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
 ## Interpretation
 In order to understand this graph, we must understand the different crime clearance types. "Open/Not Cleared" indicates that a crime has not been solved. "Cleared by Arrest" means that the crime was solved and an arrest was made. "Cleared by Citation" means that the crime was solved and the offender was given a citation rather than being arrested. "Exceptional Clearance" indicates that a crime was solved with enough evidence to make an arrest, but the victim did not want to prosecute the offender.
 
-We see some interesting takeaways from the data in terms of how crimes are treated when they are solved. DWI offenses are very frequently issued a citation, which likely stems from how the law dictates they be handled. Contrarily, assault with injury in family and date violence cases being issued citations at such a high rate is very surprising. We would assume that assault causing injuries would be prosecuted more heavily, but it is possible that these cases have a lower arrest rate due to victims not wanting to prosecute further. We would have to look further into the data to understand if this lack of arrests is specific to family violence or if all assault cases are treated similarly. The most surprising statistic overall is the general lack of prosecution across all crimes. One would think that auto theft, burglary of vehicles, and harrasment would warrant prosecution, so it is interesting to see so many victims opt to not seek prosecution for these crimes. Austin Police Department may find this information useful to analyze their success rate in solving crime, as well as identifying where they can be stricter or more lenient with prosecution.  
+We see some interesting takeaways from the data in terms of how crimes are treated when they are solved. DWI offenses are very frequently issued a citation, which likely stems from how the law dictates they be handled. Contrarily, assault with injury in family and date violence cases being issued citations at such a high rate is very surprising. We would assume that assault causing injuries would be prosecuted more heavily, but it's possible that these cases have a lower arrest rate due to victims not wanting to prosecute further. We would have to look further into the data to understand if this lack of arrests is specific to family violence or if all assault cases are treated similarly. The most surprising statistic overall is the general lack of prosecution across all crimes. One would think that auto theft, burglary of vehicles, and harassment would warrant prosecution, so it's interesting to see so many victims opt to not seek prosecution for these crimes.
+
 
 
 ## Pie Chart -- Amount of crime by time of day
 
-It's easy to think that most crimes would be committed at night when less people will see. This pie chart allows us to visualize this and see if that assumption really is true. We want to use this pie chart to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
+After examining what types of crimes occur most frequently, where they happen, and how quickly they're resolved, we now turn to understanding when crimes are most likely to occur throughout the day. It's easy to think that most crimes would be committed at night when less people will see. This pie chart allows us to visualize this and see if that assumption really is true. We want to use this analysis to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
+
 
 ```{r, , message=FALSE, echo = FALSE}
 pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
@@ -397,11 +401,13 @@ pie(table(crimes$timeOfDay), label = pieBuckets,
 
 ## Pie Chart Interpretation
 
-The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occured after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes.
+The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occurred after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes. This even distribution suggests that Austin's crime patterns are driven more by opportunity and population activity levels than by darkness alone. The higher crime rates during afternoon and early evening likely correlate with increased population movement, more occupied public spaces, and peak traffic times—aligning with our earlier finding that streets and residences are primary crime locations. For the Austin Police Department, this means maintaining consistent staffing levels throughout most of the day rather than concentrating resources solely during nighttime hours.
+
 
 ## Mosaic Plot -- Frequent Crimes by Time of Day
 
-This plot will build on the pie chart and breakdown when crimes are occurring by the most frequent types of crime. The pie chart is a good start and gives us general information, but in this mosaic plot we can see when the most common types of crime are occurring.
+This plot will build on the pie chart and break down when crimes are occurring by the most frequent types of crime. The pie chart is a good start and gives us general information, but in this mosaic plot, we can see when the most common types of crime are occurring.
+
 
 ```{r, message=FALSE, echo = FALSE}
 
@@ -433,12 +439,13 @@ mosaicplot(tab_top,
 
 ## Mosaic Interpretation
 
-Most of the frequent types of crime occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burgalry or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case. Additionally, APD may find it valuable to use this data to look for certain types of crimes during specific times of day. 
+Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burglary or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case. Additionally, APD may find it valuable to use this data to patrol for certain types of crimes during specific times of day.
 
 
 ## Bar Graph -- Average Response Time by Council District
 
-Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or not there are certain districts that have significantly faster or slower response times.
+Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or not there are certain districts that have significantly faster or slower response times. By identifying which districts experience faster or slower response times, the Austin Police Department can make data-driven decisions about station placement, patrol routing, and resource reallocation to ensure equitable service delivery across all communities.
+
 
 ```{r, , message=FALSE, echo = FALSE}
 
@@ -448,11 +455,11 @@ crimes$Response.Duration.Seconds <- as.numeric(
 )
 
 # Convert to minutes
-crimes$Response.Duration.Minutes <- crimes$Response.Duration.Seconds / 60
+crimes$Response.Duration.Days <- crimes$Response.Duration.Seconds / 86400
 
 # Get average for each district
 crimes_summary <- aggregate(
-  x = crimes$Response.Duration.Minutes, 
+  x = crimes$Response.Duration.Days, 
   by = list(District = crimes$Council.District),
   FUN = mean,
   na.rm = TRUE
@@ -473,7 +480,7 @@ ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Tim
     labs(
     title = "Average Incident Response Time by Council District",
     x = "Council District",
-    y = "Average Response Time (Minutes)"
+    y = "Average Response Time (Days)"
   ) +  scale_x_discrete(breaks = as.character(1:10)) +
   theme_minimal() +
   theme(
@@ -486,12 +493,14 @@ ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Tim
 
 ## Bar Graph Interpretation
 
-There are some significant disparities in average response time across the districts. District 9 stands out, reporting crimes significantly faster than any other. On the other hand, Districts 7 and 10 consistently exhibit the longest response times. External research strongly correlates faster response times with a much higher crime resolution rate. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes.
+There are some significant disparities in average response time across the districts, with times ranging from approximately 6.7 days in District 9 to over 13 days in Districts 6 and 10. District 9 stands out, responding to crimes significantly faster than any other, nearly half that of the slowest districts. Districts 3 and 4 also demonstrate relatively quick response times, around 8 days. External research strongly correlates faster response times with much higher crime resolution rates. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes. The geographic clustering of slow-response districts may indicate these areas are underserved by current police infrastructure, potentially located farther from stations or experiencing higher call volumes relative to available units. The Austin Police Department should consider these disparities when planning patrol routes and station locations.
+
 
 
 ## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
 
-Not all crimes get solved, but the ones that do start with the crime being reported. This takes someone witnessing the crime or finding something related to the crime scene like the victim or perpetrator. Whether people witnessed the crime or not, reporting can be anywhere from immediate to months and this boxplot will visualize, in general, how long it takes for crimes to get reported.
+Not all crimes get solved, but the ones that do start with the crime being reported. This takes someone witnessing the crime or finding something related to the crime scene like the victim or perpetrator. Whether people witnessed the crime or not, reporting can be anywhere from immediate to months. Understanding these reporting delays is essential for the Austin Police Department to develop strategies that encourage faster victim response and improve overall case resolution rates.
+
 
 ```{r, , message=FALSE, echo = FALSE, warning = FALSE}
 
@@ -522,11 +531,13 @@ text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "t
 
 ## Boxplot Interpretation
 
-The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11 and a half hours. Additionally, the time needed to report a crime is heavily right-skewed, indicating significant room for study on what crimes are not reported quickly, and why. This investigation could focus on a variety of aspects such as analyzing what crime types take the longest to report.
+The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11.5 hours, with a first quartile of just 1 hour 35 minutes, suggesting that a substantial portion of victims contact authorities within hours of an incident occurring. Additionally, the time needed to report a crime is heavily right-skewed, with the third quartile extending to nearly 53 hours. This indicates significant room for study on what crimes are not reported quickly, and why. The extended upper whisker reaching beyond 1,100 hours suggests that some crimes go unreported for weeks or even months, though these extreme cases have been identified as outliers. This investigation could focus on a variety of aspects such as analyzing what crime types take the longest to report. For the Austin Police Department, reducing these delays could meaningfully improve case clearance rates.
+
 
 ## Heatmap -- Crime by Month and District
 
-Just because our data looks at a relatively small area doesn't mean that crime doesn't vary in different parts of the city. By using the district breakdown of Austin we can investigate the amount of crime occurring in each district while also potentially finding times of the year that are more prone to prevalent crime.
+Just because our data looks at a relatively small area doesn't mean that crime doesn't vary in different parts of the city. By using the district breakdown of Austin we can investigate the amount of crime occurring in each district while also potentially finding times of the year that are more prone to prevalent crime. This dual analysis allows the Austin Police Department to anticipate both where and when to concentrate resources.
+
 
 ```{r, , message=FALSE, echo = FALSE}
 #Pulling Months and labelling as text
@@ -555,11 +566,16 @@ heatmap(as.matrix(count_table),
 
 ## Heat Map Interpretation
 
-In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it is reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. We can use this information to further explore the interactions crime has with the general economy in these areas.
+In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it's reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. The darker shading in Districts 1-4 suggests these areas experience the highest crime volumes consistently throughout the year. Interestingly, the relatively uniform coloring across months indicates that seasonal variation is minimal, crime remains fairly constant year-round rather than spiking during particular seasons. This finding complements our earlier discovery that crime is evenly distributed throughout the day. For the Austin Police Department, this means maintaining consistent year-round staffing in these high-crime districts rather than adjusting seasonally. We can use this information to further explore the interactions crime has with the general economy in these areas.
+
+## Transition: From General Patterns to Specific Crime Types
+Having established the foundational patterns of crime in Austin, where it occurs, when it happens, and how quickly it's addressed, we now turn our attention to examining specific crime types. Our earlier analysis revealed that family disturbances, theft, and burglary rank among the most common offenses in Austin, making it crucial to understand how these particular categories have evolved over time. The following sections will dive deeper into specific crime trends to identify unique patterns within each crime type. We want to explore whether certain crimes follow different temporal patterns, how they've changed over the years, and what this might mean for targeted policing strategies.
+
 
 ## Lollipop Chart -- Family Violence Reports over Time
 
-To better understand the prevalence of family violence in crimes, we wanted to study how the proportion of crimes reported as family violence changed over time. This study may also inform us on reporting practices, and whether people became more willing to report family violence over time. 
+To better understand the prevalence of family violence in crimes, we wanted to study how the proportion of crimes reported as family violence changed over time. This study may also inform us on reporting practices, and whether people became more willing to report family violence over time. Given that our earlier analysis showed family disturbances as one of the top three most common crime types, this trend analysis becomes particularly important for understanding shifting crime dynamics in Austin. 
+
 
 ```{r,  message=FALSE, echo = FALSE}
 crime_table <- table(crimes$Family.Violence, crimes$ReportMonth)
@@ -597,11 +613,11 @@ ggplot(crime_pct, aes(x=ReportMonth, y=Pct_Yes)) +
 
 ## Lollipop Chart Interpretation
 
-From 2003 through 2025, the proportion of reported crimes that were family violence cases increased by over 50%. Logically, this increase can be attributed to increase in family violence cases, an increase in reporting of these cases, and the general decrease of crime which increases the proportion of stable family violence cases. While it is possible that one of these cases makes up the majority of the increase, such a drastic change in reports is likely due to some combination of the three.  
+From 2003 through 2025, the proportion of reported crimes that were family violence cases increased by over 50%, rising from approximately 4.5% to nearly 8% of all reported crimes. This dramatic increase tells a complex story that likely involves multiple factors. The steady upward trend suggests this isn't just random variation but a sustained shift in Austin's crime landscape. Three main factors could explain this increase: actual rises in family violence incidents, improved reporting rates as stigma decreases and support systems strengthen, or the proportional effect of other crime types declining while family violence remains stable. The relatively smooth progression of the increase, particularly the acceleration after 2016, suggests that changing social attitudes and improved victim support services may play a significant role. The COVID-19 period shows continued elevation, which aligns with national trends of increased domestic tensions during lockdowns. What's particularly striking is that while overall crime patterns have remained relatively stable in terms of location and timing, this specific category has shown consistent growth. This could indicate that family violence operates independently of the economic factors that influence property crimes and other offenses. For the Austin Police Department, this trend emphasizes the need for specialized domestic violence units and continued investment in victim support services, as these cases now represent nearly 1 in 12 reported crimes in the city.
 
 ## Slope Chart -- Total Thefts by Type & Year
 
-Of all the crimes, theft occurs quite frequently, leading to a variety of types of theft occurring. In this graph we look to better understand the most common types of theft, how often they occur, and if there are any patterns over time.
+Of all the crimes, theft occurs quite frequently, leading to a variety of types of theft occurring. Our earlier analysis showed that General Theft and Burglary-Vehicle rank among the most common crimes in Austin. In this graph we look to better understand the most common types of theft, how often they occur, and if there are any patterns over time that might correlate with economic conditions.
 
 ```{r,  message=FALSE, echo = FALSE}
 # Get all theft rows
@@ -684,11 +700,17 @@ ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_typ
 
 ## Slope Chart Interpretation
 
-The drop in General Theft (unspecified) could be because reports are more detailed now, total thefts have declined, or both simultaneously. A key trend shows shoplifting has steadily dropped since 2013, while auto theft surged from 2017 to 2023 but has since fallen even faster. It's notable that two of the most common types of theft are specific crimes: bicycle theft and license plate theft. This indicates that many theft issues stem from people stealing lower-value items that are nonetheless essential for daily life.
+The graph reveals a dramatic shift in Austin's theft landscape over the past two decades. General Theft dominated from 2003 to 2008, peaking at over 15,000 incidents annually before experiencing a steep decline after 2009,  dropping nearly 70% by 2025. This decline could be because reports are more detailed now, allowing crimes to be categorized more specifically, or it could reflect genuine reductions in opportunistic theft. The most striking trend is the surge in auto theft starting around 2019, jumping from roughly 2,000 cases to over 6,500 by 2023, more than tripling in just four years. This spike coincides with nationwide trends linked to certain vehicle vulnerabilities and organized theft rings. However, the sharp decline in 2024-2025 suggests that countermeasures may be taking effect. Shoplifting shows interesting stability, maintaining around 3,000-4,000 cases annually from 2011 onward, despite significant changes in retail environments and security technology. Meanwhile, smaller categories like bicycle theft and license plate theft remain remarkably consistent at around 1,000-1,500 cases each year. This indicates that many theft issues stem from people stealing lower-value items that are nonetheless essential for daily life. The overall pattern suggests that while total theft volumes have declined since their 2008 peak, the nature of theft has evolved. The shift from general theft to more specific categories like auto theft may reflect changing criminal opportunities and methods. For the Austin Police Department, this data emphasizes the need for targeted approaches. Some potential approaches would be an auto theft task force during surge periods, continued retail partnership programs for shoplifting, and community awareness campaigns about securing vehicles and bicycles.
+
+## Transition: Working in Our Secondary Economy Dataset
+
+Now that we've examined specific crime types and their individual trends, we want to explore how these patterns might relate to broader economic conditions in Texas. Economic factors like unemployment, gas prices, and financial stress can influence criminal behavior in complex ways. The following sections will analyze how Austin's crime patterns correlate with key Texas economic indicators. By understanding these relationships, we can better predict when certain crimes might increase and help the Austin Police Department anticipate resource needs based on economic forecasts. This economic dimension adds another layer to our analysis, moving beyond just describing crime patterns to understanding potential underlying drivers.
+
 
 
 # Linear Regression Model -- Predicting Shoplifting Thefts
 
+Having identified shoplifting as one of the most stable categories within Austin's theft landscape, maintaining consistent volumes of 3,000-4,000 cases annually, we now examine whether this crime type responds to economic pressures. We wanted to test if unemployment rates could predict shoplifting incidents, since financial stress might drive some individuals toward retail theft. By analyzing the relationship between shoplifting incidents and Texas's unemployment rate, we can determine whether economic downturns translate into measurable increases in retail theft.
 
 
 ```{r, message=FALSE, echo = FALSE}
@@ -739,12 +761,12 @@ with(summary_shopL_unem, {
 ```
 
 ## Linear Regression Model Interpretation
-
+The scatter plot and regression results reveal a lack of relationship between shoplifting and unemployment rates in Texas. The nearly horizontal regression line indicates that for every 1% increase in unemployment, shoplifting incidents increase by fewer than 2 cases per month, practically negligible given Austin's baseline of 250-300 monthly shoplifting incidents. With a p-value of 0.708 (far above the 0.05 threshold), we cannot conclude that unemployment has any meaningful predictive power over shoplifting rates. The visual data tells an even more compelling story. Shoplifting counts vary wildly at similar unemployment levels, with cases ranging from under 100 to over 450 at unemployment rates around 5-6%. This massive vertical spread indicates that factors other than unemployment are driving shoplifting behavior. This finding is somewhat surprising given the assumption that property crime increases during economic hardship. However, it aligns with our earlier observation that shoplifting has maintained remarkable stability from 2011 onwards despite significant economic fluctuations during that period, including the 2020 recession. The consistency of shoplifting regardless of unemployment indicates that this crime is driven more by opportunity than by economic necessity.
 
 
 
 ## Scatterplot -- Total Auto Thefts by Gas Prices
-
+Our earlier analysis showed that auto theft experienced a dramatic surge from 2019 to 2023, more than tripling before declining sharply in 2024-2025. We wanted to explore whether this pattern might correlate with gas prices, since higher fuel costs could theoretically either deter theft (due to operating costs) or encourage it (if vehicles become more valuable or if economic stress increases). By examining the relationship between auto theft incidents and Texas gas prices, we can test whether fuel costs influence vehicle-related crime rates.
 
 
 ```{r, message=FALSE, echo = FALSE}
@@ -801,12 +823,10 @@ with(summary_autogas, {
 ```
 
 ## Scatterplot Interpretation
-
+The scatter plot reveals a weak positive relationship between gas prices and auto theft in Austin. With an R² of 0.045, gas prices explain only 4.5% of the variation in auto theft rates, meaning 95.5% of the variation is due to other factors. The correlation coefficient of 0.212 indicates a very weak positive association that has minimal practical significance. Looking at the data distribution, auto theft counts vary tremendously at any given gas price level. When gas prices hover around $2.50 per gallon, auto theft ranges from under 150 to over 600 incidents per month. This wide spread suggests that gas prices are not a meaningful predictor of auto theft behavior. The slight upward trend in the regression line might initially suggest that higher gas prices correlate with more auto thefts, but the relationship is so weak it's essentially negligible. The massive spike in auto theft we observed from 2019-2023 doesn't align cleanly with gas price patterns during that period, further confirming that other factors were driving that surge. This finding indicates that auto theft in Austin operates independently of fuel costs. The dramatic changes we saw in auto theft rates were likely driven by factors such as specific vehicle vulnerabilities, organized theft rings, or changes in security technology rather than economic indicators like gas prices. For the Austin Police Department, this means that monitoring gas prices won't help predict auto theft trends, and prevention strategies should focus on addressing the specific methods and motivations behind vehicle theft rather than broader economic conditions.
 
 
 # Key Findings
 
-Our analysis made significant progress in better understanding crime in Austin. We found it's a misconception in Austin that crime occurs more after sundown, as occurrences were close to evenly split between day and night. An overwhelming majority of all crimes are occurring at residences and on the streets. While we found that report times are generally fast, District 9 proved to have the best response time to these reports, allowing crimes that occur there to have a higher chance of being solved. Both family violence and auto theft have surged recently. However, in the past two years, auto theft has rapidly declined. Shoplifting has also declined but much more steadily over the last 12 years. Our economic analysis informed us of key indicators in Texas that prompt questions like: Do certain types of crimes happen more often when the economy is doing worse? Overall, our analysis has yielded many interesting findings and prompted many more questions.
-# Key Findings
+Our analysis made significant progress in better understanding crime in Austin. We found it's a misconception that crime occurs more after sundown, occurrences were close to evenly split between day and night, with only early morning (3-9 AM) showing reduced activity. An overwhelming majority of crimes happen at residences and on streets. While report times are generally fast (74% within 48 hours), response times vary wildly, District 9 responds in 6.7 days while Districts 6 and 10 take over 13 days, on average. Family violence cases have increased by over 50% as a proportion of total crime since 2003. Auto theft surged dramatically from 2019-2023 (tripling in volume) before rapidly declining in 2024-2025. General theft has dropped 70% since 2008, while shoplifting remains steady at 3,000-4,000 cases annually. Surprisingly, we found minimal relationships between crime and economic indicators. Shoplifting doesn't correlate with unemployment (p-value = 0.708), and auto theft shows negligible connection to gas prices (R² = 0.045). This suggests Austin crime is driven more by opportunity and enforcement than economic conditions. These findings provide the Austin Police Department with actionable insights: addressing response time disparities across districts, maintaining consistent daytime staffing, and focusing prevention strategies on opportunity reduction rather than economic monitoring.
 
-Our analysis made significant progress in better understanding crime in Austin. We found it's a misconception in Austin that crime occurs more after sundown, as occurrences were close to evenly split between day and night. An overwhelming majority of all crimes are occurring at residences and on the streets. While we found that report times are generally fast, District 9 proved to have the best response time to these reports, allowing crimes that occur there to have a higher chance of being solved. Both family violence and auto theft have surged recently. However, in the past two years, auto theft has rapidly declined. Shoplifting has also declined but much more steadily over the last 12 years. Our economic analysis informed us of key indicators in Texas that prompt questions like: Do certain types of crimes happen more often when the economy is doing worse? Overall, our analysis has yielded many interesting findings and prompted many more questions.
