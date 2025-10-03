@@ -59,7 +59,7 @@ A significant part of our work will involve grouping key variables to simplify d
 
 ## Pre-Processing
 
-Main Dataset:
+#Main Dataset:
 -   Grouping times, so instead of looking at specific times we can analyze times of day. 
 -   Converting datetime character vectors to datetime object to make datetime data columns more usable. 
 -   Create a new column, NetResponse.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported. 
@@ -67,7 +67,7 @@ Main Dataset:
 -   Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening. 
 -   Created a new column, Year, which takes Occurred.Date.Time and extracts the year from it as a date variable. 
 
-Secondary Dataset:
+#Secondary Dataset:
 -   Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format.
 
 ```{r, message=FALSE, echo=FALSE}
