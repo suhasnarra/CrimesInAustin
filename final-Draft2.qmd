@@ -82,358 +82,6 @@ crimes$OccurMonth <- format(crimes$Occurred.Date.Time, "%Y-%m")
 crimes$ReportMonth <- format(crimes$Report.Date.Time, "%Y-%m")
 ```
 
-# Linear Regression Model -- Predicting Gas Prices
-
-To better understand the Texas economy we will create a simple model that uses linear regression to show the relationship between produced gas, gas prices, and diesel prices. It's important for us to be well informed on the Texas economy to understand any patterns that may exist between economic changes and frequency of crime.
-
-```{r, message=FALSE, echo = FALSE}
-# Linear Regression: predicting gas price given diesel price
-retail_gas <- econ$Retail.Gasoline.Price.TX
-retail_diesel <- econ$Retail.Diesel.Price.TX
-# Extracted gas value in billions
-gas_prod <- econ$Gross.Value.Natural.Gas.Production / 1000
-gas_diesel_model <- lm(retail_gas ~ retail_diesel + gas_prod)
-model_sum <- summary(gas_diesel_model)
-stargazer(model_sum$coefficients, type = "text", 
-          title = "Regression Results",
-          single.row = TRUE)
-```
-
-## Linear Regression Model Interpretation
-
-The model was constructed using linear regression with two independent/predictor variables and one dependent variable. For every `$`1 increase in diesel price, gas prices increase by `$`0.7878. For every one billion dollar increase in diesel price, gas prices decrease by a minimal `$`0.029. The purpose of this model is to understand how diesel prices and the value of the extracted natural gas in a given month are related to gas prices. From our model, it's clear diesel prices changing has a much stronger correlation that the change of value in natural gas extracted (in billions).
-
-# Visualizations
-
-## Bar Graph -- Average Response Time by Council District
-
-Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or not there are certain districts that have significantly faster or slower response times.
-
-```{r, , message=FALSE, echo = FALSE}
-
-# get numeric value in seconds
-crimes$Response.Duration.Seconds <- as.numeric(
-  gsub(" secs", "", crimes$NetResponse.Date.Time)
-)
-
-# Convert to minutes
-crimes$Response.Duration.Minutes <- crimes$Response.Duration.Seconds / 60
-
-# Get average for each district
-crimes_summary <- aggregate(
-  x = crimes$Response.Duration.Minutes, 
-  by = list(District = crimes$Council.District),
-  FUN = mean,
-  na.rm = TRUE
-)
-
-# Name average time column
-names(crimes_summary)[2] <- "Average.Response.Time"
-
-# Create plot
-ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Time)) +
-  geom_col(fill = "skyblue") +
-  
-  geom_text(
-    aes(label = round(Average.Response.Time, 1)), 
-    vjust = -0.5, 
-    size = 3.5
-  ) +
-    labs(
-    title = "Average Incident Response Time by Council District",
-    x = "Council District",
-    y = "Average Response Time (Minutes)"
-  ) +  scale_x_discrete(breaks = as.character(1:10)) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title.y = element_text(margin = margin(r = 15)),
-    panel.grid.major.x = element_blank()
-  )
-
-```
-
-## Bar Graph Interpretation
-
-There are some significant disparities in average response time across the districts. District 9 stands out, reporting crimes significantly faster than any other. On the other hand, Districts 7 and 10 consistently exhibit the longest response times. External research strongly correlates faster response times with a much higher crime resolution rate. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes.
-
-## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
-
-Not all crimes get solved, but the ones that do start with the crime being reported. This takes someone witnessing the crime or finding something related to the crime scene like the victim or perpetrator. Whether people witnessed the crime or not, reporting can be anywhere from immediate to months and this boxplot will visualize, in general, how long it takes for crimes to get reported.
-
-```{r, , message=FALSE, echo = FALSE, warning = FALSE}
-
-#Plot
-bp <- boxplot(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0], outline = FALSE,
-        yaxt = "n", 
-        ylab = "Report Time (HRS:MIN:SEC)", 
-        main = "Average Time to Report Crime in Austin, TX (2003-2025)",
-        sub = "Zero Duration Excluded | Outliers Removed From Plot"
-        )
-
-axis(2, at = axTicks(2), labels = as.hms(axTicks(2)))
-
-# Add labels for median, Q1, and Q3
-stats <- bp$stats
-rownames(stats) <- c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")
-
-text(x = 0.7, y = stats[2,1], labels = paste("Q1:", as.hms(stats[2,1], 1)), pos = 3, col = "red")
-text(x = 0.7, y = stats[3,1], labels = paste("Median:", as.hms(stats[3,1], 1)), pos = 3, col = "blue")
-text(x = 0.7, y = stats[4,1], labels = paste("Q3:", as.hms(stats[4,1], 1)), pos = 3, col = "darkgreen")
-#line and % at 48 hours
-percentile_48 <- round(ecdf(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0])(60*60*48)*100, 1)
-abline(h = 48 * 60 * 60, col = "red", lwd = 2, lty = 2)
-text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "th Percentile"), 
-     pos = 3, col = "red", offset = 1)
-
-```
-
-## Boxplot Interpretation
-
-The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11 and a half hours. Additionally, the time needed to report a crime is heavily right-skewed, indicating significant room for study on what crimes are not reported quickly, and why. This investigation could focus on a variety of aspects such as analyzing what crime types take the longest to report.
-
-## Heatmap -- Crime by Month and District
-
-Just because our data looks at a relatively small area doesn't mean that crime doesn't vary in different parts of the city. By using the district breakdown of Austin we can investigate the amount of crime occurring in each district while also potentially finding times of the year that are more prone to prevalent crime.
-
-```{r, , message=FALSE, echo = FALSE}
-#Pulling Months and labelling as text
-heatmap_crimes <- crimes[,c("Occurred.Date", "APD.District")]
-heatmap_crimes$month <- substr(as.character(heatmap_crimes$Occurred.Date), 0, 2)
-heatmap_crimes$month <- factor(heatmap_crimes$month, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), levels = c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"))
-heatmap_crimes$month <- factor(heatmap_crimes$month, levels = rev(levels(heatmap_crimes$month)))
-heatmap_crimes <- heatmap_crimes[heatmap_crimes$APD.District != "",]
-
-#Turn data into table object
-count_table <- table(heatmap_crimes$month, heatmap_crimes$APD.District)
-count_table <- count_table[rowSums(count_table) >= 1500, 
-               colSums(count_table) >= 1500]
-
-par(mar = c(7, 6, 8, 6))  # Increased margins: c(bottom, left, top, right)
-#Plot the table as a heatmap
-heatmap(as.matrix(count_table), 
-        Colv = NA, 
-        Rowv = NA,
-        col = colorRampPalette(c("pink", "red"))(50),
-        ylab = "Month",
-        xlab = "Austin, TX | District | Min. 1500 Reported Crimes | 2003-2025",
-        main = "Crime by Month and District",
-        cex.main = 0.6)
-```
-
-## Heat Map Interpretation
-
-In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it is reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. We can use this information to further explore the interactions crime has with the general economy in these areas.
-
-## Pie Chart -- Amount of crime by time of day
-
-It's easy to think that most crimes would be committed at night when less people will see. This pie chart allows us to visualize this and see if that assumption really is true. We want to use this pie chart to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
-
-```{r, , message=FALSE, echo = FALSE}
-pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
-crimes$timeOfDay <- cut(crimes$`Occurred.Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
-                         labels = pieBuckets)
-
-pie(table(crimes$timeOfDay), label = pieBuckets, 
-    col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
-    main = "Amount of Crimes by Time of Day")
-```
-
-## Pie Chart Interpretation
-
-The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occured after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes.
-
-## Mosaic Plot -- Frequent Crimes by Time of Day
-
-This plot will build on the pie chart and breakdown when crimes are occurring by the most frequent crime types. The pie chart is a good start and gives us general information, but in this mosaic plot we can see when the most common crime types are occurring.
-
-```{r, message=FALSE, echo = FALSE}
-
-# Two-way table of crime type vs. time of day bucket
-tab <- table(crimes$Highest.Offense.Description, crimes$timeOfDay)
-# Keep only the top 10 offenses 
-phrase_freq <- sort(table(crimes$Highest.Offense.Description), decreasing = TRUE)
-top_offenses <- names(head(phrase_freq, 10))
-tab_top <- tab[top_offenses, ]
-# Wrap labels
-wrapped_names <- sapply(rownames(tab_top), function(x) {
-  x_clean <- gsub("-", " - ", x)  
-  paste(strwrap(x_clean, width = 12), collapse = "\n")
-})
-rownames(tab_top) <- wrapped_names
-rownames(tab_top)[rownames(tab_top) == "ASSAULT\nW/INJURY -\nFAM/DATE\nVIOL"] <- "ASSAULT"
-# Make Plot
-par(mar = c(6, 6, 6, 6))
-
-mosaicplot(tab_top,
-           main = "Most Frequent Crime Types by Time of Day (Austin, TX)",
-           xlab = "",
-           ylab = "",
-           col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
-           las = 2,
-           cex.axis = 0.7)
-
-```
-
-## Mosaic Interpretation
-
-Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burgalry or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case.
-
-## Line Chart -- Unemployment & Gas Prices against time since 2007 by month.
-
-These are our main economic indicators so it's critical we visualize how they are related, if they are related at all. By understanding this relationship we can better utilize each piece of information when we look to connect them to information on crimes.
-
-```{r, message=FALSE, echo = FALSE}
-#Pre processing
-econ$date <- as.Date(paste(econ$Year, econ$Month, "01", sep = "-"))
-x_value_time <- econ$date[25:247]
-
-y_values_gasPrice <- econ$Retail.Gasoline.Price.TX[25:247]
-y_values_unemployment <- econ$Unemployment.TX[25:247]
-
-#Plot
-y_min <- min(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
-y_max <- max(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
-
-y_margin <- (y_max - y_min) * 0.05
-ylim_range <- c(y_min - y_margin, y_max + y_margin)
-
-plot(x_value_time, y_values_gasPrice, type = "n",  # "n" means no points, just a blank canvas
-     xlab = "Time", ylab = "Values",
-     main = "Retail Gasoline Price vs Unemployment Rate",
-     ylim = ylim_range)  
-
-lines(smooth.spline(x_value_time, y_values_gasPrice), col = "darkblue", lwd = 2)
-
-lines(smooth.spline(x_value_time, y_values_unemployment), col = "darkred", lwd = 2)
-
-legend("topleft", legend = c("Gasoline Price ($)", "Unemployment Rate (%)"),
-       col = c("darkblue", "darkred"), lwd = 2)
-```
-
-## Line Chart Interpretation
-
-This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
-
-
-## Lollipop Chart -- Family Violence Reports over Time
-
-To better understand the prevalence of family violence in crimes, we wanted to study how the proportion of crimes reported as family violence changed over time. This study may also inform us on reporting practices, and whether people became more willing to report family violence over time. 
-
-```{r,  message=FALSE, echo = FALSE}
-crime_table <- table(crimes$Family.Violence, crimes$ReportMonth)
-crime_table <- crime_table[rowSums(crime_table) > 100,]
-crime_df <- as.data.frame(t(crime_table))
-crime_df$ReportMonth <- rownames(crime_df)
-crime_df <- as.data.frame(crime_table)
-colnames(crime_df) <- c("Family.Violence", "ReportMonth", "Freq")
-crime_wide <- reshape(crime_df, 
-                     idvar = "ReportMonth",
-                     timevar = "Family.Violence",
-                     direction = "wide")
-colnames(crime_wide) <- c("ReportMonth", "No", "Yes")
-colnames(crime_wide) <- gsub("Freq\\.", "", colnames(crime_wide))
-crime_table <- crime_wide[, c("ReportMonth", "Yes", "No")]
-crime_table$Total <- crime_table$Yes + crime_table$No
-crime_table$Pct_Yes <- (crime_table$Yes / crime_table$Total) * 100
-crime_table$Pct_No <- (crime_table$No / crime_table$Total) * 100
-crime_pct <- crime_table[, c("ReportMonth", "Pct_Yes", "Pct_No")]
-
-selected_months <- crime_pct$ReportMonth[seq(1, nrow(crime_pct), by = 24)]
-
-ggplot(crime_pct, aes(x=ReportMonth, y=Pct_Yes)) +
-  geom_segment( aes(x=ReportMonth, xend=ReportMonth, y=0, yend=Pct_Yes), color = "skyblue") +
-  geom_point(color = "blue") +
-  labs(
-    title = "Family Violence Cases Reported Over Time",
-    x = "",
-    y = "Cases Reported as Family Violence (%)",
-    subtitle = "Austin, TX (2003-2025)"
-  ) +
-  scale_x_discrete(breaks = selected_months) +
-  theme_minimal()
-```
-
-## Lollipop Chart Interpretation
-
-From 2003 through 2025, the proportion of reported crimes that were family violence cases increased by over 50%. Logically, this increase can be attributed to increase in family violence cases, an increase in reporting of these cases, and the general decrease of crime which increases the proportion of stable family violence cases. While it is possible that one of these cases makes up the majority of the increase, such a drastic change in reports is likely due to some combination of the three.  
-
-## Area Chart -- Occurrence of Crime at Key Locations
-
-To better understand the change in where crimes occur, we wanted to study the change in the proportions of the locations of crimes. This study, along with analysis of other charts and our secondary dataset that provides economic backdrop will allow us to better understand the properties of Austin crimes along with possible correlations to change in economic conditions. There are over 30 different crime locations that the crimes dataset provides. However, to ensure that the graph is legible, we chose to focus only on the top 10 crime locations, compromising around 80% of the crimes in Austin. 
-
-```{r,  message=FALSE, echo = FALSE}
-#Make a new column based off the Occured.Date.Time column (already formatted when
-#we made our boxplot), which is only the year
-crimes$year <- format(as.POSIXct(crimes$Occurred.Date.Time), "%Y")
-
-# These are the relevant locations we will be examining
-relevant_location_types <- c(
-  "GROCERY / SUPERMARKET",
-  "CONVENIENCE STORE",
-  "RESIDENCE / HOME",
-  "HWY / ROAD / ALLEY/ STREET/ SIDEWALK",
-  "PARKING /DROP LOT/ GARAGE",
-  "HOTEL / MOTEL / ETC.",
-  "DRUG STORE / DOCTOR'S OFFICE / HOSPITAL",
-  "COMMERCIAL / OFFICE BUILDING",
-  "BAR / NIGHTCLUB",
-  "RESTAURANT"
-)
-
-#Gets the total crimes per year from the full dataset
-total_crimes_per_year <- table(crimes$year)
-
-# Filtering the crimes to include only the ones that are relevant
-crimes_filtered <- subset(crimes, Location.Type %in% relevant_location_types)
-
-#Create a table containing the year and how many of each different type of crime
-#happened that year.
-crime_counts_table <- table(crimes_filtered$year, crimes_filtered$Location.Type)
-
-# Convert to data frame
-crime_counts_df <- as.data.frame(crime_counts_table)
-colnames(crime_counts_df) <- c("year", "Location.Type", "count")
-
-#Calculates percentages based on total crimes 
-#(not just based on the crime locations we're focusing on)
-years <- unique(crime_counts_df$year)
-crime_counts_df$percentage <- 0
-
-for(yr in years) {
-  year_mask <- crime_counts_df$year == yr
-  #Uses total crimes from all data to calculate percentage
-  year_total <- total_crimes_per_year[yr]
-  crime_counts_df$percentage[year_mask] <- (crime_counts_df$count[year_mask] / as.numeric(year_total)) * 100
-}
-
-# Ensure that the years will be treated as numbers instead of date variables.
-crime_counts_df$year <- as.numeric(as.character(crime_counts_df$year))
-
-# Plot with percentages
-ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
-  geom_area(alpha = 1) +  
-  theme_minimal() +
-  labs(title = "Selected Crime Locations as Percentage of All Crimes",
-       x = "Year",
-       y = "Percentage of Total Crimes (%)",
-       fill = "Location Type") +
-  # Shows every other year in the x-label for a cleaner look.
-  scale_x_continuous(breaks = seq(min(crime_counts_df$year), 
-                                  max(crime_counts_df$year), 
-                                  by = 2)) +
-  # Format y-axis as percentage
-  scale_y_continuous(labels = function(x) paste0(x, "%")) +
-  scale_fill_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
-                               "#FF7F00", "#FFFF33", "#A65628", "#F781BF",
-                               "#999999", "#66C2A5")) +
-  # Fix the x-axis label
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-## Area Chart Interpretation
-
-The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on Residences / Homes and Parking Lots / Garages, while the relative percentage of crime occurring on HWY / Road / Alley / Street / Sidewalk has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas, with little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
 
 ## Word Cloud -- Most Common Types of Crime
 
@@ -538,6 +186,416 @@ ggplot(grouped_counts, aes(label = Category, size = Count)) +
 
 The word cloud condenses over 440 original crime categories into about 40 broader groups, making the data easier to interpret and compare. It shows that General Theft, Burglary – Vehicle, and Family Disturbance are by far the most common reported offenses in Austin. This suggests that property-related and domestic conflicts are the most pressing daily crime concerns for the city. Offenses tied to drugs, alcohol, and fraud also appear prominently, reflecting broader social and economic dimensions of crime. Overall, the word cloud shows the diversity of crime in Austin while drawing attention to a handful of categories that may be most influential when considering their relationship with the Texas economy.
 
+## Area Chart -- Occurrence of Crime at Key Locations
+
+To better understand the change in where crimes occur, we wanted to study the change in the proportions of the locations of crimes. This study, along with analysis of other charts and our secondary dataset that provides economic backdrop will allow us to better understand the properties of Austin crimes along with possible correlations to change in economic conditions. There are over 30 different crime locations that the crimes dataset provides. However, to ensure that the graph is legible, we chose to focus only on the top 10 crime locations, compromising around 80% of the crimes in Austin. 
+
+```{r,  message=FALSE, echo = FALSE}
+#Make a new column based off the Occured.Date.Time column (already formatted when
+#we made our boxplot), which is only the year
+crimes$year <- format(as.POSIXct(crimes$Occurred.Date.Time), "%Y")
+
+# These are the relevant locations we will be examining
+relevant_location_types <- c(
+  "GROCERY / SUPERMARKET",
+  "CONVENIENCE STORE",
+  "RESIDENCE / HOME",
+  "HWY / ROAD / ALLEY/ STREET/ SIDEWALK",
+  "PARKING /DROP LOT/ GARAGE",
+  "HOTEL / MOTEL / ETC.",
+  "DRUG STORE / DOCTOR'S OFFICE / HOSPITAL",
+  "COMMERCIAL / OFFICE BUILDING",
+  "BAR / NIGHTCLUB",
+  "RESTAURANT"
+)
+
+#Gets the total crimes per year from the full dataset
+total_crimes_per_year <- table(crimes$year)
+
+# Filtering the crimes to include only the ones that are relevant
+crimes_filtered <- subset(crimes, Location.Type %in% relevant_location_types)
+
+#Create a table containing the year and how many of each different type of crime
+#happened that year.
+crime_counts_table <- table(crimes_filtered$year, crimes_filtered$Location.Type)
+
+# Convert to data frame
+crime_counts_df <- as.data.frame(crime_counts_table)
+colnames(crime_counts_df) <- c("year", "Location.Type", "count")
+
+#Calculates percentages based on total crimes 
+#(not just based on the crime locations we're focusing on)
+years <- unique(crime_counts_df$year)
+crime_counts_df$percentage <- 0
+
+for(yr in years) {
+  year_mask <- crime_counts_df$year == yr
+  #Uses total crimes from all data to calculate percentage
+  year_total <- total_crimes_per_year[yr]
+  crime_counts_df$percentage[year_mask] <- (crime_counts_df$count[year_mask] / as.numeric(year_total)) * 100
+}
+
+# Ensure that the years will be treated as numbers instead of date variables.
+crime_counts_df$year <- as.numeric(as.character(crime_counts_df$year))
+
+# Plot with percentages
+ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
+  geom_area(alpha = 1) +  
+  theme_minimal() +
+  labs(title = "Selected Crime Locations as Percentage of All Crimes",
+       x = "Year",
+       y = "Percentage of Total Crimes (%)",
+       fill = "Location Type") +
+  # Shows every other year in the x-label for a cleaner look.
+  scale_x_continuous(breaks = seq(min(crime_counts_df$year), 
+                                  max(crime_counts_df$year), 
+                                  by = 2)) +
+  # Format y-axis as percentage
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+  scale_fill_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
+                               "#FF7F00", "#FFFF33", "#A65628", "#F781BF",
+                               "#999999", "#66C2A5")) +
+  # Fix the x-axis label
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Area Chart Interpretation
+
+The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on Residences / Homes and Parking Lots / Garages, while the relative percentage of crime occurring on HWY / Road / Alley / Street / Sidewalk has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas, with little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
+
+
+## Violin chart -- The Difference In When Crime Was Reported Versus When It Was Closed
+
+```{r,  message=FALSE, echo = FALSE}
+#Set it equal to variables so we do not modify the crimes (source) dataframe
+netResponseTime <- crimes$NetResponse.Date.Time
+netClearanceTime <- crimes$NetClearance.Date.Time
+
+#Calculate the percentage of NA so we know what percentage of the data we remove.
+percentNA <- length(netClearanceTime[is.na(netClearanceTime)]) / length(netClearanceTime)
+#percentNA
+
+#Make a new dataframe to pass into the plot later on.
+newDataFrame <- data.frame(netResponseTime = netResponseTime,netClearanceTime = netClearanceTime)
+
+#Remove the rows containing NAs
+newDataFrame <- na.omit(newDataFrame)
+
+#Turn the data into numeric
+newDataFrame$netResponseTime <- as.numeric(newDataFrame$netResponseTime)
+newDataFrame$netClearanceTime <- as.numeric(newDataFrame$netClearanceTime)
+
+#Convert from seconds to days and round
+newDataFrame <- newDataFrame / 86400
+newDataFrame <- round(newDataFrame, 3)
+
+#Remove outliers
+Q3Response <- quantile(newDataFrame$netResponseTime, 0.75)
+Q3Clearance <- quantile(newDataFrame$netClearanceTime, 0.75)
+responseOutlierThresholdUpper <- Q3Response + 1.5 * IQR(newDataFrame$netResponseTime)
+clearanceOutlierThresholdUpper <- Q3Clearance + 1.5 * IQR(newDataFrame$netClearanceTime)
+newDataFrame <- newDataFrame[
+  newDataFrame$netResponseTime >= 0 & 
+  newDataFrame$netResponseTime <= responseOutlierThresholdUpper &
+  newDataFrame$netClearanceTime >= 0 & 
+  newDataFrame$netClearanceTime <= clearanceOutlierThresholdUpper,]
+
+# Create the plot with filtered data
+p <- ggplot(newDataFrame, aes(x=netResponseTime, y=netClearanceTime)) + 
+  geom_violin(trim = TRUE,fill = "aliceblue", alpha = 0.7) +
+  labs(title = "Net Response Time versus Net Clearance Time",
+       x = "Net Response Time",
+       y = "Net Clearance Time")
+p
+
+```
+
+## Interpretation
+
+
+
+## Stacked Barplot -- Crime Solve Rate for Common Crimes
+
+Certain crimes are more severe than others, which results in variance in crime solve rate and how the crime is dealt with after it is solved. We use this graph to study how the most common crimes are solved and prosecuted over a long period of time. 
+
+```{r,  message=FALSE, echo = FALSE}
+clearance_df <- subset(crimes, select = c(Clearance.Status, Highest.Offense.Description))
+# Create a frequency table of offenses
+offense_freq <- table(clearance_df$Highest.Offense.Description)
+# Get the top 10 offense names
+top_offense_names <- names(sort(offense_freq, decreasing = TRUE)[1:10])
+# Subset the original dataframe to only include top 10 offenses
+clearance_top10 <- clearance_df[clearance_df$Highest.Offense.Description %in% top_offense_names, ]
+offense_clearance_counts <- as.data.frame(table(
+  clearance_top10$Highest.Offense.Description,
+  clearance_top10$Clearance.Status))
+
+offense_totals <- aggregate(Freq ~ Var1, data = offense_clearance_counts, sum)
+
+# Merge to calculate percentages
+plot_data <- merge(offense_clearance_counts, offense_totals, by = "Var1", suffixes = c("", "_Total"))
+plot_data$Percentage <- plot_data$Freq / plot_data$Freq_Total
+
+# Order offenses by total frequency (optional)
+offense_order <- offense_totals[order(-offense_totals$Freq), "Var1"]
+plot_data$Offense <- factor(plot_data$Var1, levels = offense_order)
+
+# Replace empty strings with a descriptive label in the data
+plot_data$Var2 <- as.character(plot_data$Var2)
+plot_data$Var2[plot_data$Var2 == ""] <- "Open"
+plot_data$Var2 <- factor(plot_data$Var2)
+
+# Create the stacked barplot
+ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_x_discrete(
+    labels = function(x) stringr::str_wrap(x, width = 7)
+  ) +
+  scale_fill_discrete(
+    name = "Clearance Status",
+    labels = c(
+      "N" = "Exceptional Clearance",
+      "O" = "Cleared by Arrest", 
+      "C" = "Cleared by Citation",
+      "Open" = "Open/Not Cleared"
+    )
+  ) +
+  labs(
+    title = "Clearance Status as Percentage of Common Offenses",
+    x = "Offense",
+    y = "Percentage",
+    subtitle = "Austin, TX (2003-2025)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+```
+
+## Interpretation
+In order to understand this graph, we must understand the different crime clearance types. "Open/Not Cleared" indicates that a crime has not been solved. "Cleared by Arrest" means that the crime was solved and an arrest was made. "Cleared by Citation" means that the crime was solved and the offender was given a citation rather than being arrested. "Exceptional Clearance" indicates that a crime was solved with enough evidence to make an arrest, but the victim did not want to prosecute the offender.
+
+We see some interesting takeaways from the data in terms of how crimes are treated when they are solved. DWI offenses are very frequently issued a citation, which likely stems from how the law dictates they be handled. Contrarily, assault with injury in family and date violence cases being issued citations at such a high rate is very surprising. We would assume that assault causing injuries would be prosecuted more heavily, but it is possible that these cases have a lower arrest rate due to victims not wanting to prosecute further. We would have to look further into the data to understand if this lack of arrests is specific to family violence or if all assault cases are treated similarly. The most surprising statistic overall is the general lack of prosecution across all crimes. One would think that auto theft, burgalry of vehicles, and harrasment would warrant prosecution, so it is interesting to see so many victims opt to not seek prosecution for these crimes. 
+
+
+
+## Pie Chart -- Amount of crime by time of day
+
+It's easy to think that most crimes would be committed at night when less people will see. This pie chart allows us to visualize this and see if that assumption really is true. We want to use this pie chart to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
+
+```{r, , message=FALSE, echo = FALSE}
+pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
+crimes$timeOfDay <- cut(crimes$`Occurred.Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
+                         labels = pieBuckets)
+
+pie(table(crimes$timeOfDay), label = pieBuckets, 
+    col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
+    main = "Amount of Crimes by Time of Day")
+```
+
+## Pie Chart Interpretation
+
+The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occured after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes.
+
+## Mosaic Plot -- Frequent Crimes by Time of Day
+
+This plot will build on the pie chart and breakdown when crimes are occurring by the most frequent crime types. The pie chart is a good start and gives us general information, but in this mosaic plot we can see when the most common crime types are occurring.
+
+```{r, message=FALSE, echo = FALSE}
+
+# Two-way table of crime type vs. time of day bucket
+tab <- table(crimes$Highest.Offense.Description, crimes$timeOfDay)
+# Keep only the top 10 offenses 
+phrase_freq <- sort(table(crimes$Highest.Offense.Description), decreasing = TRUE)
+top_offenses <- names(head(phrase_freq, 10))
+tab_top <- tab[top_offenses, ]
+# Wrap labels
+wrapped_names <- sapply(rownames(tab_top), function(x) {
+  x_clean <- gsub("-", " - ", x)  
+  paste(strwrap(x_clean, width = 12), collapse = "\n")
+})
+rownames(tab_top) <- wrapped_names
+rownames(tab_top)[rownames(tab_top) == "ASSAULT\nW/INJURY -\nFAM/DATE\nVIOL"] <- "ASSAULT"
+# Make Plot
+par(mar = c(6, 6, 6, 6))
+
+mosaicplot(tab_top,
+           main = "Most Frequent Crime Types by Time of Day (Austin, TX)",
+           xlab = "",
+           ylab = "",
+           col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
+           las = 2,
+           cex.axis = 0.7)
+
+```
+
+## Mosaic Interpretation
+
+Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burgalry or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case.
+
+
+## Bar Graph -- Average Response Time by Council District
+
+Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or not there are certain districts that have significantly faster or slower response times.
+
+```{r, , message=FALSE, echo = FALSE}
+
+# get numeric value in seconds
+crimes$Response.Duration.Seconds <- as.numeric(
+  gsub(" secs", "", crimes$NetResponse.Date.Time)
+)
+
+# Convert to minutes
+crimes$Response.Duration.Minutes <- crimes$Response.Duration.Seconds / 60
+
+# Get average for each district
+crimes_summary <- aggregate(
+  x = crimes$Response.Duration.Minutes, 
+  by = list(District = crimes$Council.District),
+  FUN = mean,
+  na.rm = TRUE
+)
+
+# Name average time column
+names(crimes_summary)[2] <- "Average.Response.Time"
+
+# Create plot
+ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Time)) +
+  geom_col(fill = "skyblue") +
+  
+  geom_text(
+    aes(label = round(Average.Response.Time, 1)), 
+    vjust = -0.5, 
+    size = 3.5
+  ) +
+    labs(
+    title = "Average Incident Response Time by Council District",
+    x = "Council District",
+    y = "Average Response Time (Minutes)"
+  ) +  scale_x_discrete(breaks = as.character(1:10)) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title.y = element_text(margin = margin(r = 15)),
+    panel.grid.major.x = element_blank()
+  )
+
+```
+
+## Bar Graph Interpretation
+
+There are some significant disparities in average response time across the districts. District 9 stands out, reporting crimes significantly faster than any other. On the other hand, Districts 7 and 10 consistently exhibit the longest response times. External research strongly correlates faster response times with a much higher crime resolution rate. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes.
+
+
+## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
+
+Not all crimes get solved, but the ones that do start with the crime being reported. This takes someone witnessing the crime or finding something related to the crime scene like the victim or perpetrator. Whether people witnessed the crime or not, reporting can be anywhere from immediate to months and this boxplot will visualize, in general, how long it takes for crimes to get reported.
+
+```{r, , message=FALSE, echo = FALSE, warning = FALSE}
+
+#Plot
+bp <- boxplot(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0], outline = FALSE,
+        yaxt = "n", 
+        ylab = "Report Time (HRS:MIN:SEC)", 
+        main = "Average Time to Report Crime in Austin, TX (2003-2025)",
+        sub = "Zero Duration Excluded | Outliers Removed From Plot"
+        )
+
+axis(2, at = axTicks(2), labels = as.hms(axTicks(2)))
+
+# Add labels for median, Q1, and Q3
+stats <- bp$stats
+rownames(stats) <- c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")
+
+text(x = 0.7, y = stats[2,1], labels = paste("Q1:", as.hms(stats[2,1], 1)), pos = 3, col = "red")
+text(x = 0.7, y = stats[3,1], labels = paste("Median:", as.hms(stats[3,1], 1)), pos = 3, col = "blue")
+text(x = 0.7, y = stats[4,1], labels = paste("Q3:", as.hms(stats[4,1], 1)), pos = 3, col = "darkgreen")
+#line and % at 48 hours
+percentile_48 <- round(ecdf(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0])(60*60*48)*100, 1)
+abline(h = 48 * 60 * 60, col = "red", lwd = 2, lty = 2)
+text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "th Percentile"), 
+     pos = 3, col = "red", offset = 1)
+
+```
+
+## Boxplot Interpretation
+
+The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11 and a half hours. Additionally, the time needed to report a crime is heavily right-skewed, indicating significant room for study on what crimes are not reported quickly, and why. This investigation could focus on a variety of aspects such as analyzing what crime types take the longest to report.
+
+## Heatmap -- Crime by Month and District
+
+Just because our data looks at a relatively small area doesn't mean that crime doesn't vary in different parts of the city. By using the district breakdown of Austin we can investigate the amount of crime occurring in each district while also potentially finding times of the year that are more prone to prevalent crime.
+
+```{r, , message=FALSE, echo = FALSE}
+#Pulling Months and labelling as text
+heatmap_crimes <- crimes[,c("Occurred.Date", "APD.District")]
+heatmap_crimes$month <- substr(as.character(heatmap_crimes$Occurred.Date), 0, 2)
+heatmap_crimes$month <- factor(heatmap_crimes$month, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), levels = c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"))
+heatmap_crimes$month <- factor(heatmap_crimes$month, levels = rev(levels(heatmap_crimes$month)))
+heatmap_crimes <- heatmap_crimes[heatmap_crimes$APD.District != "",]
+
+#Turn data into table object
+count_table <- table(heatmap_crimes$month, heatmap_crimes$APD.District)
+count_table <- count_table[rowSums(count_table) >= 1500, 
+               colSums(count_table) >= 1500]
+
+par(mar = c(7, 6, 8, 6))  # Increased margins: c(bottom, left, top, right)
+#Plot the table as a heatmap
+heatmap(as.matrix(count_table), 
+        Colv = NA, 
+        Rowv = NA,
+        col = colorRampPalette(c("pink", "red"))(50),
+        ylab = "Month",
+        xlab = "Austin, TX | District | Min. 1500 Reported Crimes | 2003-2025",
+        main = "Crime by Month and District",
+        cex.main = 0.6)
+```
+
+## Heat Map Interpretation
+
+In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it is reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. We can use this information to further explore the interactions crime has with the general economy in these areas.
+
+## Lollipop Chart -- Family Violence Reports over Time
+
+To better understand the prevalence of family violence in crimes, we wanted to study how the proportion of crimes reported as family violence changed over time. This study may also inform us on reporting practices, and whether people became more willing to report family violence over time. 
+
+```{r,  message=FALSE, echo = FALSE}
+crime_table <- table(crimes$Family.Violence, crimes$ReportMonth)
+crime_table <- crime_table[rowSums(crime_table) > 100,]
+crime_df <- as.data.frame(t(crime_table))
+crime_df$ReportMonth <- rownames(crime_df)
+crime_df <- as.data.frame(crime_table)
+colnames(crime_df) <- c("Family.Violence", "ReportMonth", "Freq")
+crime_wide <- reshape(crime_df, 
+                     idvar = "ReportMonth",
+                     timevar = "Family.Violence",
+                     direction = "wide")
+colnames(crime_wide) <- c("ReportMonth", "No", "Yes")
+colnames(crime_wide) <- gsub("Freq\\.", "", colnames(crime_wide))
+crime_table <- crime_wide[, c("ReportMonth", "Yes", "No")]
+crime_table$Total <- crime_table$Yes + crime_table$No
+crime_table$Pct_Yes <- (crime_table$Yes / crime_table$Total) * 100
+crime_table$Pct_No <- (crime_table$No / crime_table$Total) * 100
+crime_pct <- crime_table[, c("ReportMonth", "Pct_Yes", "Pct_No")]
+
+selected_months <- crime_pct$ReportMonth[seq(1, nrow(crime_pct), by = 24)]
+
+ggplot(crime_pct, aes(x=ReportMonth, y=Pct_Yes)) +
+  geom_segment( aes(x=ReportMonth, xend=ReportMonth, y=0, yend=Pct_Yes), color = "skyblue") +
+  geom_point(color = "blue") +
+  labs(
+    title = "Family Violence Cases Reported Over Time",
+    x = "",
+    y = "Cases Reported as Family Violence (%)",
+    subtitle = "Austin, TX (2003-2025)"
+  ) +
+  scale_x_discrete(breaks = selected_months) +
+  theme_minimal()
+```
+
+## Lollipop Chart Interpretation
+
+From 2003 through 2025, the proportion of reported crimes that were family violence cases increased by over 50%. Logically, this increase can be attributed to increase in family violence cases, an increase in reporting of these cases, and the general decrease of crime which increases the proportion of stable family violence cases. While it is possible that one of these cases makes up the majority of the increase, such a drastic change in reports is likely due to some combination of the three.  
 
 ## Slope Chart -- Total Thefts by Type & Year
 
@@ -626,118 +684,67 @@ ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_typ
 
 The drop in General Theft (unspecified) could be because reports are more detailed now, total thefts have declined, or both simultaneously. A key trend shows shoplifting has steadily dropped since 2013, while auto theft surged from 2017 to 2023 but has since fallen even faster. It's notable that two of the most common types of theft are specific crimes: bicycle theft and license plate theft. This indicates that many theft issues stem from people stealing lower-value items that are nonetheless essential for daily life.
 
-## Stacked Barplot -- Crime Solve Rate for Common Crimes
 
-Certain crimes are more severe than others, which results in variance in crime solve rate and how the crime is dealt with after it is solved. We use this graph to study how the most common crimes are solved and prosecuted over a long period of time. 
+# Linear Regression Model -- Predicting Gas Prices
 
-```{r,  message=FALSE, echo = FALSE}
-clearance_df <- subset(crimes, select = c(Clearance.Status, Highest.Offense.Description))
-# Create a frequency table of offenses
-offense_freq <- table(clearance_df$Highest.Offense.Description)
-# Get the top 10 offense names
-top_offense_names <- names(sort(offense_freq, decreasing = TRUE)[1:10])
-# Subset the original dataframe to only include top 10 offenses
-clearance_top10 <- clearance_df[clearance_df$Highest.Offense.Description %in% top_offense_names, ]
-offense_clearance_counts <- as.data.frame(table(
-  clearance_top10$Highest.Offense.Description,
-  clearance_top10$Clearance.Status))
+To better understand the Texas economy we will create a simple model that uses linear regression to show the relationship between produced gas, gas prices, and diesel prices. It's important for us to be well informed on the Texas economy to understand any patterns that may exist between economic changes and frequency of crime.
 
-offense_totals <- aggregate(Freq ~ Var1, data = offense_clearance_counts, sum)
-
-# Merge to calculate percentages
-plot_data <- merge(offense_clearance_counts, offense_totals, by = "Var1", suffixes = c("", "_Total"))
-plot_data$Percentage <- plot_data$Freq / plot_data$Freq_Total
-
-# Order offenses by total frequency (optional)
-offense_order <- offense_totals[order(-offense_totals$Freq), "Var1"]
-plot_data$Offense <- factor(plot_data$Var1, levels = offense_order)
-
-# Replace empty strings with a descriptive label in the data
-plot_data$Var2 <- as.character(plot_data$Var2)
-plot_data$Var2[plot_data$Var2 == ""] <- "Open"
-plot_data$Var2 <- factor(plot_data$Var2)
-
-# Create the stacked barplot
-ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
-  geom_bar(stat = "identity", position = "fill") +
-  scale_y_continuous(labels = scales::percent_format()) +
-  scale_x_discrete(
-    labels = function(x) stringr::str_wrap(x, width = 7)
-  ) +
-  scale_fill_discrete(
-    name = "Clearance Status",
-    labels = c(
-      "N" = "Exceptional Clearance",
-      "O" = "Cleared by Arrest", 
-      "C" = "Cleared by Citation",
-      "Open" = "Open/Not Cleared"
-    )
-  ) +
-  labs(
-    title = "Clearance Status as Percentage of Common Offenses",
-    x = "Offense",
-    y = "Percentage",
-    subtitle = "Austin, TX (2003-2025)"
-  ) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
-
+```{r, message=FALSE, echo = FALSE}
+# Linear Regression: predicting gas price given diesel price
+retail_gas <- econ$Retail.Gasoline.Price.TX
+retail_diesel <- econ$Retail.Diesel.Price.TX
+# Extracted gas value in billions
+gas_prod <- econ$Gross.Value.Natural.Gas.Production / 1000
+gas_diesel_model <- lm(retail_gas ~ retail_diesel + gas_prod)
+model_sum <- summary(gas_diesel_model)
+stargazer(model_sum$coefficients, type = "text", 
+          title = "Regression Results",
+          single.row = TRUE)
 ```
 
-## Interpretation
-In order to understand this graph, we must understand the different crime clearance types. "Open/Not Cleared" indicates that a crime has not been solved. "Cleared by Arrest" means that the crime was solved and an arrest was made. "Cleared by Citation" means that the crime was solved and the offender was given a citation rather than being arrested. "Exceptional Clearance" indicates that a crime was solved with enough evidence to make an arrest, but the victim did not want to prosecute the offender.
+## Linear Regression Model Interpretation
 
-We see some interesting takeaways from the data in terms of how crimes are treated when they are solved. DWI offenses are very frequently issued a citation, which likely stems from how the law dictates they be handled. Contrarily, assault with injury in family and date violence cases being issued citations at such a high rate is very surprising. We would assume that assault causing injuries would be prosecuted more heavily, but it is possible that these cases have a lower arrest rate due to victims not wanting to prosecute further. We would have to look further into the data to understand if this lack of arrests is specific to family violence or if all assault cases are treated similarly. The most surprising statistic overall is the general lack of prosecution across all crimes. One would think that auto theft, burgalry of vehicles, and harrasment would warrant prosecution, so it is interesting to see so many victims opt to not seek prosecution for these crimes. 
+The model was constructed using linear regression with two independent/predictor variables and one dependent variable. For every `$`1 increase in diesel price, gas prices increase by `$`0.7878. For every one billion dollar increase in diesel price, gas prices decrease by a minimal `$`0.029. The purpose of this model is to understand how diesel prices and the value of the extracted natural gas in a given month are related to gas prices. From our model, it's clear diesel prices changing has a much stronger correlation that the change of value in natural gas extracted (in billions).
+
+# Visualizations
 
 
-## Violin chart -- The Difference In When Crime Was Reported Versus When It Was Closed
 
-```{r,  message=FALSE, echo = FALSE}
-#Set it equal to variables so we do not modify the crimes (source) dataframe
-netResponseTime <- crimes$NetResponse.Date.Time
-netClearanceTime <- crimes$NetClearance.Date.Time
+## Line Chart -- Unemployment & Gas Prices against time since 2007 by month.
 
-#Calculate the percentage of NA so we know what percentage of the data we remove.
-percentNA <- length(netClearanceTime[is.na(netClearanceTime)]) / length(netClearanceTime)
-#percentNA
+These are our main economic indicators so it's critical we visualize how they are related, if they are related at all. By understanding this relationship we can better utilize each piece of information when we look to connect them to information on crimes.
 
-#Make a new dataframe to pass into the plot later on.
-newDataFrame <- data.frame(netResponseTime = netResponseTime,netClearanceTime = netClearanceTime)
+```{r, message=FALSE, echo = FALSE}
+#Pre processing
+econ$date <- as.Date(paste(econ$Year, econ$Month, "01", sep = "-"))
+x_value_time <- econ$date[25:247]
 
-#Remove the rows containing NAs
-newDataFrame <- na.omit(newDataFrame)
+y_values_gasPrice <- econ$Retail.Gasoline.Price.TX[25:247]
+y_values_unemployment <- econ$Unemployment.TX[25:247]
 
-#Turn the data into numeric
-newDataFrame$netResponseTime <- as.numeric(newDataFrame$netResponseTime)
-newDataFrame$netClearanceTime <- as.numeric(newDataFrame$netClearanceTime)
+#Plot
+y_min <- min(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
+y_max <- max(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
 
-#Convert from seconds to days and round
-newDataFrame <- newDataFrame / 86400
-newDataFrame <- round(newDataFrame, 3)
+y_margin <- (y_max - y_min) * 0.05
+ylim_range <- c(y_min - y_margin, y_max + y_margin)
 
-#Remove outliers
-Q3Response <- quantile(newDataFrame$netResponseTime, 0.75)
-Q3Clearance <- quantile(newDataFrame$netClearanceTime, 0.75)
-responseOutlierThresholdUpper <- Q3Response + 1.5 * IQR(newDataFrame$netResponseTime)
-clearanceOutlierThresholdUpper <- Q3Clearance + 1.5 * IQR(newDataFrame$netClearanceTime)
-newDataFrame <- newDataFrame[
-  newDataFrame$netResponseTime >= 0 & 
-  newDataFrame$netResponseTime <= responseOutlierThresholdUpper &
-  newDataFrame$netClearanceTime >= 0 & 
-  newDataFrame$netClearanceTime <= clearanceOutlierThresholdUpper,]
+plot(x_value_time, y_values_gasPrice, type = "n",  # "n" means no points, just a blank canvas
+     xlab = "Time", ylab = "Values",
+     main = "Retail Gasoline Price vs Unemployment Rate",
+     ylim = ylim_range)  
 
-# Create the plot with filtered data
-p <- ggplot(newDataFrame, aes(x=netResponseTime, y=netClearanceTime)) + 
-  geom_violin(trim = TRUE,fill = "aliceblue", alpha = 0.7) +
-  labs(title = "Net Response Time versus Net Clearance Time",
-       x = "Net Response Time",
-       y = "Net Clearance Time")
-p
+lines(smooth.spline(x_value_time, y_values_gasPrice), col = "darkblue", lwd = 2)
 
+lines(smooth.spline(x_value_time, y_values_unemployment), col = "darkred", lwd = 2)
+
+legend("topleft", legend = c("Gasoline Price ($)", "Unemployment Rate (%)"),
+       col = c("darkblue", "darkred"), lwd = 2)
 ```
 
-## Interpretation
+## Line Chart Interpretation
 
+This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
 
 # Key Findings
 
