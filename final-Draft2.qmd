@@ -621,16 +621,68 @@ ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_typ
 
 The drop in General Theft (unspecified) could be because reports are more detailed now, total thefts have declined, or both simultaneously. A key trend shows shoplifting has steadily dropped since 2013, while auto theft surged from 2017 to 2023 but has since fallen even faster. It's notable that two of the most common types of theft are specific crimes: bicycle theft and license plate theft. This indicates that many theft issues stem from people stealing lower-value items that are nonetheless essential for daily life.
 
-## Viz 11
+## Stacked Barplot -- Crime Solve Rate for Common Crimes
 
-
+Certain crimes are more severe than others, which results in variance in crime solve rate and how the crime is dealt with after it is solved. We use this graph to study how the most common crimes are solved and prosecuted over a long period of time. 
 
 ```{r,  message=FALSE, echo = FALSE}
+clearance_df <- subset(crimes, select = c(Clearance.Status, Highest.Offense.Description))
+# Create a frequency table of offenses
+offense_freq <- table(clearance_df$Highest.Offense.Description)
+# Get the top 10 offense names
+top_offense_names <- names(sort(offense_freq, decreasing = TRUE)[1:10])
+# Subset the original dataframe to only include top 10 offenses
+clearance_top10 <- clearance_df[clearance_df$Highest.Offense.Description %in% top_offense_names, ]
+offense_clearance_counts <- as.data.frame(table(
+  clearance_top10$Highest.Offense.Description,
+  clearance_top10$Clearance.Status))
 
+offense_totals <- aggregate(Freq ~ Var1, data = offense_clearance_counts, sum)
+
+# Merge to calculate percentages
+plot_data <- merge(offense_clearance_counts, offense_totals, by = "Var1", suffixes = c("", "_Total"))
+plot_data$Percentage <- plot_data$Freq / plot_data$Freq_Total
+
+# Order offenses by total frequency (optional)
+offense_order <- offense_totals[order(-offense_totals$Freq), "Var1"]
+plot_data$Offense <- factor(plot_data$Var1, levels = offense_order)
+
+# Replace empty strings with a descriptive label in the data
+plot_data$Var2 <- as.character(plot_data$Var2)
+plot_data$Var2[plot_data$Var2 == ""] <- "Open"
+plot_data$Var2 <- factor(plot_data$Var2)
+
+# Create the stacked barplot
+ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_x_discrete(
+    label = function(x) stringr::str_wrap(x, width = 10)
+  ) +
+  scale_fill_discrete(
+    name = "Clearance Status",
+    labels = c(
+      "N" = "Exceptional Clearance",
+      "O" = "Cleared by Arrest", 
+      "C" = "Cleared by Citation",
+      "Open" = "Open/Not Cleared"
+    )
+  ) +
+  labs(
+    title = "Clearance Status as Percentage of Common Offenses",
+    x = "Offense",
+    y = "Percentage",
+    subtitle = "Austin, TX (2003-2025)"
+  ) +
+  theme_minimal()
 
 ```
 
 ## Interpretation
+In order to understand this graph, we must understand the different crime clearance types. "Open/Not Cleared" indicates that a crime has not been solved. "Cleared by Arrest" means that the crime was solved and an arrest was made. "Cleared by Citation" means that the crime was solved and the offender was given a citation rather than being arrested. "Exceptional Clearance" indicates that a crime was solved with enough evidence to make an arrest, but the victim did not want to prosecute the offender.
+
+We see some interesting takeaways from the data in terms of how crimes are treated when they are solved. DWI offenses are very frequently issued a citation, which likely stems from how the law dictates they be handled. Contrarily, assault with injury in family and date violence cases being issued citations at such a high rate is very surprising. We would assume that assault causing injuries would be prosecuted more heavily, but it is possible that these cases have a lower arrest rate due to victims not wanting to prosecute further. We would have to look further into the data to understand if this lack of arrests is specific to family violence or if all assault cases are treated similarly. The most surprising statistic overall is the general lack of prosecution across all crimes. One would think that auto theft, burgalry of vehicles, and harrasment would warrant prosecution, so it is interesting to see so many victims opt to not seek prosecution for these crimes. 
+
 
 ## Viz 12
 
