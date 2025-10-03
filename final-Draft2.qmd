@@ -439,81 +439,73 @@ The word cloud provides a visual overview of the relative frequency of different
 crimes$Group <- NA
 
 ### PROPERTY & THEFT
-crimes$Group[grepl("AUTO THEFT", crimes$Var1, ignore.case = TRUE)] <- "Auto Theft"
-crimes$Group[grepl("BURGLARY", crimes$Var1, ignore.case = TRUE)] <- "Burglary - Residence/Building"
-crimes$Group[grepl("SHOPLIFT|THEFT|PACKAGE", crimes$Var1, ignore.case = TRUE)] <- "General Theft"
-crimes$Group[grepl("ROBBERY.*INDIVIDUAL|ROBBERY", crimes$Var1, ignore.case = TRUE)] <- "Robbery - Individual"
-crimes$Group[grepl("FRAUD|FORGERY|IDENTITY", crimes$Var1, ignore.case = TRUE)] <- "Fraud / Identity Theft"
-crimes$Group[grepl("ARSON", crimes$Var1, ignore.case = TRUE)] <- "Arson"
-crimes$Group[grepl("TRESPASS", crimes$Var1, ignore.case = TRUE)] <- "Trespass"
-crimes$Group[grepl("STOLEN", crimes$Var1, ignore.case = TRUE)] <- "Possession of Stolen Property"
+crimes$Group[grepl("AUTO THEFT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Auto Theft"
+crimes$Group[grepl("BURGLARY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Burglary - Residence/Building"
+crimes$Group[grepl("SHOPLIFT|THEFT|PACKAGE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "General Theft"
+crimes$Group[grepl("ROBBERY.*INDIVIDUAL|ROBBERY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Robbery - Individual"
+crimes$Group[grepl("FRAUD|FORGERY|IDENTITY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Fraud / Identity Theft"
+crimes$Group[grepl("ARSON", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Arson"
+crimes$Group[grepl("TRESPASS", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Trespass"
+crimes$Group[grepl("STOLEN", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Possession of Stolen Property"
 
 ### VIOLENCE & DISTURBANCE
-crimes$Group[grepl("ASSAULT.*FAM|FAMILY VIOLENCE|DATE VIOL", crimes$Var1, ignore.case = TRUE)] <- "Assault - Family/Domestic"
-crimes$Group[grepl("ASSAULT", crimes$Var1, ignore.case = TRUE)] <- "Assault - Non-Family"
-crimes$Group[grepl("AGG ASSAULT|DEADLY CONDUCT", crimes$Var1, ignore.case = TRUE)] <- "Aggravated Assault"
-crimes$Group[grepl("HOMICIDE|MURDER", crimes$Var1, ignore.case = TRUE)] <- "Homicide"
-crimes$Group[grepl("DISTURBANCE.*FAM", crimes$Var1, ignore.case = TRUE)] <- "Disturbance - Family"
-crimes$Group[grepl("DISTURBANCE", crimes$Var1, ignore.case = TRUE)] <- "Disturbance - Other"
-crimes$Group[grepl("HARASSMENT|THREAT", crimes$Var1, ignore.case = TRUE)] <- "Harassment / Threats"
-crimes$Group[grepl("RESIST|INTERFERE|OBSTRUCT", crimes$Var1, ignore.case = TRUE)] <- "Interference / Obstruction"
+crimes$Group[grepl("ASSAULT.*FAM|FAMILY VIOLENCE|DATE VIOL", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Assault - Family/Domestic"
+crimes$Group[grepl("ASSAULT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Assault - Non-Family"
+crimes$Group[grepl("AGG ASSAULT|DEADLY CONDUCT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Aggravated Assault"
+crimes$Group[grepl("HOMICIDE|MURDER", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Homicide"
+crimes$Group[grepl("DISTURBANCE.*FAM", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Disturbance - Family"
+crimes$Group[grepl("DISTURBANCE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Disturbance - Other"
+crimes$Group[grepl("HARASSMENT|THREAT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Harassment / Threats"
+crimes$Group[grepl("RESIST|INTERFERE|OBSTRUCT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Interference / Obstruction"
 
 ### DRUGS, ALCOHOL & WEAPONS
-crimes$Group[grepl("DRUG|NARCOTIC|MANUF|DELIV", crimes$Var1, ignore.case = TRUE)] <- "Drug Offenses"
-crimes$Group[grepl("DWI|DUI|INTOX", crimes$Var1, ignore.case = TRUE)] <- "DWI / Alcohol"
-crimes$Group[grepl("WEAPON.*DISCHARGE", crimes$Var1, ignore.case = TRUE)] <- "Weapons - Discharge"
-crimes$Group[grepl("WEAPON|UNLAWFUL CARRY", crimes$Var1, ignore.case = TRUE)] <- "Weapons - Other"
+crimes$Group[grepl("DRUG|NARCOTIC|MANUF|DELIV", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Drug Offenses"
+crimes$Group[grepl("DWI|DUI|INTOX", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "DWI / Alcohol"
+crimes$Group[grepl("WEAPON.*DISCHARGE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Weapons - Discharge"
+crimes$Group[grepl("WEAPON|UNLAWFUL CARRY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Weapons - Other"
 
 ### SEXUAL & SENSITIVE
-crimes$Group[grepl("SEXUAL ASSAULT|RAPE", crimes$Var1, ignore.case = TRUE)] <- "Sexual Assault"
-crimes$Group[grepl("INDECENT", crimes$Var1, ignore.case = TRUE)] <- "Indecent Exposure"
-crimes$Group[grepl("CHILD", crimes$Var1, ignore.case = TRUE)] <- "Child-Related Offenses"
-crimes$Group[grepl("KIDNAP", crimes$Var1, ignore.case = TRUE)] <- "Kidnapping"
+crimes$Group[grepl("SEXUAL ASSAULT|RAPE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Sexual Assault"
+crimes$Group[grepl("INDECENT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Indecent Exposure"
+crimes$Group[grepl("CHILD", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Child-Related Offenses"
+crimes$Group[grepl("KIDNAP", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Kidnapping"
 
 ### PUBLIC ORDER / OTHER
-crimes$Group[grepl("DISORDERLY|CURFEW|NOISE", crimes$Var1, ignore.case = TRUE)] <- "Public Disorder"
-crimes$Group[grepl("MISSING PERSON|RUNAWAY", crimes$Var1, ignore.case = TRUE)] <- "Missing Person / Runaway"
-crimes$Group[grepl("TRAFFIC|ACCIDENT", crimes$Var1, ignore.case = TRUE)] <- "Traffic Offense"
-crimes$Group[grepl("ESCAPE|FAIL TO APPEAR|WARRANT", crimes$Var1, ignore.case = TRUE)] <- "Justice System Offenses"
+crimes$Group[grepl("DISORDERLY|CURFEW|NOISE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Public Disorder"
+crimes$Group[grepl("MISSING PERSON|RUNAWAY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Missing Person / Runaway"
+crimes$Group[grepl("TRAFFIC|ACCIDENT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Traffic Offense"
+crimes$Group[grepl("ESCAPE|FAIL TO APPEAR|WARRANT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Justice System Offenses"
 
 ### EXTRA PROMOTIONS FROM MISC 
-crimes$Group[grepl("^FAMILY DISTURBANCE", crimes$Var1, ignore.case = TRUE)] <- "Family Disturbance"
-crimes$Group[grepl("^CRIMINAL MISCHIEF", crimes$Var1, ignore.case = TRUE)] <- "Criminal Mischief"
-crimes$Group[grepl("^DWI", crimes$Var1, ignore.case = TRUE)] <- "DWI / Alcohol"
-crimes$Group[grepl("^HARASSMENT", crimes$Var1, ignore.case = TRUE)] <- "Harassment / Threats"
-crimes$Group[grepl("CRUELTY TO ANIMALS|DOG FIGHTING", crimes$Var1, ignore.case=TRUE)] <- "Animal Cruelty / Fighting"
+crimes$Group[grepl("^FAMILY DISTURBANCE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Family Disturbance"
+crimes$Group[grepl("^CRIMINAL MISCHIEF", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Criminal Mischief"
+crimes$Group[grepl("^DWI", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "DWI / Alcohol"
+crimes$Group[grepl("^HARASSMENT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Harassment / Threats"
+crimes$Group[grepl("CRUELTY TO ANIMALS|DOG FIGHTING", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Animal Cruelty / Fighting"
 
-crimes$Group[grepl("POSSESSION OF MARIJUANA", crimes$Var1, ignore.case=TRUE)] <- "Possession of Marijuana"
-crimes$Group[grepl("VIOL CITY ORDINANCE", crimes$Var1, ignore.case=TRUE)] <- "City Ordinance Violation"
-crimes$Group[grepl("CRED CARD ABUSE|DEBIT CARD ABUSE", crimes$Var1, ignore.case=TRUE)] <- "Credit/Debit Card Abuse"
-crimes$Group[grepl("GRAFFITI", crimes$Var1, ignore.case=TRUE)] <- "Graffiti / Vandalism"
-crimes$Group[grepl("PROTECTIVE ORDER", crimes$Var1, ignore.case=TRUE)] <- "Protective Order"
-crimes$Group[grepl("VOCO - ALCOHOL", crimes$Var1, ignore.case=TRUE)] <- "Alcohol Violation"
-crimes$Group[grepl("FAILURE TO IDENTIFY", crimes$Var1, ignore.case=TRUE)] <- "Failure to Identify"
-crimes$Group[grepl("AGG ASLT STRANGLE|FELONY ENHANCEMENT/ASSLT", crimes$Var1, ignore.case=TRUE)] <- "Aggravated Assault"
-crimes$Group[grepl("CRASH/FAIL STOP AND RENDER AID", crimes$Var1, ignore.case=TRUE)] <- "Fail to Stop/Render Aid"
-crimes$Group[grepl("VIOL STATE LAW", crimes$Var1, ignore.case=TRUE)] <- "State Law Violation"
-crimes$Group[grepl("DAMAGE CITY PROP", crimes$Var1, ignore.case=TRUE)] <- "Damage to City Property"
-crimes$Group[grepl("VOCO SOLICITATION", crimes$Var1, ignore.case=TRUE)] <- "Solicitation Violation"
-crimes$Group[grepl("CAMPING IN PARK", crimes$Var1, ignore.case=TRUE)] <- "Camping in Park"
-crimes$Group[grepl("DOC FIGHTING", crimes$Var1, ignore.case=TRUE)] <- "Disorderly Conduct - Fighting"
-crimes$Group[grepl("CRUELTY TO ANIMALS", crimes$Var1, ignore.case=TRUE)] <- "Cruelty to Animals"
-crimes$Group[grepl("VOCO AMPLIFIED MUSIC", crimes$Var1, ignore.case=TRUE)] <- "Noise Violation"
-crimes$Group[grepl("EVADING / FOOT", crimes$Var1, ignore.case=TRUE)] <- "Evading Arrest (Foot)"
-crimes$Group[grepl("URINATING IN PUBLIC PLACE", crimes$Var1, ignore.case=TRUE)] <- "Public Urination"
+crimes$Group[grepl("POSSESSION OF MARIJUANA", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Possession of Marijuana"
+crimes$Group[grepl("VIOL CITY ORDINANCE", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "City Ordinance Violation"
+crimes$Group[grepl("CRED CARD ABUSE|DEBIT CARD ABUSE", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Credit/Debit Card Abuse"
+crimes$Group[grepl("GRAFFITI", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Graffiti / Vandalism"
+crimes$Group[grepl("PROTECTIVE ORDER", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Protective Order"
+crimes$Group[grepl("VOCO - ALCOHOL", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Alcohol Violation"
+crimes$Group[grepl("FAILURE TO IDENTIFY", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Failure to Identify"
+crimes$Group[grepl("AGG ASLT STRANGLE|FELONY ENHANCEMENT/ASSLT", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Aggravated Assault"
+crimes$Group[grepl("CRASH/FAIL STOP AND RENDER AID", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Fail to Stop/Render Aid"
+crimes$Group[grepl("VIOL STATE LAW", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "State Law Violation"
+crimes$Group[grepl("DAMAGE CITY PROP", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Damage to City Property"
+crimes$Group[grepl("VOCO SOLICITATION", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Solicitation Violation"
+crimes$Group[grepl("CAMPING IN PARK", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Camping in Park"
+crimes$Group[grepl("DOC FIGHTING", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Disorderly Conduct - Fighting"
+crimes$Group[grepl("CRUELTY TO ANIMALS", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Cruelty to Animals"
+crimes$Group[grepl("VOCO AMPLIFIED MUSIC", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Noise Violation"
+crimes$Group[grepl("EVADING / FOOT", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Evading Arrest (Foot)"
+crimes$Group[grepl("URINATING IN PUBLIC PLACE", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Public Urination"
 
-crimes$Group[grepl("ROBBERY", crimes$Var1, ignore.case = TRUE)] <- "Robbery"
-crimes$Group[grepl("BURGLARY.*VEHICLE", crimes$Var1, ignore.case = TRUE)] <- "Burglary - Vehicle"
+crimes$Group[grepl("ROBBERY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Robbery"
+crimes$Group[grepl("BURGLARY.*VEHICLE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Burglary - Vehicle"
 
-small_groups <- c("Homicide",
-                  "Kidnapping",
-                  "Possession of Stolen Property",
-                  "Missing Person / Runaway",
-                  "Arson",
-                  "Assault - Family/Domestic")
 
-# THIS IS WHAT NEEDS FIXING
-crimes$Group[crimes$Group !%in% small_groups] <- "Other / Misc"
 crimes$Group[is.na(crimes$Group)] <- "Other / Misc"
 
 crimes$N <- 1
@@ -531,7 +523,7 @@ ggplot(grouped_counts, aes(label = Category, size = Count)) +
   geom_text_wordcloud_area() +
   scale_size_area(max_size = 40) +
   theme_minimal() + 
-  ggtitle("Word Cloud of Crime Types in Austin")
+  ggtitle("Popular Criminal Offense Descriptions | Austin, TX (2003-2025)")
 
 ```
 
@@ -595,9 +587,10 @@ theft_type_consumer_confidence <- merge(
 )
 
 # Create slope chart
-filtered_theft_summary$year <- as.factor(filtered_theft_summary$year)
+selected_year <- seq(2003, 2025, by = 2)
 theft_type_label_data <- do.call(rbind, lapply(split(filtered_theft_summary, filtered_theft_summary$theft_type), 
                                                function(x) x[which.max(as.numeric(as.character(x$year))), ]))
+
 
 ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_type, color = theft_type)) +
   geom_line(size = 1.2, alpha = 0.8) +
@@ -616,7 +609,9 @@ ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_typ
     x = "Year",
     y = "Total Thefts",
     color = "Theft Type"
-  )
+  ) + 
+  scale_x_discrete(breaks = selected_year, labels = selected_year)
+  
 
 ```
 
@@ -660,7 +655,7 @@ ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
   geom_bar(stat = "identity", position = "fill") +
   scale_y_continuous(labels = scales::percent_format()) +
   scale_x_discrete(
-    label = function(x) stringr::str_wrap(x, width = 10)
+    label = function(x) stringr::str_wrap(x, width = 7)
   ) +
   scale_fill_discrete(
     name = "Clearance Status",
