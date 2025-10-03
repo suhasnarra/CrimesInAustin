@@ -68,7 +68,10 @@ A significant part of our work will involve grouping key variables to simplify d
 #Pre Processing
 crimes$Occurred.Date.Time <- as.POSIXct(crimes$Occurred.Date.Time, format = "%m/%d/%Y %H:%M")
 crimes$Report.Date.Time <- as.POSIXct(crimes$Report.Date.Time, format = "%m/%d/%Y %H:%M")
+crimes$Report.Date <- as.POSIXct(crimes$Report.Date, format = "%m/%d/%Y")
+crimes$Clearance.Date <- as.POSIXct(crimes$Clearance.Date, format = "%m/%d/%Y")
 crimes$NetResponse.Date.Time <- crimes$Report.Date.Time - crimes$Occurred.Date.Time
+crimes$NetClearance.Date.Time <- crimes$Clearance.Date - crimes$Report.Date
 crimes$OccurMonth <- format(crimes$Occurred.Date.Time, "%Y-%m")
 crimes$ReportMonth <- format(crimes$Report.Date.Time, "%Y-%m")
 ```
@@ -684,12 +687,49 @@ In order to understand this graph, we must understand the different crime cleara
 We see some interesting takeaways from the data in terms of how crimes are treated when they are solved. DWI offenses are very frequently issued a citation, which likely stems from how the law dictates they be handled. Contrarily, assault with injury in family and date violence cases being issued citations at such a high rate is very surprising. We would assume that assault causing injuries would be prosecuted more heavily, but it is possible that these cases have a lower arrest rate due to victims not wanting to prosecute further. We would have to look further into the data to understand if this lack of arrests is specific to family violence or if all assault cases are treated similarly. The most surprising statistic overall is the general lack of prosecution across all crimes. One would think that auto theft, burgalry of vehicles, and harrasment would warrant prosecution, so it is interesting to see so many victims opt to not seek prosecution for these crimes. 
 
 
-## Viz 12
-
-
+## Violin chart -- The Difference In When Crime Was Reported Versus When It Was Closed
 
 ```{r,  message=FALSE, echo = FALSE}
+#Set it equal to variables so we do not modify the crimes (source) dataframe
+netResponseTime <- crimes$NetResponse.Date.Time
+netClearanceTime <- crimes$NetClearance.Date.Time
 
+#Calculate the percentage of NA so we know what percentage of the data we remove.
+percentNA <- length(netClearanceTime[is.na(netClearanceTime)]) / length(netClearanceTime)
+#percentNA
+
+#Make a new dataframe to pass into the plot later on.
+newDataFrame <- data.frame(netResponseTime = netResponseTime,netClearanceTime = netClearanceTime)
+
+#Remove the rows containing NAs
+newDataFrame <- na.omit(newDataFrame)
+
+#Turn the data into numeric
+newDataFrame$netResponseTime <- as.numeric(newDataFrame$netResponseTime)
+newDataFrame$netClearanceTime <- as.numeric(newDataFrame$netClearanceTime)
+
+#Convert from seconds to days and round
+newDataFrame <- newDataFrame / 86400
+newDataFrame <- round(newDataFrame, 3)
+
+#Remove outliers
+Q3Response <- quantile(newDataFrame$netResponseTime, 0.75)
+Q3Clearance <- quantile(newDataFrame$netClearanceTime, 0.75)
+responseOutlierThresholdUpper <- Q3Response + 1.5 * IQR(newDataFrame$netResponseTime)
+clearanceOutlierThresholdUpper <- Q3Clearance + 1.5 * IQR(newDataFrame$netClearanceTime)
+newDataFrame <- newDataFrame[
+  newDataFrame$netResponseTime >= 0 & 
+  newDataFrame$netResponseTime <= responseOutlierThresholdUpper &
+  newDataFrame$netClearanceTime >= 0 & 
+  newDataFrame$netClearanceTime <= clearanceOutlierThresholdUpper,]
+
+# Create the plot with filtered data
+p <- ggplot(newDataFrame, aes(x=netResponseTime, y=netClearanceTime)) + 
+  geom_violin(trim = TRUE,fill = "aliceblue", alpha = 0.7) +
+  labs(title = "Net Response Time versus Net Clearance Time",
+       x = "Net Response Time",
+       y = "Net Clearance Time")
+p
 
 ```
 
