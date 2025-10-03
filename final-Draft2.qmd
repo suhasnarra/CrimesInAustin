@@ -264,7 +264,7 @@ ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
 The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on Residences / Homes and Parking Lots / Garages, while the relative percentage of crime occurring on HWY / Road / Alley / Street / Sidewalk has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas, with little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
 
 
-## Violin Chart -- The Difference In When Crime Was Reported Versus When It Was Closed
+## Violin chart -- The Difference In When Crime Was Reported Versus When It Was Closed
 
 ```{r,  message=FALSE, echo = FALSE}
 #Set it equal to variables so we do not modify the crimes (source) dataframe
@@ -685,66 +685,122 @@ ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_typ
 The drop in General Theft (unspecified) could be because reports are more detailed now, total thefts have declined, or both simultaneously. A key trend shows shoplifting has steadily dropped since 2013, while auto theft surged from 2017 to 2023 but has since fallen even faster. It's notable that two of the most common types of theft are specific crimes: bicycle theft and license plate theft. This indicates that many theft issues stem from people stealing lower-value items that are nonetheless essential for daily life.
 
 
-# Linear Regression Model -- Predicting Gas Prices
+# Linear Regression Model -- Predicting Shoplifting Thefts
 
-To better understand the Texas economy we will create a simple model that uses linear regression to show the relationship between produced gas, gas prices, and diesel prices. It's important for us to be well informed on the Texas economy to understand any patterns that may exist between economic changes and frequency of crime.
+
 
 ```{r, message=FALSE, echo = FALSE}
-# Linear Regression: predicting gas price given diesel price
-retail_gas <- econ$Retail.Gasoline.Price.TX
-retail_diesel <- econ$Retail.Diesel.Price.TX
-# Extracted gas value in billions
-gas_prod <- econ$Gross.Value.Natural.Gas.Production / 1000
-gas_diesel_model <- lm(retail_gas ~ retail_diesel + gas_prod)
-model_sum <- summary(gas_diesel_model)
-stargazer(model_sum$coefficients, type = "text", 
+# Linear Regression: predicting total shoplifting crimes in a given month
+
+# Get shoplifting rows
+shoplifting_rows <- grepl("THEFT BY SHOPLIFTING", crimes$Highest.Offense.Description, ignore.case = TRUE)
+shoplifting_df <- crimes[shoplifting_rows, c("Highest.Offense.Description", "year", "OccurMonth")]
+shoplifting_df$OccurMonth <- as.numeric(substr(shoplifting_df$OccurMonth, 6, 7))
+names(shoplifting_df)[names(shoplifting_df) == "OccurMonth"] <- "Month"
+names(shoplifting_df)[names(shoplifting_df) == "year"] <- "Year"
+
+# Get unemployment by month and year
+target_cols <- c("Month", "Year", "Unemployment.TX")
+unemployment_df <- econ[complete.cases(econ[, target_cols]), target_cols]
+
+# Merge dfs based on month and year
+shopL_unem <- merge(
+  unemployment_df, shoplifting_df,
+  by = c("Month", "Year"),
+  all = FALSE 
+)
+
+# Get total amount of theft per month
+summary_shopL_unem <- aggregate(
+  Highest.Offense.Description ~ Month + Year + Unemployment.TX,
+  data = shopL_unem,
+  FUN = length
+)
+names(summary_shopL_unem)[4] <- "Count"
+
+model_shopL_unem <- lm(Count ~ Unemployment.TX, data = summary_shopL_unem)
+model_sum_shopunem <- summary(model_shopL_unem)
+stargazer(model_sum_shopunem$coefficients, type = "text", 
           title = "Regression Results",
           single.row = TRUE)
+
+# Scatterplot
+with(summary_shopL_unem, {
+  plot(Unemployment.TX, Count,
+       main = "Shoplifting Theft Count vs. Texas Unemployment Rate",
+       xlab = "Unemployment Rate (TX)",
+       ylab = "Shoplifting Theft Count",
+       pch = 19, col = "skyblue")
+  abline(model_shopL_unem, col = "orange", lwd = 2)
+})
+
 ```
 
 ## Linear Regression Model Interpretation
 
-The model was constructed using linear regression with two independent/predictor variables and one dependent variable. For every `$`1 increase in diesel price, gas prices increase by `$`0.7878. For every one billion dollar increase in diesel price, gas prices decrease by a minimal `$`0.029. The purpose of this model is to understand how diesel prices and the value of the extracted natural gas in a given month are related to gas prices. From our model, it's clear diesel prices changing has a much stronger correlation that the change of value in natural gas extracted (in billions).
-
-# Visualizations
 
 
 
-## Line Chart -- Unemployment & Gas Prices against time since 2007 by month.
+## Scatterplot -- Total Auto Thefts by Gas Prices
 
-These are our main economic indicators so it's critical we visualize how they are related, if they are related at all. By understanding this relationship we can better utilize each piece of information when we look to connect them to information on crimes.
+
 
 ```{r, message=FALSE, echo = FALSE}
-#Pre processing
-econ$date <- as.Date(paste(econ$Year, econ$Month, "01", sep = "-"))
-x_value_time <- econ$date[25:247]
 
-y_values_gasPrice <- econ$Retail.Gasoline.Price.TX[25:247]
-y_values_unemployment <- econ$Unemployment.TX[25:247]
+# Get shoplifting rows
+auto_rows <- grepl("AUTO THEFT", crimes$Highest.Offense.Description, ignore.case = TRUE)
+auto_df <- crimes[auto_rows, c("Highest.Offense.Description", "year", "OccurMonth")]
+auto_df$OccurMonth <- as.numeric(substr(auto_df$OccurMonth, 6, 7))
+names(auto_df)[names(auto_df) == "OccurMonth"] <- "Month"
+names(auto_df)[names(auto_df) == "year"] <- "Year"
 
-#Plot
-y_min <- min(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
-y_max <- max(c(y_values_gasPrice, y_values_unemployment), na.rm = TRUE)
+# Get unemployment by month and year
+auto_target_cols <- c("Month", "Year", "Retail.Gasoline.Price.TX")
+gas_df <- econ[complete.cases(econ[, auto_target_cols]), auto_target_cols]
 
-y_margin <- (y_max - y_min) * 0.05
-ylim_range <- c(y_min - y_margin, y_max + y_margin)
+# Merge dfs based on month and year
+auto_gas_merge <- merge(
+  gas_df, auto_df,
+  by = c("Month", "Year"),
+  all = FALSE 
+)
 
-plot(x_value_time, y_values_gasPrice, type = "n",  # "n" means no points, just a blank canvas
-     xlab = "Time", ylab = "Values",
-     main = "Retail Gasoline Price vs Unemployment Rate",
-     ylim = ylim_range)  
+# Get total amount of theft per month
+summary_autogas <- aggregate(
+  Highest.Offense.Description ~ Month + Year + Retail.Gasoline.Price.TX,
+  data = auto_gas_merge,
+  FUN = length
+)
+names(summary_autogas)[4] <- "Count"
 
-lines(smooth.spline(x_value_time, y_values_gasPrice), col = "darkblue", lwd = 2)
+model_autogas <- lm(Count ~ Retail.Gasoline.Price.TX, data = summary_autogas)
+model_sum_autogas <- summary(model_autogas)
 
-lines(smooth.spline(x_value_time, y_values_unemployment), col = "darkred", lwd = 2)
+# R and R^2
+auto_r_val  <- cor(summary_autogas$Retail.Gasoline.Price.TX, summary_autogas$Count)
+auto_r2_val <- summary(model_autogas)$r.squared
 
-legend("topleft", legend = c("Gasoline Price ($)", "Unemployment Rate (%)"),
-       col = c("darkblue", "darkred"), lwd = 2)
+# Scatterplot
+with(summary_autogas, {
+  plot(Retail.Gasoline.Price.TX, Count,
+       main = "Auto Theft Count vs. Texas Gas Prices",
+       xlab = "Gas Price (TX)",
+       ylab = "Auto Theft Count",
+       pch = 19, col = "skyblue")
+  abline(model_autogas, col = "orange", lwd = 2)
+  legend("topright",
+         legend = c(
+           paste0("r = ", round(auto_r_val, 3)),
+           paste0("R² = ", round(auto_r2_val, 3))
+         ),
+         bty = "n")
+})
+
 ```
 
-## Line Chart Interpretation
+## Scatterplot Interpretation
 
-This was secondary data that we wanted to analyze to help us understand the trends in crimes in Austin. Gas prices (in Tx) and unemployment (in Tx) are often used as key economic indicators, therefore we plotted them against time to gain insight into the conditions that might contribute to a rise or decline in crime. This extra dimension of our analysis will allow us to understand unique period of time (such as the COVID Lockdowns and the associated impacts on crime).
+
 
 # Key Findings
 
