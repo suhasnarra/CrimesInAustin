@@ -13,6 +13,8 @@ format:
 library(hms)
 library(ggplot2)
 library(ggwordcloud)
+library(scales)
+library(stargazer)
 ```
 
 # Group: Suhas, Mert, Carson, Max
@@ -88,8 +90,9 @@ retail_diesel <- econ$Retail.Diesel.Price.TX
 gas_prod <- econ$Gross.Value.Natural.Gas.Production / 1000
 gas_diesel_model <- lm(retail_gas ~ retail_diesel + gas_prod)
 model_sum <- summary(gas_diesel_model)
-model_sum$coefficients
-
+stargazer(model_sum$coefficients, type = "text", 
+          title = "Regression Results",
+          single.row = TRUE)
 ```
 
 ## Linear Regression Model Interpretation
