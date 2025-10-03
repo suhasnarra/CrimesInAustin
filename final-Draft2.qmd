@@ -264,7 +264,7 @@ ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
 The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on Residences / Homes and Parking Lots / Garages, while the relative percentage of crime occurring on HWY / Road / Alley / Street / Sidewalk has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas, with little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
 
 
-## Violin chart -- The Difference In When Crime Was Reported Versus When It Was Closed
+## Violin Chart -- The Difference In When Crime Was Reported Versus When It Was Closed
 
 ```{r,  message=FALSE, echo = FALSE}
 #Set it equal to variables so we do not modify the crimes (source) dataframe
