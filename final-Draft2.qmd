@@ -596,7 +596,7 @@ theft_type_label_data <- do.call(rbind, lapply(split(filtered_theft_summary, fil
 
 
 ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_type, color = theft_type)) +
-  geom_line(size = 1.2, alpha = 0.8) +
+  geom_line(linewidth = 1.2, alpha = 0.8) +
   geom_point(size = 3) +
   coord_cartesian(clip = "off") + 
   theme_minimal(base_size = 14) +
@@ -658,7 +658,7 @@ ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
   geom_bar(stat = "identity", position = "fill") +
   scale_y_continuous(labels = scales::percent_format()) +
   scale_x_discrete(
-    label = function(x) stringr::str_wrap(x, width = 7)
+    labels = function(x) stringr::str_wrap(x, width = 7)
   ) +
   scale_fill_discrete(
     name = "Clearance Status",
@@ -675,7 +675,8 @@ ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
     y = "Percentage",
     subtitle = "Austin, TX (2003-2025)"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 
 ```
 
