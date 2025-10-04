@@ -43,7 +43,7 @@ econ <- read.csv("austin_econ.csv")
 
 # Key Objective
 
-Our goal is to evaluate the properties of Austin crime and their relationships with the Texas economy. Our main focus will be on key crime characteristics, including the time of day and year, types and categories of offenses, and geographic location. We will look for patterns and relationships among these characteristics to gain a deeper, more informed understanding of crime within Austin. We will use these patterns to identify 
+Our goal is to evaluate the properties of Austin crime and their relationships with the Texas economy. Our main focus will be on key crime characteristics, including the time of day and year, types and categories of offenses, and geographic location. We will look for patterns and relationships among these characteristics to gain a deeper, more informed understanding of crime within Austin. We will use these patterns to identify strategies that the Austin police department may use to help mitigate and respond to crime in a timely and efficient manner.  
 
 A significant part of our work will involve grouping key variables to simplify data visualization and ensure our evaluation captures general patterns. Instead of analyzing time by the minute, for example, we'll focus on specific times of day, and we'll likewise group various crime types into broader categories. These strategic groupings will allow us to draw meaningful connections between different crime cohorts, providing the city of Austin with actionable insights into the crime patterns within its jurisdiction.
 
