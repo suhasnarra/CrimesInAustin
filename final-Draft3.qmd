@@ -44,9 +44,7 @@ econ <- read.csv("austin_econ.csv")
 
 # Key Objective
 
-Our goal is to evaluate the properties of Austin crime and their relationships with the Texas economy. Our main focus will be on key crime characteristics, including the time of day and year, types and categories of offenses, and geographic location. We will look for patterns and relationships among these characteristics to gain a deeper, more informed understanding of crime within Austin. We will use these patterns to identify strategies that the Austin police department may use to help mitigate and respond to crime in a timely and efficient manner.  
-
-A significant part of our work will involve grouping key variables to simplify data visualization and ensure our evaluation captures general patterns. Instead of analyzing time by the minute, for example, we'll focus on specific times of day, and we'll likewise group various crime types into broader categories. These strategic groupings will allow us to draw meaningful connections between different crime cohorts, providing the city of Austin with actionable insights into the crime patterns within its jurisdiction.
+Our goal is to evaluate Austin crime properties and their relationship with the Texas economy, focusing on key characteristics like time of day/year, offense types, and geographic location. By identifying patterns and relationships among these characteristics, we aim to gain a deeper understanding of crime to inform the Austin Police Department's strategies for timely and efficient crime mitigation and response. A significant part of our work involves strategically grouping variables—such as analyzing offenses by broader categories and focusing on specific times of day, rather than by the minute—to simplify data visualization. These groupings will ensure our evaluation captures general patterns and yields actionable insights for the city.
 
 ## Key Variables
 
@@ -356,6 +354,7 @@ bp$stats %>%
   mutate(Statistic = c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")) %>%
   select(Statistic, everything()) %>%
   summary()
+
 ```
 
 ## Pie Chart Interpretation
@@ -424,49 +423,6 @@ In general, the displayed districts are the only districts in Austin with any si
 ## Transition: From General Patterns to Specific Crime Types
 Having established the foundational patterns of crime in Austin, where it occurs, when it happens, and how quickly it's addressed, we now turn our attention to examining specific crime types. Our earlier analysis revealed that family disturbances, theft, and burglary rank among the most common offenses in Austin, making it crucial to understand how these particular categories have evolved over time. The following sections will dive deeper into specific crime trends to identify unique patterns within each crime type. We want to explore whether certain crimes follow different temporal patterns, how they've changed over the years, and what this might mean for targeted policing strategies.
 
-
-## Lollipop Chart -- Family Violence Reports over Time
-
-To better understand the prevalence of family violence in crimes, we wanted to study how the proportion of crimes reported as family violence changed over time. This study may also inform us on reporting practices, and whether people became more willing to report family violence over time. Given that our earlier analysis showed family disturbances as one of the top three most common crime types, this trend analysis becomes particularly important for understanding shifting crime dynamics in Austin. 
-
-
-```{r,  message=FALSE, echo = FALSE}
-crime_table <- table(crimes$Family.Violence, crimes$ReportMonth)
-crime_table <- crime_table[rowSums(crime_table) > 100,]
-crime_df <- as.data.frame(t(crime_table))
-crime_df$ReportMonth <- rownames(crime_df)
-crime_df <- as.data.frame(crime_table)
-colnames(crime_df) <- c("Family.Violence", "ReportMonth", "Freq")
-crime_wide <- reshape(crime_df, 
-                     idvar = "ReportMonth",
-                     timevar = "Family.Violence",
-                     direction = "wide")
-colnames(crime_wide) <- c("ReportMonth", "No", "Yes")
-colnames(crime_wide) <- gsub("Freq\\.", "", colnames(crime_wide))
-crime_table <- crime_wide[, c("ReportMonth", "Yes", "No")]
-crime_table$Total <- crime_table$Yes + crime_table$No
-crime_table$Pct_Yes <- (crime_table$Yes / crime_table$Total) * 100
-crime_table$Pct_No <- (crime_table$No / crime_table$Total) * 100
-crime_pct <- crime_table[, c("ReportMonth", "Pct_Yes", "Pct_No")]
-
-selected_months <- crime_pct$ReportMonth[seq(1, nrow(crime_pct), by = 24)]
-
-ggplot(crime_pct, aes(x=ReportMonth, y=Pct_Yes)) +
-  geom_segment( aes(x=ReportMonth, xend=ReportMonth, y=0, yend=Pct_Yes), color = "skyblue") +
-  geom_point(color = "blue") +
-  labs(
-    title = "Family Violence Cases Reported Over Time",
-    x = "",
-    y = "Cases Reported as Family Violence (%)",
-    subtitle = "Austin, TX (2003-2025)"
-  ) +
-  scale_x_discrete(breaks = selected_months) +
-  theme_minimal()
-```
-
-## Lollipop Chart Interpretation
-
-From 2003 through 2025, the proportion of reported crimes that were family violence cases increased by over 50%, rising from approximately 4.5% to nearly 8% of all reported crimes. This dramatic increase tells a complex story that likely involves multiple factors. The steady upward trend suggests this isn't just random variation but a sustained shift in Austin's crime landscape. Three main factors could explain this increase: actual rises in family violence incidents, improved reporting rates as stigma decreases and support systems strengthen, or the proportional effect of other crime types declining while family violence remains stable. The relatively smooth progression of the increase, particularly the acceleration after 2016, suggests that changing social attitudes and improved victim support services may play a significant role. The COVID-19 period shows continued elevation, which aligns with national trends of increased domestic tensions during lockdowns. What's particularly striking is that while overall crime patterns have remained relatively stable in terms of location and timing, this specific category has shown consistent growth. This could indicate that family violence operates independently of the economic factors that influence property crimes and other offenses. For the Austin Police Department, this trend emphasizes the need for specialized domestic violence units and continued investment in victim support services, as these cases now represent nearly 1 in 12 reported crimes in the city.
 
 ## Slope Chart -- Total Thefts by Type & Year
 
@@ -553,7 +509,7 @@ ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_typ
 
 ## Slope Chart Interpretation
 
-The graph reveals a dramatic shift in Austin's theft landscape over the past two decades. General Theft dominated from 2003 to 2008, peaking at over 15,000 incidents annually before experiencing a steep decline after 2009,  dropping nearly 70% by 2025. This decline could be because reports are more detailed now, allowing crimes to be categorized more specifically, or it could reflect genuine reductions in opportunistic theft. The most striking trend is the surge in auto theft starting around 2019, jumping from roughly 2,000 cases to over 6,500 by 2023, more than tripling in just four years. This spike coincides with nationwide trends linked to certain vehicle vulnerabilities and organized theft rings. However, the sharp decline in 2024-2025 suggests that countermeasures may be taking effect. Shoplifting shows interesting stability, maintaining around 3,000-4,000 cases annually from 2011 onward, despite significant changes in retail environments and security technology. Meanwhile, smaller categories like bicycle theft and license plate theft remain remarkably consistent at around 1,000-1,500 cases each year. This indicates that many theft issues stem from people stealing lower-value items that are nonetheless essential for daily life. The overall pattern suggests that while total theft volumes have declined since their 2008 peak, the nature of theft has evolved. The shift from general theft to more specific categories like auto theft may reflect changing criminal opportunities and methods. For the Austin Police Department, this data emphasizes the need for targeted approaches. Some potential approaches would be an auto theft task force during surge periods, continued retail partnership programs for shoplifting, and community awareness campaigns about securing vehicles and bicycles.
+The graph reveals a dramatic shift in Austin's theft landscape over the past two decades. General Theft dominated from 2003 to 2008, peaking at over 15,000 incidents before a steep post-2009 decline, dropping nearly 70% by 2025 which was a reduction that may reflect genuine change or improved crime categorization. The most striking trend is the surge in Auto Theft starting around 2019, more than tripling from 2,000 to over 6,500 cases by 2023, aligning with nationwide trends linked to specific vehicle vulnerabilities and organized theft rings. The subsequent sharp decline in 2024-2025 suggests countermeasures may be working. Shoplifting, conversely, shows remarkable stability, maintaining 3,000-4,000 cases annually since 2011 despite major changes in retail and security. Smaller categories, like bicycle and license plate theft, also remain remarkably consistent (1,000–1,500 cases each), confirming the persistence of low-value, essential item theft. Overall, while total theft volumes have declined since their 2008 peak, the nature of theft has evolved, shifting from general theft toward more specific, opportunistic crimes like auto theft. This data emphasizes the need for the Austin Police Department to employ targeted approaches, such as auto theft task forces and sustained retail partnership programs.
 
 ## Transition: Working in Our Secondary Economy Dataset
 
@@ -614,8 +570,7 @@ with(summary_shopL_unem, {
 ```
 
 ## Linear Regression Model Interpretation
-The scatter plot and regression results reveal a lack of relationship between shoplifting and unemployment rates in Texas. The nearly horizontal regression line indicates that for every 1% increase in unemployment, shoplifting incidents increase by fewer than 2 cases per month, practically negligible given Austin's baseline of 250-300 monthly shoplifting incidents. With a p-value of 0.708 (far above the 0.05 threshold), we cannot conclude that unemployment has any meaningful predictive power over shoplifting rates. The visual data tells an even more compelling story. Shoplifting counts vary wildly at similar unemployment levels, with cases ranging from under 100 to over 450 at unemployment rates around 5-6%. This massive vertical spread indicates that factors other than unemployment are driving shoplifting behavior. This finding is somewhat surprising given the assumption that property crime increases during economic hardship. However, it aligns with our earlier observation that shoplifting has maintained remarkable stability from 2011 onwards despite significant economic fluctuations during that period, including the 2020 recession. The consistency of shoplifting regardless of unemployment indicates that this crime is driven more by opportunity than by economic necessity.
-
+The data confirms a negligible relationship between shoplifting and Texas unemployment rates. The regression line's near-zero slope indicates that a 1% unemployment rise corresponds to a practically insignificant increase of fewer than two shoplifting cases per month, trivial compared to Austin's 250-300 incident baseline. A high p-value of 0.708 means unemployment holds no meaningful predictive power. This is visually evidenced by the massive data spread: at 5-6% unemployment, shoplifting counts vary wildly (under 100 to over 450 cases). This inconsistency, along with shoplifting's surprising stability since 2011 despite major economic shifts, suggests the crime is fundamentally driven by opportunity rather than economic necessity.
 
 
 ## Scatterplot -- Total Auto Thefts by Gas Prices
@@ -676,8 +631,7 @@ with(summary_autogas, {
 ```
 
 ## Scatterplot Interpretation
-The scatter plot reveals a weak positive relationship between gas prices and auto theft in Austin. With an R² of 0.045, gas prices explain only 4.5% of the variation in auto theft rates, meaning 95.5% of the variation is due to other factors. The correlation coefficient of 0.212 indicates a very weak positive association that has minimal practical significance. Looking at the data distribution, auto theft counts vary tremendously at any given gas price level. When gas prices hover around $2.50 per gallon, auto theft ranges from under 150 to over 600 incidents per month. This wide spread suggests that gas prices are not a meaningful predictor of auto theft behavior. The slight upward trend in the regression line might initially suggest that higher gas prices correlate with more auto thefts, but the relationship is so weak it's essentially negligible. The massive spike in auto theft we observed from 2019-2023 doesn't align cleanly with gas price patterns during that period, further confirming that other factors were driving that surge. This finding indicates that auto theft in Austin operates independently of fuel costs. The dramatic changes we saw in auto theft rates were likely driven by factors such as specific vehicle vulnerabilities, organized theft rings, or changes in security technology rather than economic indicators like gas prices. For the Austin Police Department, this means that monitoring gas prices won't help predict auto theft trends, and prevention strategies should focus on addressing the specific methods and motivations behind vehicle theft rather than broader economic conditions.
-
+The scatter plot clearly reveals a weak positive relationship between gas prices and auto theft in Austin, a finding that is statistically and practically negligible. With an $R^2$ of 0.045, gas prices explain just 4.5% of the variation in theft rates, leaving the vast majority (95.5%) to other factors. The corresponding correlation coefficient of 0.212 confirms this is a very weak association with minimal practical significance. The data distribution makes this clear: at a price point like $2.50 per gallon, auto theft counts still ranged tremendously from under 150 to over 600 incidents per month, suggesting gas prices are simply not a meaningful predictor of behavior. Furthermore, the massive auto theft spike observed from 2019-2023 failed to align cleanly with gas price patterns during that time, strongly indicating that other factors were driving that surge. Auto theft in Austin essentially operates independently of fuel costs, and the dramatic changes were likely driven by issues like specific vehicle vulnerabilities, organized theft rings, or changes in security technology. This means monitoring gas prices is useless for the Austin Police Department; prevention strategies should focus instead on addressing the specific methods and motivations behind vehicle theft rather than broader economic conditions.
 
 # Key Findings
 
