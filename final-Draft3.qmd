@@ -340,6 +340,22 @@ crimes$timeOfDay <- cut(crimes$`Occurred.Time`, breaks = c(1, 300, 600, 900, 120
 pie(table(crimes$timeOfDay), label = pieBuckets, 
     col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
     main = "Amount of Crimes by Time of Day")
+
+plot_data <- crimes %>%
+  filter(NetResponse.Date.Time > 0) %>%
+  pull(NetResponse.Date.Time)
+
+bp <- boxplot(plot_data, outline = FALSE, plot = FALSE,
+        yaxt = "n", 
+        ylab = "Report Time (HRS:MIN:SEC)", 
+        main = "Average Time to Report Crime in Austin, TX (2003-2025)",
+        sub = "Zero Duration Excluded | Outliers Removed From Plot")
+
+bp$stats %>%
+  as.data.frame() %>%
+  mutate(Statistic = c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")) %>%
+  select(Statistic, everything()) %>%
+  summary()
 ```
 
 ## Pie Chart Interpretation
