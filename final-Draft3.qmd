@@ -97,85 +97,76 @@ The first property we will be evaluating is the type of crimes that are most pre
 # Create grouping column
 crimes$Group <- NA
 
-### PROPERTY & THEFT
-crimes$Group[grepl("AUTO THEFT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Auto Theft"
-crimes$Group[grepl("BURGLARY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Burglary - Residence/Building"
-crimes$Group[grepl("SHOPLIFT|THEFT|PACKAGE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "General Theft"
-crimes$Group[grepl("ROBBERY.*INDIVIDUAL|ROBBERY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Robbery - Individual"
-crimes$Group[grepl("FRAUD|FORGERY|IDENTITY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Fraud / Identity Theft"
-crimes$Group[grepl("ARSON", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Arson"
-crimes$Group[grepl("TRESPASS", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Trespass"
-crimes$Group[grepl("STOLEN", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Possession of Stolen Property"
+crimes <- crimes %>%
+  mutate(
+    Group = case_when(
+      # PROPERTY CRIMES
+      grepl("AUTO THEFT", Highest.Offense.Description, ignore.case = TRUE) ~ "Auto Theft",
+      grepl("BURGLARY.*VEHICLE", Highest.Offense.Description, ignore.case = TRUE) ~ "Burglary - Vehicle",
+      grepl("BURGLARY", Highest.Offense.Description, ignore.case = TRUE) ~ "Burglary - Residence/Building",
+      grepl("SHOPLIFT|THEFT|PACKAGE", Highest.Offense.Description, ignore.case = TRUE) ~ "General Theft",
+      grepl("STOLEN", Highest.Offense.Description, ignore.case = TRUE) ~ "Possession of Stolen Property",
+      grepl("ARSON", Highest.Offense.Description, ignore.case = TRUE) ~ "Arson",
+      grepl("^CRIMINAL MISCHIEF", Highest.Offense.Description, ignore.case = TRUE) ~ "Criminal Mischief",
+      grepl("GRAFFITI", Highest.Offense.Description, ignore.case = TRUE) ~ "Graffiti / Vandalism",
+      grepl("DAMAGE CITY PROP", Highest.Offense.Description, ignore.case = TRUE) ~ "Damage to City Property",
 
-### VIOLENCE & DISTURBANCE
-crimes$Group[grepl("ASSAULT.*FAM|FAMILY VIOLENCE|DATE VIOL", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Assault - Family/Domestic"
-crimes$Group[grepl("ASSAULT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Assault - Non-Family"
-crimes$Group[grepl("AGG ASSAULT|DEADLY CONDUCT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Aggravated Assault"
-crimes$Group[grepl("HOMICIDE|MURDER", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Homicide"
-crimes$Group[grepl("DISTURBANCE.*FAM", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Disturbance - Family"
-crimes$Group[grepl("DISTURBANCE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Disturbance - Other"
-crimes$Group[grepl("HARASSMENT|THREAT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Harassment / Threats"
-crimes$Group[grepl("RESIST|INTERFERE|OBSTRUCT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Interference / Obstruction"
+      # VIOLENCE & DISTURBANCE
+      grepl("ASSAULT.*FAM|FAMILY VIOLENCE|DATE VIOL", Highest.Offense.Description, ignore.case = TRUE) ~ "Assault - Family/Domestic",
+      grepl("AGG ASLT STRANGLE|FELONY ENHANCEMENT/ASSLT|AGG ASSAULT|DEADLY CONDUCT", Highest.Offense.Description, ignore.case = TRUE) ~ "Aggravated Assault",
+      grepl("ASSAULT", Highest.Offense.Description, ignore.case = TRUE) ~ "Assault - Non-Family",
+      grepl("HOMICIDE|MURDER", Highest.Offense.Description, ignore.case = TRUE) ~ "Homicide",
+      grepl("^FAMILY DISTURBANCE|DISTURBANCE.*FAM", Highest.Offense.Description, ignore.case = TRUE) ~ "Disturbance - Family",
+      grepl("DISTURBANCE", Highest.Offense.Description, ignore.case = TRUE) ~ "Disturbance - Other",
+      grepl("HARASSMENT|THREAT", Highest.Offense.Description, ignore.case = TRUE) ~ "Harassment / Threats",
+      grepl("RESIST|INTERFERE|OBSTRUCT", Highest.Offense.Description, ignore.case = TRUE) ~ "Interference / Obstruction",
+      grepl("DOC FIGHTING", Highest.Offense.Description, ignore.case = TRUE) ~ "Disorderly Conduct - Fighting",
 
-### DRUGS, ALCOHOL & WEAPONS
-crimes$Group[grepl("DRUG|NARCOTIC|MANUF|DELIV", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Drug Offenses"
-crimes$Group[grepl("DWI|DUI|INTOX", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "DWI / Alcohol"
-crimes$Group[grepl("WEAPON.*DISCHARGE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Weapons - Discharge"
-crimes$Group[grepl("WEAPON|UNLAWFUL CARRY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Weapons - Other"
+      # ROBBERY / FRAUD
+      grepl("ROBBERY.*INDIVIDUAL|ROBBERY", Highest.Offense.Description, ignore.case = TRUE) ~ "Robbery - Individual",
+      grepl("FRAUD|FORGERY|IDENTITY", Highest.Offense.Description, ignore.case = TRUE) ~ "Fraud / Identity Theft",
+      grepl("CRED CARD ABUSE|DEBIT CARD ABUSE", Highest.Offense.Description, ignore.case = TRUE) ~ "Credit/Debit Card Abuse",
 
-### SEXUAL & SENSITIVE
-crimes$Group[grepl("SEXUAL ASSAULT|RAPE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Sexual Assault"
-crimes$Group[grepl("INDECENT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Indecent Exposure"
-crimes$Group[grepl("CHILD", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Child-Related Offenses"
-crimes$Group[grepl("KIDNAP", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Kidnapping"
+      # DRUGS, ALCOHOL & WEAPONS
+      grepl("DRUG|NARCOTIC|MANUF|DELIV", Highest.Offense.Description, ignore.case = TRUE) ~ "Drug Offenses",
+      grepl("POSSESSION OF MARIJUANA", Highest.Offense.Description, ignore.case = TRUE) ~ "Possession of Marijuana",
+      grepl("DWI|DUI|INTOX", Highest.Offense.Description, ignore.case = TRUE) ~ "DWI / Alcohol",
+      grepl("WEAPON.*DISCHARGE", Highest.Offense.Description, ignore.case = TRUE) ~ "Weapons - Discharge",
+      grepl("WEAPON|UNLAWFUL CARRY", Highest.Offense.Description, ignore.case = TRUE) ~ "Weapons - Other",
+      grepl("VOCO - ALCOHOL", Highest.Offense.Description, ignore.case = TRUE) ~ "Alcohol Violation",
 
-### PUBLIC ORDER / OTHER
-crimes$Group[grepl("DISORDERLY|CURFEW|NOISE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Public Disorder"
-crimes$Group[grepl("MISSING PERSON|RUNAWAY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Missing Person / Runaway"
-crimes$Group[grepl("TRAFFIC|ACCIDENT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Traffic Offense"
-crimes$Group[grepl("ESCAPE|FAIL TO APPEAR|WARRANT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Justice System Offenses"
+      # SEXUAL & SENSITIVE
+      grepl("SEXUAL ASSAULT|RAPE", Highest.Offense.Description, ignore.case = TRUE) ~ "Sexual Assault",
+      grepl("INDECENT", Highest.Offense.Description, ignore.case = TRUE) ~ "Indecent Exposure",
+      grepl("CHILD", Highest.Offense.Description, ignore.case = TRUE) ~ "Child-Related Offenses",
+      grepl("KIDNAP", Highest.Offense.Description, ignore.case = TRUE) ~ "Kidnapping",
 
-### EXTRA PROMOTIONS FROM MISC 
-crimes$Group[grepl("^FAMILY DISTURBANCE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Family Disturbance"
-crimes$Group[grepl("^CRIMINAL MISCHIEF", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Criminal Mischief"
-crimes$Group[grepl("^DWI", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "DWI / Alcohol"
-crimes$Group[grepl("^HARASSMENT", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Harassment / Threats"
-crimes$Group[grepl("CRUELTY TO ANIMALS|DOG FIGHTING", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Animal Cruelty / Fighting"
+      # PUBLIC ORDER / OTHER
+      grepl("DISORDERLY|CURFEW|NOISE", Highest.Offense.Description, ignore.case = TRUE) ~ "Public Disorder",
+      grepl("URINATING IN PUBLIC PLACE", Highest.Offense.Description, ignore.case = TRUE) ~ "Public Urination",
+      grepl("MISSING PERSON|RUNAWAY", Highest.Offense.Description, ignore.case = TRUE) ~ "Missing Person / Runaway",
+      grepl("TRAFFIC|ACCIDENT", Highest.Offense.Description, ignore.case = TRUE) ~ "Traffic Offense",
+      grepl("ESCAPE|FAIL TO APPEAR|WARRANT", Highest.Offense.Description, ignore.case = TRUE) ~ "Justice System Offenses",
+      grepl("FAILURE TO IDENTIFY", Highest.Offense.Description, ignore.case = TRUE) ~ "Failure to Identify",
+      grepl("FAIL STOP AND RENDER AID", Highest.Offense.Description, ignore.case = TRUE) ~ "Fail to Stop/Render Aid",
+      grepl("VIOL CITY ORDINANCE", Highest.Offense.Description, ignore.case = TRUE) ~ "City Ordinance Violation",
+      grepl("VIOL STATE LAW", Highest.Offense.Description, ignore.case = TRUE) ~ "State Law Violation",
+      grepl("CRUELTY TO ANIMALS|DOG FIGHTING", Highest.Offense.Description, ignore.case = TRUE) ~ "Animal Cruelty / Fighting",
+      grepl("PROTECTIVE ORDER", Highest.Offense.Description, ignore.case = TRUE) ~ "Protective Order",
+      grepl("VOCO SOLICITATION", Highest.Offense.Description, ignore.case = TRUE) ~ "Solicitation Violation",
+      grepl("CAMPING IN PARK", Highest.Offense.Description, ignore.case = TRUE) ~ "Camping in Park",
+      grepl("VOCO AMPLIFIED MUSIC", Highest.Offense.Description, ignore.case = TRUE) ~ "Noise Violation",
+      grepl("EVADING / FOOT", Highest.Offense.Description, ignore.case = TRUE) ~ "Evading Arrest (Foot)",
 
-crimes$Group[grepl("POSSESSION OF MARIJUANA", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Possession of Marijuana"
-crimes$Group[grepl("VIOL CITY ORDINANCE", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "City Ordinance Violation"
-crimes$Group[grepl("CRED CARD ABUSE|DEBIT CARD ABUSE", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Credit/Debit Card Abuse"
-crimes$Group[grepl("GRAFFITI", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Graffiti / Vandalism"
-crimes$Group[grepl("PROTECTIVE ORDER", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Protective Order"
-crimes$Group[grepl("VOCO - ALCOHOL", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Alcohol Violation"
-crimes$Group[grepl("FAILURE TO IDENTIFY", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Failure to Identify"
-crimes$Group[grepl("AGG ASLT STRANGLE|FELONY ENHANCEMENT/ASSLT", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Aggravated Assault"
-crimes$Group[grepl("CRASH/FAIL STOP AND RENDER AID", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Fail to Stop/Render Aid"
-crimes$Group[grepl("VIOL STATE LAW", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "State Law Violation"
-crimes$Group[grepl("DAMAGE CITY PROP", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Damage to City Property"
-crimes$Group[grepl("VOCO SOLICITATION", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Solicitation Violation"
-crimes$Group[grepl("CAMPING IN PARK", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Camping in Park"
-crimes$Group[grepl("DOC FIGHTING", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Disorderly Conduct - Fighting"
-crimes$Group[grepl("CRUELTY TO ANIMALS", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Cruelty to Animals"
-crimes$Group[grepl("VOCO AMPLIFIED MUSIC", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Noise Violation"
-crimes$Group[grepl("EVADING / FOOT", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Evading Arrest (Foot)"
-crimes$Group[grepl("URINATING IN PUBLIC PLACE", crimes$Highest.Offense.Description, ignore.case=TRUE)] <- "Public Urination"
-
-crimes$Group[grepl("ROBBERY", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Robbery"
-crimes$Group[grepl("BURGLARY.*VEHICLE", crimes$Highest.Offense.Description, ignore.case = TRUE)] <- "Burglary - Vehicle"
-
-
-crimes$Group[is.na(crimes$Group)] <- "Other / Misc"
-
-crimes$N <- 1
-grouped_counts <- aggregate(N ~ Group, data = crimes, sum)
-crimes$N <- NULL 
-
-
-names(grouped_counts)[names(grouped_counts) == "N"] <- "Count"
-
-names(grouped_counts)[names(grouped_counts) == "Group"] <- "Category"
-grouped_counts <- grouped_counts[order(-grouped_counts$Count), ]
+      # fallback
+      TRUE ~ "Other / Misc"
+    )
+  )
+grouped_counts <- crimes %>%
+  group_by(Group) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  rename(Category = Group) %>%
+  arrange(desc(Count))
 
 
 ggplot(grouped_counts, aes(label = Category, size = Count)) +
@@ -188,7 +179,7 @@ ggplot(grouped_counts, aes(label = Category, size = Count)) +
 
 ## Word Cloud Interpretation
 
-The word cloud condenses over 440 original crime categories into about 40 broader groups, making the data easier to interpret and compare. It shows that General Theft, Burglary – Vehicle, and Family Disturbance are by far the most common reported offenses in Austin. This suggests that property-related and domestic conflicts are the most pressing daily crime concerns for the city. Offenses tied to drugs, alcohol, and fraud also appear prominently, reflecting broader social and economic dimensions of crime. Overall, the word cloud shows the diversity of crime in Austin while drawing attention to a handful of categories that may be most influential when considering their relationship with the Texas economy. This graph is a crucial starting point as our future analyses of the crimes dataset will now have in context the most common types of crimes committed, and draw better conclusions as a result.
+The word cloud condenses over 440 original crime categories into about 40 broader groups, making the data easier to interpret and compare. It shows that General Theft, Burglary – Vehicle, and Family Disturbance are by far the most common reported offenses in Austin. This suggests that property-related and domestic conflicts are the most pressing daily crime concerns for the city. Offenses tied to drugs, alcohol, and fraud also appear prominently, reflecting broader social and economic dimensions of crime. Overall, the word cloud shows the diversity of crime in Austin while drawing attention to a handful of categories that may be most influential when considering their relationship with the Texas economy. This graph is a crucial starting point as our future analyses of the crimes data set will now have in context the most common types of crimes committed, and draw better conclusions as a result.
 
 
 ## Area Chart -- Occurrence of Crime at Key Locations
@@ -268,58 +259,6 @@ ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
 ## Area Chart Interpretation
 
 The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on residences, homes, parking lots, and garages, while the relative percentage of crime occurring on highways, roads, alleys, streets, and sidewalks has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas. There's little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
-
-## Violin Chart -- The Difference In When Crime Was Reported Versus When It Was Closed
-
-Understanding the temporal dynamics between when crimes are reported and when cases are closed is essential for evaluating police department efficiency and resource allocation. Net response time measures the delay between when a crime occurs and when it's reported to authorities, while net clearance time captures how long it takes to close a case after it's been reported. We had to remove about 14% of the data due to it containing negative time differentials, which is impossible, and due to rows containing NA values. However, the ~86% of the data that we observe still provide wholly accurate results, as we simply remove outliers and missing values. These metrics provide critical insights into both community engagement with law enforcement and the department's investigative capacity.
-
-
-```{r,  message=FALSE, echo = FALSE}
-#Set it equal to variables so we do not modify the crimes (source) dataframe
-netResponseTime <- crimes$NetResponse.Date.Time
-netClearanceTime <- crimes$NetClearance.Date.Time
-
-#Calculate the percentage of NA so we know what percentage of the data we remove.
-percentNA <- length(netClearanceTime[is.na(netClearanceTime)]) / length(netClearanceTime)
-#percentNA
-
-#Make a new dataframe to pass into the plot later on.
-newDataFrame <- data.frame(netResponseTime = netResponseTime,netClearanceTime = netClearanceTime)
-
-#Remove the rows containing NAs
-newDataFrame <- na.omit(newDataFrame)
-
-#Turn the data into numeric
-newDataFrame$netResponseTime <- as.numeric(newDataFrame$netResponseTime)
-newDataFrame$netClearanceTime <- as.numeric(newDataFrame$netClearanceTime)
-
-#Convert from seconds to days and round
-newDataFrame <- newDataFrame / 86400
-newDataFrame <- round(newDataFrame, 3)
-
-#Remove outliers
-Q3Response <- quantile(newDataFrame$netResponseTime, 0.75)
-Q3Clearance <- quantile(newDataFrame$netClearanceTime, 0.75)
-responseOutlierThresholdUpper <- Q3Response + 1.5 * IQR(newDataFrame$netResponseTime)
-clearanceOutlierThresholdUpper <- Q3Clearance + 1.5 * IQR(newDataFrame$netClearanceTime)
-newDataFrame <- newDataFrame[
-  newDataFrame$netResponseTime >= 0 & 
-  newDataFrame$netResponseTime <= responseOutlierThresholdUpper &
-  newDataFrame$netClearanceTime >= 0 & 
-  newDataFrame$netClearanceTime <= clearanceOutlierThresholdUpper,]
-
-# Create the plot with filtered data
-p <- ggplot(newDataFrame, aes(x=netResponseTime, y=netClearanceTime)) + 
-  geom_violin(trim = TRUE,fill = "aliceblue", alpha = 0.7) +
-  labs(title = "Net Response Time versus Net Clearance Time",
-       x = "Net Response Time",
-       y = "Net Clearance Time")
-p
-
-```
-
-## Interpretation
-The violin plot reveals a highly concentrated distribution for both metrics, with the vast majority of cases clustering near zero on both axes. This indicates that most crimes are reported very quickly after they occur (within a day) and are also resolved relatively quickly after being reported. The violin's narrow waist and wide middle section around 30-35 days for net clearance time suggests a common resolution timeframe of approximately one month for typical cases. However, the extended tails reaching beyond 50 days indicate a subset of complex cases that require significantly longer investigation periods. The symmetrical shape of the distribution suggests consistent processing patterns across different crime types. Notably, the concentration near zero for net response time demonstrates strong community-police engagement, with victims promptly reporting crimes. The department can use these insights to set realistic case closure expectations and allocate investigative resources more effectively based on typical case progression patterns.
 
 
 ## Stacked Barplot -- Crime Solve Rate for Common Crimes
@@ -407,42 +346,6 @@ pie(table(crimes$timeOfDay), label = pieBuckets,
 
 The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occurred after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes. This even distribution suggests that Austin's crime patterns are driven more by opportunity and population activity levels than by darkness alone. The higher crime rates during afternoon and early evening likely correlate with increased population movement, more occupied public spaces, and peak traffic times—aligning with our earlier finding that streets and residences are primary crime locations. For the Austin Police Department, this means maintaining consistent staffing levels throughout most of the day rather than concentrating resources solely during nighttime hours.
 
-
-## Mosaic Plot -- Frequent Crimes by Time of Day
-
-This plot will build on the pie chart and break down when crimes are occurring by the most frequent types of crime. The pie chart is a good start and gives us general information, but in this mosaic plot, we can see when the most common types of crime are occurring.
-
-
-```{r, message=FALSE, echo = FALSE}
-
-# Two-way table of crime type vs. time of day bucket
-tab <- table(crimes$Highest.Offense.Description, crimes$timeOfDay)
-# Keep only the top 10 offenses 
-phrase_freq <- sort(table(crimes$Highest.Offense.Description), decreasing = TRUE)
-top_offenses <- names(head(phrase_freq, 10))
-tab_top <- tab[top_offenses, ]
-# Wrap labels
-wrapped_names <- sapply(rownames(tab_top), function(x) {
-  x_clean <- gsub("-", " - ", x)  
-  paste(strwrap(x_clean, width = 12), collapse = "\n")
-})
-rownames(tab_top) <- wrapped_names
-rownames(tab_top)[rownames(tab_top) == "ASSAULT\nW/INJURY -\nFAM/DATE\nVIOL"] <- "ASSAULT"
-# Make Plot
-par(mar = c(6, 6, 6, 6))
-
-mosaicplot(tab_top,
-           main = "Most Frequent Crime Types by Time of Day (Austin, TX)",
-           xlab = "",
-           ylab = "",
-           col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
-           las = 2,
-           cex.axis = 0.7)
-
-```
-
-## Mosaic Interpretation
-
 Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burglary or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case. Additionally, APD may find it valuable to use this data to patrol for certain types of crimes during specific times of day.
 
 
@@ -499,78 +402,8 @@ ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Tim
 
 There are some significant disparities in average response time across the districts, with times ranging from approximately 6.7 days in District 9 to over 13 days in Districts 6 and 10. District 9 stands out, responding to crimes significantly faster than any other, nearly half that of the slowest districts. Districts 3 and 4 also demonstrate relatively quick response times, around 8 days. External research strongly correlates faster response times with much higher crime resolution rates. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes. The geographic clustering of slow-response districts may indicate these areas are underserved by current police infrastructure, potentially located farther from stations or experiencing higher call volumes relative to available units. The Austin Police Department should consider these disparities when planning patrol routes and station locations.
 
-
-
-## Boxplot -- Average Time to Report Crime in Austin (2003-2025)
-
-Not all crimes get solved, but the ones that do start with the crime being reported. This takes someone witnessing the crime or finding something related to the crime scene like the victim or perpetrator. Whether people witnessed the crime or not, reporting can be anywhere from immediate to months. Understanding these reporting delays is essential for the Austin Police Department to develop strategies that encourage faster victim response and improve overall case resolution rates.
-
-
-```{r, , message=FALSE, echo = FALSE, warning = FALSE}
-
-#Plot
-bp <- boxplot(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0], outline = FALSE,
-        yaxt = "n", 
-        ylab = "Report Time (HRS:MIN:SEC)", 
-        main = "Average Time to Report Crime in Austin, TX (2003-2025)",
-        sub = "Zero Duration Excluded | Outliers Removed From Plot"
-        )
-
-axis(2, at = axTicks(2), labels = as.hms(axTicks(2)))
-
-# Add labels for median, Q1, and Q3
-stats <- bp$stats
-rownames(stats) <- c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")
-
-text(x = 0.7, y = stats[2,1], labels = paste("Q1:", as.hms(stats[2,1], 1)), pos = 3, col = "red")
-text(x = 0.7, y = stats[3,1], labels = paste("Median:", as.hms(stats[3,1], 1)), pos = 3, col = "blue")
-text(x = 0.7, y = stats[4,1], labels = paste("Q3:", as.hms(stats[4,1], 1)), pos = 3, col = "darkgreen")
-#line and % at 48 hours
-percentile_48 <- round(ecdf(crimes$NetResponse.Date.Time[crimes$NetResponse.Date.Time > 0])(60*60*48)*100, 1)
-abline(h = 48 * 60 * 60, col = "red", lwd = 2, lty = 2)
-text(x = 1.25, y = 48 * 60 * 60, labels = paste0("48 Hours: ", percentile_48, "th Percentile"), 
-     pos = 3, col = "red", offset = 1)
-
-```
-
-## Boxplot Interpretation
-
-The vast majority (74%) of crimes are reported within 48 hours of reportedly being committed. The median time to report a crime is about 11.5 hours, with a first quartile of just 1 hour 35 minutes, suggesting that a substantial portion of victims contact authorities within hours of an incident occurring. Additionally, the time needed to report a crime is heavily right-skewed, with the third quartile extending to nearly 53 hours. This indicates significant room for study on what crimes are not reported quickly, and why. The extended upper whisker reaching beyond 1,100 hours suggests that some crimes go unreported for weeks or even months, though these extreme cases have been identified as outliers. This investigation could focus on a variety of aspects such as analyzing what crime types take the longest to report. For the Austin Police Department, reducing these delays could meaningfully improve case clearance rates.
-
-
-## Heatmap -- Crime by Month and District
-
-Just because our data looks at a relatively small area doesn't mean that crime doesn't vary in different parts of the city. By using the district breakdown of Austin we can investigate the amount of crime occurring in each district while also potentially finding times of the year that are more prone to prevalent crime. This dual analysis allows the Austin Police Department to anticipate both where and when to concentrate resources.
-
-
-```{r, , message=FALSE, echo = FALSE}
-#Pulling Months and labelling as text
-heatmap_crimes <- crimes[,c("Occurred.Date", "APD.District")]
-heatmap_crimes$month <- substr(as.character(heatmap_crimes$Occurred.Date), 0, 2)
-heatmap_crimes$month <- factor(heatmap_crimes$month, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), levels = c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"))
-heatmap_crimes$month <- factor(heatmap_crimes$month, levels = rev(levels(heatmap_crimes$month)))
-heatmap_crimes <- heatmap_crimes[heatmap_crimes$APD.District != "",]
-
-#Turn data into table object
-count_table <- table(heatmap_crimes$month, heatmap_crimes$APD.District)
-count_table <- count_table[rowSums(count_table) >= 1500, 
-               colSums(count_table) >= 1500]
-
-par(mar = c(7, 6, 8, 6))  # Increased margins: c(bottom, left, top, right)
-#Plot the table as a heatmap
-heatmap(as.matrix(count_table), 
-        Colv = NA, 
-        Rowv = NA,
-        col = colorRampPalette(c("pink", "red"))(50),
-        ylab = "Month",
-        xlab = "Austin, TX | District | Min. 1500 Reported Crimes | 2003-2025",
-        main = "Crime by Month and District",
-        cex.main = 0.6)
-```
-
-## Heat Map Interpretation
-
 In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it's reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. The darker shading in Districts 1-4 suggests these areas experience the highest crime volumes consistently throughout the year. Interestingly, the relatively uniform coloring across months indicates that seasonal variation is minimal, crime remains fairly constant year-round rather than spiking during particular seasons. This finding complements our earlier discovery that crime is evenly distributed throughout the day. For the Austin Police Department, this means maintaining consistent year-round staffing in these high-crime districts rather than adjusting seasonally. We can use this information to further explore the interactions crime has with the general economy in these areas.
+
 
 ## Transition: From General Patterns to Specific Crime Types
 Having established the foundational patterns of crime in Austin, where it occurs, when it happens, and how quickly it's addressed, we now turn our attention to examining specific crime types. Our earlier analysis revealed that family disturbances, theft, and burglary rank among the most common offenses in Austin, making it crucial to understand how these particular categories have evolved over time. The following sections will dive deeper into specific crime trends to identify unique patterns within each crime type. We want to explore whether certain crimes follow different temporal patterns, how they've changed over the years, and what this might mean for targeted policing strategies.
