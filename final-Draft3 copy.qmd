@@ -89,6 +89,7 @@ crimes <- crimes %>%
 The first property we will be evaluating is the type of crimes that are most prevalent. This is a crucial factor that we must analyze as it gives us insight into what types of crimes we must analyze further. This will allow us to identify the most critical areas that the Austin Police Department needs to focus on to mitigate and respond to crime in a more timely and efficient manner.
 
 ```{r,  message=FALSE, echo = FALSE}
+#| out-width: "75%"
 
 # Create grouping column
 crimes$Group <- NA
@@ -182,6 +183,8 @@ The word cloud condenses over 440 original crime categories into about 40 broade
 To better understand where these crimes occur, we wanted to study the change in the proportions of the locations of crimes. There are over 30 different crime locations that the crimes dataset provides. However, to ensure that the graph is legible, we chose to focus only on the top 10 crime locations, comprising around 80% of the crimes in Austin. By understanding where crimes occur, the Austin Police force can concentrate personnel in high-risk areas to help mitigate incidents.
 
 ```{r,  message=FALSE, echo = FALSE}
+#| out-width: "75%"
+
 #Make a new column based off the Occured.Date.Time column (already formatted when
 #we made our boxplot), which is only the year
 crimes$year <- format(as.POSIXct(crimes$Occurred.Date.Time), "%Y")
@@ -322,6 +325,8 @@ We see some interesting takeaways from the data in terms of how crimes are treat
 After examining crime types, locations, and resolution times, we now investigate when crimes occur throughout the day. We want to use this analysis to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
 
 ```{r, , message=FALSE, echo = FALSE}
+#| out-width: "50%"
+
 pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
 crimes$timeOfDay <- cut(crimes$`Occurred.Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
                          labels = pieBuckets)
@@ -378,7 +383,7 @@ bp <- boxplot(plot_data, outline = FALSE, plot = FALSE,
         main = "Average Time to Report Crime in Austin, TX (2003-2025)",
         sub = "Zero Duration Excluded | Outliers Removed From Plot")
 
-bp$stats %>%
+bp_stats <- bp$stats %>%
   as.data.frame() %>%
   mutate(Statistic = c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")) %>%
   select(Statistic, everything()) %>%
