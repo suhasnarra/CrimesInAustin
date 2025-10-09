@@ -1,0 +1,647 @@
+---
+title: "Crime in Austin"
+format:
+  pdf:
+    fig-width: 10
+    fig-height: 8
+    fig-margin: false
+    fig-align: center
+---
+
+```{r, message=FALSE, echo = FALSE}
+# Load any libraries used
+library(hms)
+library(ggplot2)
+library(ggwordcloud)
+library(scales)
+library(stargazer)
+library(tidyverse)
+```
+
+# Group: Suhas Narra, Mert Esat Yercel, Max Basurto, Carson Khun
+
+# Our Data
+
+## Primary Dataset: Austin Crime Reports 2003-Present
+
+### Source: https://catalog.data.gov/dataset/crime-reports-bf2b7
+
+This dataset is sourced directly from the Austin Police Department (APD) and is updated weekly. It is a record of every crime report filed by APD officers, with the data being entered online by the officers and subsequently stored in this database.
+
+## Secondary Dataset: Key Economic Indicators in Austin 2007-2025
+
+### Source: https://catalog.data.gov/dataset/key-economic-indicators
+
+This data set is a compilation that pulls from various external sources and integrates them into a single data frame. Specifically, the presence of data for the United States and regions other than Texas confirms that it was compiled from a variety of sources to provide a broader economic context. The inclusion of data beyond Texas simply means there are extra fields in the table that we don't need for a Texas-only analysis.
+
+```{r, message=FALSE, echo = FALSE}
+
+# Load in data
+crimes <- read.csv("austin.csv")
+econ <- read.csv("austin_econ.csv")
+
+```
+
+# Key Objective
+
+Our goal is to evaluate Austin crime properties and their relationship with the Texas economy, focusing on key characteristics like time of day/year, offense types, and geographic location. By identifying patterns and relationships among these characteristics, we aim to gain a deeper understanding of crime to inform the Austin Police Department's strategies for timely and efficient crime mitigation and response. A significant part of our work involves strategically grouping variables—such as analyzing offenses by broader categories and focusing on specific times of day, rather than by the minute—to simplify data visualization. These groupings will ensure our evaluation captures general patterns and yields actionable insights for the city.
+
+## Key Variables
+
+-   **Highest Offense Description**: Tells us what the crime is. Important for us to be able to judge severity and type of crime.
+-   **Location Type**: Tells us what type of place the crime occurred. Important to make distinctions between places like homes, stores, etc.
+-   **District**: Gives general area of the crime in Austin. Allows us to understand where crimes are occurring in the city.
+-   **Occurred Time**: Tells us when the crime occurred so we can determine if crime is more common during certain times of day.
+-   **Report Time**: Tells us when the crime was reported and can be combined with occurred time to understand how it takes certain areas to report crimes.
+-   **Unemployment in Texas**: Informs on the state of the economy in Texas, allowing us to search for patterns in how crime changes when the economy does.
+-   **Retail Gas Price**: Another economic indicator allowing us to understand how crime changes when the economy does.
+
+## Pre-Processing
+
+### Main Dataset:
+-   Grouping times, so instead of looking at specific times we can analyze times of day. 
+-   Converting datetime character vectors to datetime object to make datetime data columns more usable. 
+-   Create a new column, NetResponse.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported. 
+-   Create a new column, NetClearance.Date.Time, which measures the time between the date and time between when the crime occurred and when it was reported. 
+-   Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening. 
+-   Created a new column, Year, which takes Occurred.Date.Time and extracts the year from it as a date variable. 
+
+### Secondary Dataset:
+-   Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format.
+
+```{r, message=FALSE, echo=FALSE}
+#Pre Processing
+crimes <- crimes %>%
+  mutate(
+    Occurred.Date.Time = as.POSIXct(`Occurred.Date.Time`, format = "%m/%d/%Y %H:%M"),
+    Report.Date.Time = as.POSIXct(`Report.Date.Time`, format = "%m/%d/%Y %H:%M"),
+    Report.Date = as.POSIXct(`Report.Date`, format = "%m/%d/%Y"),
+    Clearance.Date = as.POSIXct(`Clearance.Date`, format = "%m/%d/%Y"),
+    NetResponse.Date.Time = `Report.Date.Time` - `Occurred.Date.Time`,
+    NetClearance.Date.Time = `Clearance.Date` - `Report.Date`,
+    OccurMonth = format(`Occurred.Date.Time`, "%Y-%m"),
+    ReportMonth = format(`Report.Date.Time`, "%Y-%m")
+  )
+```
+
+
+## Word Cloud -- Most Common Types of Crime
+
+The first property we will be evaluating is the type of crimes that are most prevalent. This is a crucial factor that we must analyze as it gives us insight into what types of crimes we must analyze further. This will allow us to identify the most critical areas that the Austin Police Department needs to focus on to mitigate and respond to crime in a more timely and efficient manner.
+
+
+```{r,  message=FALSE, echo = FALSE}
+
+# Create grouping column
+crimes$Group <- NA
+
+crimes <- crimes %>%
+  mutate(
+    Group = case_when(
+      # PROPERTY CRIMES
+      grepl("AUTO THEFT", Highest.Offense.Description, ignore.case = TRUE) ~ "Auto Theft",
+      grepl("BURGLARY.*VEHICLE", Highest.Offense.Description, ignore.case = TRUE) ~ "Burglary - Vehicle",
+      grepl("BURGLARY", Highest.Offense.Description, ignore.case = TRUE) ~ "Burglary - Residence/Building",
+      grepl("SHOPLIFT|THEFT|PACKAGE", Highest.Offense.Description, ignore.case = TRUE) ~ "General Theft",
+      grepl("STOLEN", Highest.Offense.Description, ignore.case = TRUE) ~ "Possession of Stolen Property",
+      grepl("ARSON", Highest.Offense.Description, ignore.case = TRUE) ~ "Arson",
+      grepl("^CRIMINAL MISCHIEF", Highest.Offense.Description, ignore.case = TRUE) ~ "Criminal Mischief",
+      grepl("GRAFFITI", Highest.Offense.Description, ignore.case = TRUE) ~ "Graffiti / Vandalism",
+      grepl("DAMAGE CITY PROP", Highest.Offense.Description, ignore.case = TRUE) ~ "Damage to City Property",
+
+      # VIOLENCE & DISTURBANCE
+      grepl("ASSAULT.*FAM|FAMILY VIOLENCE|DATE VIOL", Highest.Offense.Description, ignore.case = TRUE) ~ "Assault - Family/Domestic",
+      grepl("AGG ASLT STRANGLE|FELONY ENHANCEMENT/ASSLT|AGG ASSAULT|DEADLY CONDUCT", Highest.Offense.Description, ignore.case = TRUE) ~ "Aggravated Assault",
+      grepl("ASSAULT", Highest.Offense.Description, ignore.case = TRUE) ~ "Assault - Non-Family",
+      grepl("HOMICIDE|MURDER", Highest.Offense.Description, ignore.case = TRUE) ~ "Homicide",
+      grepl("^FAMILY DISTURBANCE|DISTURBANCE.*FAM", Highest.Offense.Description, ignore.case = TRUE) ~ "Disturbance - Family",
+      grepl("DISTURBANCE", Highest.Offense.Description, ignore.case = TRUE) ~ "Disturbance - Other",
+      grepl("HARASSMENT|THREAT", Highest.Offense.Description, ignore.case = TRUE) ~ "Harassment / Threats",
+      grepl("RESIST|INTERFERE|OBSTRUCT", Highest.Offense.Description, ignore.case = TRUE) ~ "Interference / Obstruction",
+      grepl("DOC FIGHTING", Highest.Offense.Description, ignore.case = TRUE) ~ "Disorderly Conduct - Fighting",
+
+      # ROBBERY / FRAUD
+      grepl("ROBBERY.*INDIVIDUAL|ROBBERY", Highest.Offense.Description, ignore.case = TRUE) ~ "Robbery - Individual",
+      grepl("FRAUD|FORGERY|IDENTITY", Highest.Offense.Description, ignore.case = TRUE) ~ "Fraud / Identity Theft",
+      grepl("CRED CARD ABUSE|DEBIT CARD ABUSE", Highest.Offense.Description, ignore.case = TRUE) ~ "Credit/Debit Card Abuse",
+
+      # DRUGS, ALCOHOL & WEAPONS
+      grepl("DRUG|NARCOTIC|MANUF|DELIV", Highest.Offense.Description, ignore.case = TRUE) ~ "Drug Offenses",
+      grepl("POSSESSION OF MARIJUANA", Highest.Offense.Description, ignore.case = TRUE) ~ "Possession of Marijuana",
+      grepl("DWI|DUI|INTOX", Highest.Offense.Description, ignore.case = TRUE) ~ "DWI / Alcohol",
+      grepl("WEAPON.*DISCHARGE", Highest.Offense.Description, ignore.case = TRUE) ~ "Weapons - Discharge",
+      grepl("WEAPON|UNLAWFUL CARRY", Highest.Offense.Description, ignore.case = TRUE) ~ "Weapons - Other",
+      grepl("VOCO - ALCOHOL", Highest.Offense.Description, ignore.case = TRUE) ~ "Alcohol Violation",
+
+      # SEXUAL & SENSITIVE
+      grepl("SEXUAL ASSAULT|RAPE", Highest.Offense.Description, ignore.case = TRUE) ~ "Sexual Assault",
+      grepl("INDECENT", Highest.Offense.Description, ignore.case = TRUE) ~ "Indecent Exposure",
+      grepl("CHILD", Highest.Offense.Description, ignore.case = TRUE) ~ "Child-Related Offenses",
+      grepl("KIDNAP", Highest.Offense.Description, ignore.case = TRUE) ~ "Kidnapping",
+
+      # PUBLIC ORDER / OTHER
+      grepl("DISORDERLY|CURFEW|NOISE", Highest.Offense.Description, ignore.case = TRUE) ~ "Public Disorder",
+      grepl("URINATING IN PUBLIC PLACE", Highest.Offense.Description, ignore.case = TRUE) ~ "Public Urination",
+      grepl("MISSING PERSON|RUNAWAY", Highest.Offense.Description, ignore.case = TRUE) ~ "Missing Person / Runaway",
+      grepl("TRAFFIC|ACCIDENT", Highest.Offense.Description, ignore.case = TRUE) ~ "Traffic Offense",
+      grepl("ESCAPE|FAIL TO APPEAR|WARRANT", Highest.Offense.Description, ignore.case = TRUE) ~ "Justice System Offenses",
+      grepl("FAILURE TO IDENTIFY", Highest.Offense.Description, ignore.case = TRUE) ~ "Failure to Identify",
+      grepl("FAIL STOP AND RENDER AID", Highest.Offense.Description, ignore.case = TRUE) ~ "Fail to Stop/Render Aid",
+      grepl("VIOL CITY ORDINANCE", Highest.Offense.Description, ignore.case = TRUE) ~ "City Ordinance Violation",
+      grepl("VIOL STATE LAW", Highest.Offense.Description, ignore.case = TRUE) ~ "State Law Violation",
+      grepl("CRUELTY TO ANIMALS|DOG FIGHTING", Highest.Offense.Description, ignore.case = TRUE) ~ "Animal Cruelty / Fighting",
+      grepl("PROTECTIVE ORDER", Highest.Offense.Description, ignore.case = TRUE) ~ "Protective Order",
+      grepl("VOCO SOLICITATION", Highest.Offense.Description, ignore.case = TRUE) ~ "Solicitation Violation",
+      grepl("CAMPING IN PARK", Highest.Offense.Description, ignore.case = TRUE) ~ "Camping in Park",
+      grepl("VOCO AMPLIFIED MUSIC", Highest.Offense.Description, ignore.case = TRUE) ~ "Noise Violation",
+      grepl("EVADING / FOOT", Highest.Offense.Description, ignore.case = TRUE) ~ "Evading Arrest (Foot)",
+
+      # fallback
+      TRUE ~ "Other / Misc"
+    )
+  )
+grouped_counts <- crimes %>%
+  group_by(Group) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  rename(Category = Group) %>%
+  arrange(desc(Count))
+
+
+ggplot(grouped_counts, aes(label = Category, size = Count)) +
+  geom_text_wordcloud_area() +
+  scale_size_area(max_size = 40) +
+  theme_minimal() + 
+  ggtitle("Popular Criminal Offense Descriptions | Austin, TX (2003-2025)")
+
+```
+
+## Word Cloud Interpretation
+
+The word cloud condenses over 440 original crime categories into about 40 broader groups, making the data easier to interpret and compare. It shows that General Theft, Burglary – Vehicle, and Family Disturbance are by far the most common reported offenses in Austin. This suggests that property-related and domestic conflicts are the most pressing daily crime concerns for the city. Offenses tied to drugs, alcohol, and fraud also appear prominently, reflecting broader social and economic dimensions of crime. Overall, the word cloud shows the diversity of crime in Austin while drawing attention to a handful of categories that may be most influential when considering their relationship with the Texas economy. This graph is a crucial starting point as our future analyses of the crimes data set will now have in context the most common types of crimes committed, and draw better conclusions as a result.
+
+
+## Area Chart -- Occurrence of Crime at Key Locations
+
+To better understand where these crimes occur, we wanted to study the change in the proportions of the locations of crimes. There are over 30 different crime locations that the crimes dataset provides. However, to ensure that the graph is legible, we chose to focus only on the top 10 crime locations, comprising around 80% of the crimes in Austin. By understanding where crimes occur, the Austin Police force can concentrate personnel in high-risk areas to help mitigate incidents.
+
+
+```{r,  message=FALSE, echo = FALSE}
+#Make a new column based off the Occured.Date.Time column (already formatted when
+#we made our boxplot), which is only the year
+crimes$year <- format(as.POSIXct(crimes$Occurred.Date.Time), "%Y")
+
+# These are the relevant locations we will be examining
+relevant_location_types <- c(
+  "GROCERY / SUPERMARKET",
+  "CONVENIENCE STORE",
+  "RESIDENCE / HOME",
+  "HWY / ROAD / ALLEY/ STREET/ SIDEWALK",
+  "PARKING /DROP LOT/ GARAGE",
+  "HOTEL / MOTEL / ETC.",
+  "DRUG STORE / DOCTOR'S OFFICE / HOSPITAL",
+  "COMMERCIAL / OFFICE BUILDING",
+  "BAR / NIGHTCLUB",
+  "RESTAURANT"
+)
+
+#Gets the total crimes per year from the full dataset
+total_crimes_per_year <- table(crimes$year)
+
+# Filtering the crimes to include only the ones that are relevant
+crimes_filtered <- subset(crimes, Location.Type %in% relevant_location_types)
+
+#Create a table containing the year and how many of each different type of crime
+#happened that year.
+crime_counts_table <- table(crimes_filtered$year, crimes_filtered$Location.Type)
+
+# Convert to data frame
+crime_counts_df <- as.data.frame(crime_counts_table)
+colnames(crime_counts_df) <- c("year", "Location.Type", "count")
+
+#Calculates percentages based on total crimes 
+#(not just based on the crime locations we're focusing on)
+years <- unique(crime_counts_df$year)
+crime_counts_df$percentage <- 0
+
+for(yr in years) {
+  year_mask <- crime_counts_df$year == yr
+  #Uses total crimes from all data to calculate percentage
+  year_total <- total_crimes_per_year[yr]
+  crime_counts_df$percentage[year_mask] <- (crime_counts_df$count[year_mask] / as.numeric(year_total)) * 100
+}
+
+# Ensure that the years will be treated as numbers instead of date variables.
+crime_counts_df$year <- as.numeric(as.character(crime_counts_df$year))
+
+# Plot with percentages
+ggplot(crime_counts_df, aes(x = year, y = percentage, fill = Location.Type)) +
+  geom_area(alpha = 1) +  
+  theme_minimal() +
+  labs(title = "Selected Crime Locations as Percentage of All Crimes",
+       x = "Year",
+       y = "Percentage of Total Crimes (%)",
+       fill = "Location Type") +
+  # Shows every other year in the x-label for a cleaner look.
+  scale_x_continuous(breaks = seq(min(crime_counts_df$year), 
+                                  max(crime_counts_df$year), 
+                                  by = 2)) +
+  # Format y-axis as percentage
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+  scale_fill_manual(values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
+                               "#FF7F00", "#FFFF33", "#A65628", "#F781BF",
+                               "#999999", "#66C2A5")) +
+  # Fix the x-axis label
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Area Chart Interpretation
+
+The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on residences, homes, parking lots, and garages, while the relative percentage of crime occurring on highways, roads, alleys, streets, and sidewalks has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas. There's little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
+
+
+## Stacked Barplot -- Crime Solve Rate for Common Crimes
+
+Certain crimes are more severe than others, which results in a variance in crime solving rate and how the crime is dealt with after it is solved. We use this graph to study how the most common crimes are solved and prosecuted over a long period of time. Such a study can help inform the Austin Police on what crimes they prosecute and where to exert more energy to yield prosecutions.
+  
+
+```{r,  message=FALSE, echo = FALSE}
+clearance_df <- subset(crimes, select = c(Clearance.Status, Highest.Offense.Description))
+# Create a frequency table of offenses
+offense_freq <- table(clearance_df$Highest.Offense.Description)
+# Get the top 10 offense names
+top_offense_names <- names(sort(offense_freq, decreasing = TRUE)[1:10])
+# Subset the original dataframe to only include top 10 offenses
+clearance_top10 <- clearance_df[clearance_df$Highest.Offense.Description %in% top_offense_names, ]
+offense_clearance_counts <- as.data.frame(table(
+  clearance_top10$Highest.Offense.Description,
+  clearance_top10$Clearance.Status))
+
+offense_totals <- aggregate(Freq ~ Var1, data = offense_clearance_counts, sum)
+
+# Merge to calculate percentages
+plot_data <- merge(offense_clearance_counts, offense_totals, by = "Var1", suffixes = c("", "_Total"))
+plot_data$Percentage <- plot_data$Freq / plot_data$Freq_Total
+
+# Order offenses by total frequency (optional)
+offense_order <- offense_totals[order(-offense_totals$Freq), "Var1"]
+plot_data$Offense <- factor(plot_data$Var1, levels = offense_order)
+
+# Replace empty strings with a descriptive label in the data
+plot_data$Var2 <- as.character(plot_data$Var2)
+plot_data$Var2[plot_data$Var2 == ""] <- "Open"
+plot_data$Var2 <- factor(plot_data$Var2)
+
+# Create the stacked barplot
+ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_x_discrete(
+    labels = function(x) stringr::str_wrap(x, width = 7)
+  ) +
+  scale_fill_discrete(
+    name = "Clearance Status",
+    labels = c(
+      "N" = "Exceptional Clearance",
+      "O" = "Cleared by Arrest", 
+      "C" = "Cleared by Citation",
+      "Open" = "Open/Not Cleared"
+    )
+  ) +
+  labs(
+    title = "Clearance Status as Percentage of Common Offenses",
+    x = "Offense",
+    y = "Percentage",
+    subtitle = "Austin, TX (2003-2025)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+```
+
+## Interpretation
+In order to understand this graph, we must understand the different crime clearance types. "Open/Not Cleared" indicates that a crime has not been solved. "Cleared by Arrest" means that the crime was solved and an arrest was made. "Cleared by Citation" means that the crime was solved and the offender was given a citation rather than being arrested. "Exceptional Clearance" indicates that a crime was solved with enough evidence to make an arrest, but the victim did not want to prosecute the offender.
+
+We see some interesting takeaways from the data in terms of how crimes are treated when they are solved. DWI offenses are very frequently issued a citation, which likely stems from how the law dictates they be handled. Contrarily, assault with injury in family and date violence cases being issued citations at such a high rate is very surprising. We would assume that assault causing injuries would be prosecuted more heavily, but it's possible that these cases have a lower arrest rate due to victims not wanting to prosecute further. We would have to look further into the data to understand if this lack of arrests is specific to family violence or if all assault cases are treated similarly. The most surprising statistic overall is the general lack of prosecution across all crimes. One would think that auto theft, burglary of vehicles, and harassment would warrant prosecution, so it's interesting to see so many victims opt to not seek prosecution for these crimes.
+
+
+
+## Pie Chart -- Amount of crime by time of day
+
+After examining what types of crimes occur most frequently, where they happen, and how quickly they're resolved, we now turn to understanding when crimes are most likely to occur throughout the day. It's easy to think that most crimes would be committed at night when less people will see. This pie chart allows us to visualize this and see if that assumption really is true. We want to use this analysis to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
+
+
+```{r, , message=FALSE, echo = FALSE}
+pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
+crimes$timeOfDay <- cut(crimes$`Occurred.Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
+                         labels = pieBuckets)
+
+pie(table(crimes$timeOfDay), label = pieBuckets, 
+    col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen","indianred3","khaki2","palegreen1","steelblue2"),
+    main = "Amount of Crimes by Time of Day")
+
+tab_top <- crimes %>%
+  # Get counts for each offense description and time of day
+  count(description = Highest.Offense.Description, timeOfDay) %>%
+  # Get top 10 offenses by total frequency
+  group_by(description) %>%
+  mutate(total = sum(n)) %>% 
+  ungroup() %>%
+  filter(dense_rank(desc(total)) <= 10) %>%
+  mutate(pct = round(n/total, 4) * 100) %>%
+  select(description, timeOfDay, pct) %>%
+  arrange(desc(description), desc(pct), timeOfDay)
+
+```
+
+## Pie Chart Interpretation
+
+The distribution of crimes is generally evenly spread across the day, only decreasing significantly during dawn and sunrise (3-9AM). The three times with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occurred after sundown. Unexpectedly, the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is very close. This even distribution suggests that Austin's crime patterns are driven more by opportunity and population activity levels than by darkness alone. The higher rates during afternoon and early evening likely correlate with increased population movement, more occupied public spaces, and peak traffic times—aligning with our earlier finding that streets and residences are primary crime locations. For the Austin Police Department, this means maintaining consistent staffing levels throughout most of the day rather than concentrating resources on nighttime hours.
+
+Upon deeper analysis of time certain crimes were committed, most of the frequent types of occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Vehicular crimes like burglary or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. APD may find it valuable to use this data to patrol for certain types of crimes during specific times of day.
+
+
+## Bar Graph -- Average Response Time by Council District
+
+Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or not there are certain districts that have significantly faster or slower response times. By identifying which districts experience faster or slower response times, the Austin Police Department can make data-driven decisions about station placement, patrol routing, and resource reallocation to ensure equitable service delivery across all communities.
+
+
+```{r, , message=FALSE, echo = FALSE}
+
+# get numeric value in seconds
+crimes$Response.Duration.Seconds <- as.numeric(
+  gsub(" secs", "", crimes$NetResponse.Date.Time)
+)
+
+# Convert to minutes
+crimes$Response.Duration.Days <- crimes$Response.Duration.Seconds / 86400
+
+# Get average for each district
+crimes_summary <- aggregate(
+  x = crimes$Response.Duration.Days, 
+  by = list(District = crimes$Council.District),
+  FUN = mean,
+  na.rm = TRUE
+)
+
+bp <- boxplot(plot_data, outline = FALSE, plot = FALSE,
+        yaxt = "n", 
+        ylab = "Report Time (HRS:MIN:SEC)", 
+        main = "Average Time to Report Crime in Austin, TX (2003-2025)",
+        sub = "Zero Duration Excluded | Outliers Removed From Plot")
+
+bp$stats %>%
+  as.data.frame() %>%
+  mutate(Statistic = c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")) %>%
+  select(Statistic, everything()) %>%
+  summary()
+
+# Name average time column
+names(crimes_summary)[2] <- "Average.Response.Time"
+
+# Create plot
+ggplot(data = crimes_summary, aes(x = factor(District), y = Average.Response.Time)) +
+  geom_col(fill = "skyblue") +
+  
+  geom_text(
+    aes(label = round(Average.Response.Time, 1)), 
+    vjust = -0.5, 
+    size = 3.5
+  ) +
+    labs(
+    title = "Average Incident Response Time by Council District",
+    x = "Council District",
+    y = "Average Response Time (Days)"
+  ) +  scale_x_discrete(breaks = as.character(1:10)) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title.y = element_text(margin = margin(r = 15)),
+    panel.grid.major.x = element_blank()
+  )
+
+```
+
+## Bar Graph Interpretation
+
+There are some significant disparities in average response time across the districts, with times ranging from approximately 6.7 days in District 9 to over 13 days in Districts 6 and 10. District 9 stands out, responding to crimes significantly faster than any other, nearly half that of the slowest districts. Districts 3 and 4 also demonstrate relatively quick response times, around 8 days. External research strongly correlates faster response times with much higher crime resolution rates. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes. The geographic clustering of slow-response districts may indicate these areas are underserved by current police infrastructure, potentially located farther from stations or experiencing higher call volumes relative to available units. The Austin Police Department should consider these disparities when planning patrol routes and station locations.
+
+In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it's reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. The darker shading in Districts 1-4 suggests these areas experience the highest crime volumes consistently throughout the year. Interestingly, the relatively uniform coloring across months indicates that seasonal variation is minimal, crime remains fairly constant year-round rather than spiking during particular seasons. This finding complements our earlier discovery that crime is evenly distributed throughout the day. For the Austin Police Department, this means maintaining consistent year-round staffing in these high-crime districts rather than adjusting seasonally. We can use this information to further explore the interactions crime has with the general economy in these areas.
+
+
+## Transition: From General Patterns to Specific Crime Types
+Having established the foundational patterns of crime in Austin, where it occurs, when it happens, and how quickly it's addressed, we now turn our attention to examining specific crime types. Our earlier analysis revealed that family disturbances, theft, and burglary rank among the most common offenses in Austin, making it crucial to understand how these particular categories have evolved over time. The following sections will dive deeper into specific crime trends to identify unique patterns within each crime type. We want to explore whether certain crimes follow different temporal patterns, how they've changed over the years, and what this might mean for targeted policing strategies.
+
+
+## Slope Chart -- Total Thefts by Type & Year
+
+Of all the crimes, theft occurs quite frequently, leading to a variety of types of theft occurring. Our earlier analysis showed that General Theft and Burglary-Vehicle rank among the most common crimes in Austin. In this graph we look to better understand the most common types of theft, how often they occur, and if there are any patterns over time that might correlate with economic conditions.
+
+```{r,  message=FALSE, echo = FALSE}
+# Get all theft rows
+theft_rows <- grepl("THEFT", crimes$Highest.Offense.Description, ignore.case = TRUE)
+
+
+# Create df with thefts, year
+theft_crimes_df <- crimes[theft_rows, c("Highest.Offense.Description", "year")]
+theft_crimes_df$Highest.Offense.Description[
+  theft_crimes_df$Highest.Offense.Description == "THEFT"
+] <- "GENERAL THEFT"
+
+# Get Amount of thefts in each year
+theft_summary <- aggregate(
+    x = theft_crimes_df$Highest.Offense.Description,
+    by = list(year = theft_crimes_df$year, theft_type = theft_crimes_df$Highest.Offense.Description),
+    FUN = length
+)
+colnames(theft_summary) <- c("year", "theft_type", "total_thefts")
+
+# Find Most Common Types of Theft
+all_time_counts <- tapply(
+    X = theft_summary$total_thefts,
+    INDEX = theft_summary$theft_type,
+    FUN = sum
+)
+top_7_theft_types <- names(sort(all_time_counts, decreasing = TRUE))[1:7]
+
+# Only keep top 7 most common types of theft
+filtered_theft_summary <- theft_summary[theft_summary$theft_type %in% top_7_theft_types, ]
+
+
+# Get average consumer confidence by year
+avg_confidence_by_year <- aggregate(
+    x = econ$Consumer.Confidence.Index.TX,
+    by = list(year = econ$Year),
+    FUN = mean,
+    na.rm = TRUE
+)
+avg_confidence_by_year <- na.omit(avg_confidence_by_year)
+colnames(avg_confidence_by_year)[colnames(avg_confidence_by_year) == "x"] <- "Consumer.Index"
+
+
+# Join confidence and crimes
+theft_type_consumer_confidence <- merge(
+    x = theft_summary,
+    y = avg_confidence_by_year,
+    by = "year",
+    all = FALSE
+)
+
+# Create slope chart
+selected_year <- seq(2003, 2025, by = 2)
+theft_type_label_data <- do.call(rbind, lapply(split(filtered_theft_summary, filtered_theft_summary$theft_type), 
+                                               function(x) x[which.max(as.numeric(as.character(x$year))), ]))
+
+
+ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_type, color = theft_type)) +
+  geom_line(linewidth = 1.2, alpha = 0.8) +
+  geom_point(size = 3) +
+  coord_cartesian(clip = "off") + 
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_text(face = "bold", size = 18),
+    panel.grid.major.x = element_blank(),
+    legend.position = "right", 
+    plot.margin = margin(10, 10, 10, 10) 
+  ) +
+  labs(
+    title = "Total Thefts by Type (2003 - 2023)",
+    x = "Year",
+    y = "Total Thefts",
+    color = "Theft Type"
+  ) + 
+  scale_x_discrete(breaks = selected_year, labels = selected_year)
+  
+
+```
+
+## Slope Chart Interpretation
+
+The graph reveals a dramatic shift in Austin's theft landscape over the past two decades. General Theft dominated from 2003 to 2008, peaking at over 15,000 incidents before a steep post-2009 decline, dropping nearly 70% by 2025 which was a reduction that may reflect genuine change or improved crime categorization. The most striking trend is the surge in Auto Theft starting around 2019, more than tripling from 2,000 to over 6,500 cases by 2023, aligning with nationwide trends linked to specific vehicle vulnerabilities and organized theft rings. The subsequent sharp decline in 2024-2025 suggests countermeasures may be working. Shoplifting, conversely, shows remarkable stability, maintaining 3,000-4,000 cases annually since 2011 despite major changes in retail and security. Smaller categories, like bicycle and license plate theft, also remain remarkably consistent (1,000–1,500 cases each), confirming the persistence of low-value, essential item theft. Overall, while total theft volumes have declined since their 2008 peak, the nature of theft has evolved, shifting from general theft toward more specific, opportunistic crimes like auto theft. This data emphasizes the need for the Austin Police Department to employ targeted approaches, such as auto theft task forces and sustained retail partnership programs.
+
+## Transition: Working in Our Secondary Economy Dataset
+
+Now that we've examined specific crime types and their individual trends, we want to explore how these patterns might relate to broader economic conditions in Texas. Economic factors like unemployment, gas prices, and financial stress can influence criminal behavior in complex ways. The following sections will analyze how Austin's crime patterns correlate with key Texas economic indicators. By understanding these relationships, we can better predict when certain crimes might increase and help the Austin Police Department anticipate resource needs based on economic forecasts. This economic dimension adds another layer to our analysis, moving beyond just describing crime patterns to understanding potential underlying drivers.
+
+
+
+# Linear Regression Model -- Predicting Shoplifting Thefts
+
+Having identified shoplifting as one of the most stable categories within Austin's theft landscape, maintaining consistent volumes of 3,000-4,000 cases annually, we now examine whether this crime type responds to economic pressures. We wanted to test if unemployment rates could predict shoplifting incidents, since financial stress might drive some individuals toward retail theft. By analyzing the relationship between shoplifting incidents and Texas's unemployment rate, we can determine whether economic downturns translate into measurable increases in retail theft.
+
+
+```{r, message=FALSE, echo = FALSE}
+# Linear Regression: predicting total shoplifting crimes in a given month
+
+# Get shoplifting rows
+shoplifting_rows <- grepl("THEFT BY SHOPLIFTING", crimes$Highest.Offense.Description, ignore.case = TRUE)
+shoplifting_df <- crimes[shoplifting_rows, c("Highest.Offense.Description", "year", "OccurMonth")]
+shoplifting_df$OccurMonth <- as.numeric(substr(shoplifting_df$OccurMonth, 6, 7))
+names(shoplifting_df)[names(shoplifting_df) == "OccurMonth"] <- "Month"
+names(shoplifting_df)[names(shoplifting_df) == "year"] <- "Year"
+
+# Get unemployment by month and year
+target_cols <- c("Month", "Year", "Unemployment.TX")
+unemployment_df <- econ[complete.cases(econ[, target_cols]), target_cols]
+
+# Merge dfs based on month and year
+shopL_unem <- merge(
+  unemployment_df, shoplifting_df,
+  by = c("Month", "Year"),
+  all = FALSE 
+)
+
+# Get total amount of theft per month
+summary_shopL_unem <- aggregate(
+  Highest.Offense.Description ~ Month + Year + Unemployment.TX,
+  data = shopL_unem,
+  FUN = length
+)
+names(summary_shopL_unem)[4] <- "Count"
+
+model_shopL_unem <- lm(Count ~ Unemployment.TX, data = summary_shopL_unem)
+model_sum_shopunem <- summary(model_shopL_unem)
+stargazer(model_sum_shopunem$coefficients, type = "text", 
+          title = "Regression Results",
+          single.row = TRUE)
+
+# Scatterplot
+with(summary_shopL_unem, {
+  plot(Unemployment.TX, Count,
+       main = "Shoplifting Theft Count vs. Texas Unemployment Rate",
+       xlab = "Unemployment Rate (TX)",
+       ylab = "Shoplifting Theft Count",
+       pch = 19, col = "skyblue")
+  abline(model_shopL_unem, col = "orange", lwd = 2)
+})
+
+```
+
+## Linear Regression Model Interpretation
+The data confirms a negligible relationship between shoplifting and Texas unemployment rates. The regression line's near-zero slope indicates that a 1% unemployment rise corresponds to a practically insignificant increase of fewer than two shoplifting cases per month, trivial compared to Austin's 250-300 incident baseline. A high p-value of 0.708 means unemployment holds no meaningful predictive power. This is visually evidenced by the massive data spread: at 5-6% unemployment, shoplifting counts vary wildly (under 100 to over 450 cases). This inconsistency, along with shoplifting's surprising stability since 2011 despite major economic shifts, suggests the crime is fundamentally driven by opportunity rather than economic necessity.
+
+
+## Scatterplot -- Total Auto Thefts by Gas Prices
+Our earlier analysis showed that auto theft experienced a dramatic surge from 2019 to 2023, more than tripling before declining sharply in 2024-2025. We wanted to explore whether this pattern might correlate with gas prices, since higher fuel costs could theoretically either deter theft (due to operating costs) or encourage it (if vehicles become more valuable or if economic stress increases). By examining the relationship between auto theft incidents and Texas gas prices, we can test whether fuel costs influence vehicle-related crime rates.
+
+
+```{r, message=FALSE, echo = FALSE}
+
+# Get shoplifting rows
+auto_rows <- grepl("AUTO THEFT", crimes$Highest.Offense.Description, ignore.case = TRUE)
+auto_df <- crimes[auto_rows, c("Highest.Offense.Description", "year", "OccurMonth")]
+auto_df$OccurMonth <- as.numeric(substr(auto_df$OccurMonth, 6, 7))
+names(auto_df)[names(auto_df) == "OccurMonth"] <- "Month"
+names(auto_df)[names(auto_df) == "year"] <- "Year"
+
+# Get unemployment by month and year
+auto_target_cols <- c("Month", "Year", "Retail.Gasoline.Price.TX")
+gas_df <- econ[complete.cases(econ[, auto_target_cols]), auto_target_cols]
+
+# Merge dfs based on month and year
+auto_gas_merge <- merge(
+  gas_df, auto_df,
+  by = c("Month", "Year"),
+  all = FALSE 
+)
+
+# Get total amount of theft per month
+summary_autogas <- aggregate(
+  Highest.Offense.Description ~ Month + Year + Retail.Gasoline.Price.TX,
+  data = auto_gas_merge,
+  FUN = length
+)
+names(summary_autogas)[4] <- "Count"
+
+model_autogas <- lm(Count ~ Retail.Gasoline.Price.TX, data = summary_autogas)
+model_sum_autogas <- summary(model_autogas)
+
+# R and R^2
+auto_r_val  <- cor(summary_autogas$Retail.Gasoline.Price.TX, summary_autogas$Count)
+auto_r2_val <- summary(model_autogas)$r.squared
+
+# Scatterplot
+with(summary_autogas, {
+  plot(Retail.Gasoline.Price.TX, Count,
+       main = "Auto Theft Count vs. Texas Gas Prices",
+       xlab = "Gas Price (TX)",
+       ylab = "Auto Theft Count",
+       pch = 19, col = "skyblue")
+  abline(model_autogas, col = "orange", lwd = 2)
+  legend("topright",
+         legend = c(
+           paste0("r = ", round(auto_r_val, 3)),
+           paste0("R² = ", round(auto_r2_val, 3))
+         ),
+         bty = "n")
+})
+
+```
+
+## Scatterplot Interpretation
+The scatter plot clearly reveals a weak positive relationship between gas prices and auto theft in Austin, a finding that is statistically and practically negligible. With an $R^2$ of 0.045, gas prices explain just 4.5% of the variation in theft rates, leaving the vast majority (95.5%) to other factors. The corresponding correlation coefficient of 0.212 confirms this is a very weak association with minimal practical significance. The data distribution makes this clear: at a price point like $2.50 per gallon, auto theft counts still ranged tremendously from under 150 to over 600 incidents per month, suggesting gas prices are simply not a meaningful predictor of behavior. Furthermore, the massive auto theft spike observed from 2019-2023 failed to align cleanly with gas price patterns during that time, strongly indicating that other factors were driving that surge. Auto theft in Austin essentially operates independently of fuel costs, and the dramatic changes were likely driven by issues like specific vehicle vulnerabilities, organized theft rings, or changes in security technology. This means monitoring gas prices is useless for the Austin Police Department; prevention strategies should focus instead on addressing the specific methods and motivations behind vehicle theft rather than broader economic conditions.
+
+# Key Findings
+
+Our analysis made significant progress in better understanding crime in Austin. We found it's a misconception that crime occurs more after sundown, occurrences were close to evenly split between day and night, with only early morning (3-9 AM) showing reduced activity. An overwhelming majority of crimes happen at residences and on streets. While report times are generally fast (74% within 48 hours), response times vary wildly, District 9 responds in 6.7 days while Districts 6 and 10 take over 13 days, on average. Family violence cases have increased by over 50% as a proportion of total crime since 2003. Auto theft surged dramatically from 2019-2023 (tripling in volume) before rapidly declining in 2024-2025. General theft has dropped 70% since 2008, while shoplifting remains steady at 3,000-4,000 cases annually. Surprisingly, we found minimal relationships between crime and economic indicators. Shoplifting doesn't correlate with unemployment (p-value = 0.708), and auto theft shows negligible connection to gas prices (R² = 0.045). This suggests Austin crime is driven more by opportunity and enforcement than economic conditions. These findings provide the Austin Police Department with actionable insights: addressing response time disparities across districts, maintaining consistent daytime staffing, and focusing prevention strategies on opportunity reduction rather than economic monitoring.
+
