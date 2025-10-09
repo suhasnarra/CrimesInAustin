@@ -18,7 +18,7 @@ library(stargazer)
 library(tidyverse)
 ```
 
-# Group: Suhas Narra, Mert Esat Yercel, Max Basurto, Carson Khun
+# Group: Suhas Narra, Mert Esat Yercel, Max Basurto, Carson Kuhn
 
 # Our Data
 
