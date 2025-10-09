@@ -315,7 +315,8 @@ ggplot(plot_data, aes(x = Offense, y = Percentage, fill = Var2)) +
 
 ```
 
-## Interpretation
+## Stacked Barplot Interpretation
+
 In order to understand this graph, we must understand the different crime clearance types. "Open/Not Cleared" indicates that a crime has not been solved. "Cleared by Arrest" means that the crime was solved and an arrest was made. "Cleared by Citation" means that the crime was solved and the offender was given a citation rather than being arrested. "Exceptional Clearance" indicates that a crime was solved with enough evidence to make an arrest, but the victim did not want to prosecute the offender.
 
 We see some interesting takeaways from the data in terms of how crimes are treated when they are solved. DWI offenses are very frequently issued a citation, which likely stems from how the law dictates they be handled. Contrarily, assault with injury in family and date violence cases being issued citations at such a high rate is very surprising. We would assume that assault causing injuries would be prosecuted more heavily, but it's possible that these cases have a lower arrest rate due to victims not wanting to prosecute further. We would have to look further into the data to understand if this lack of arrests is specific to family violence or if all assault cases are treated similarly. The most surprising statistic overall is the general lack of prosecution across all crimes. One would think that auto theft, burglary of vehicles, and harassment would warrant prosecution, so it's interesting to see so many victims opt to not seek prosecution for these crimes.
@@ -422,6 +423,7 @@ There are some significant disparities in average response time across the distr
 In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it's reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. The darker shading in Districts 1-4 suggests these areas experience the highest crime volumes consistently throughout the year. Interestingly, the relatively uniform coloring across months indicates that seasonal variation is minimal, crime remains fairly constant year-round rather than spiking during particular seasons. This finding complements our earlier discovery that crime is evenly distributed throughout the day. For the Austin Police Department, this means maintaining consistent year-round staffing in these high-crime districts rather than adjusting seasonally. We can use this information to further explore the interactions crime has with the general economy in these areas.
 
 ## Transition: From General Patterns to Specific Crime Types
+
 Having established the foundational patterns of crime in Austin, where it occurs, when it happens, and how quickly it's addressed, we now turn our attention to examining specific crime types. Our earlier analysis revealed that family disturbances, theft, and burglary rank among the most common offenses in Austin, making it crucial to understand how these particular categories have evolved over time. The following sections will dive deeper into specific crime trends to identify unique patterns within each crime type. We want to explore whether certain crimes follow different temporal patterns, how they've changed over the years, and what this might mean for targeted policing strategies.
 
 ## Slope Chart -- Total Thefts by Type & Year
@@ -565,9 +567,11 @@ with(summary_shopL_unem, {
 ```
 
 ## Linear Regression Model Interpretation
+
 The data confirms a negligible relationship between shoplifting and Texas unemployment rates. The regression line's near-zero slope indicates that a 1% unemployment rise corresponds to a practically insignificant increase of fewer than two shoplifting cases per month, trivial compared to Austin's 250-300 incident baseline. A high p-value of 0.708 means unemployment holds no meaningful predictive power. This is visually evidenced by the massive data spread. This inconsistency, along with shoplifting's surprising stability since 2011 despite major economic shifts, suggests the crime is fundamentally driven by opportunity rather than economic necessity.
 
 ## Scatterplot -- Total Auto Thefts by Gas Prices
+
 Our earlier analysis showed that auto theft experienced a dramatic surge from 2019 to 2023, more than tripling before declining sharply in 2024-2025. We wanted to explore whether this pattern might correlate with gas prices, since higher fuel costs could theoretically either deter theft (due to operating costs) or encourage it (if vehicles become more valuable or if economic stress increases). By examining the relationship between auto theft incidents and Texas gas prices, we can test whether fuel costs influence vehicle-related crime rates.
 
 ```{r, message=FALSE, echo = FALSE}
@@ -624,6 +628,7 @@ with(summary_autogas, {
 ```
 
 ## Scatterplot Interpretation
+
 The scatter plot clearly reveals a weak positive relationship between gas prices and auto theft in Austin, a finding that is statistically and practically negligible. With an $R^2$ of 0.045, gas prices explain just 4.5% of the variation in theft rates, leaving the majority to other factors. The corresponding correlation coefficient of 0.212 confirms this is a very weak association with minimal significance. The data distribution makes this clear: at a price point like $2.50 per gallon, auto theft counts still ranged tremendously from under 150 to over 600 incidents per month, suggesting gas prices are simply not a meaningful predictor of behavior. Furthermore, the massive auto theft spike observed from 2019-2023 failed to align cleanly with gas price patterns during that time, strongly indicating that other factors were driving that surge. Auto theft in Austin essentially operates independently of fuel costs, and the dramatic changes were likely driven by issues like specific vehicle vulnerabilities, organized theft rings, or changes in security technology.
 
 # Key Findings
