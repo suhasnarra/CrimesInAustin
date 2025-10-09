@@ -319,7 +319,7 @@ We see some interesting takeaways from the data in terms of how crimes are treat
 
 ## Pie Chart -- Amount of crime by time of day
 
-After examining what types of crimes occur most frequently, where they happen, and how quickly they're resolved, we now turn to understanding when crimes are most likely to occur throughout the day. It's easy to think that most crimes would be committed at night when less people will see. This pie chart allows us to visualize this and see if that assumption really is true. We want to use this analysis to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
+After examining crime types, locations, and resolution times, we now investigate when crimes occur throughout the day. We want to use this analysis to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
 
 ```{r, , message=FALSE, echo = FALSE}
 pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
@@ -346,9 +346,9 @@ tab_top <- crimes %>%
 
 ## Pie Chart Interpretation
 
-The distribution of crimes is generally evenly spread across the day, only decreasing significantly during dawn and sunrise (3-9AM). The three times with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occurred after sundown. Unexpectedly, the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is very close. This even distribution suggests that Austin's crime patterns are driven more by opportunity and population activity levels than by darkness alone. The higher rates during afternoon and early evening likely correlate with increased population movement, more occupied public spaces, and peak traffic times—aligning with our earlier finding that streets and residences are primary crime locations. For the Austin Police Department, this means maintaining consistent staffing levels throughout most of the day rather than concentrating resources on nighttime hours.
+Crime is relatively evenly distributed throughout the day, with the lowest activity during dawn and sunrise (3-9AM). The highest crime periods are afternoon, dusk, and evening. Surprisingly, the split between daylight (dawn to afternoon) and nighttime (dusk to midnight) crimes is nearly 50/50, with slightly more occurring during daylight hours. This suggests Austin's crime patterns are driven by opportunity and population activity rather than darkness alone. Higher afternoon and early evening rates likely correlate with increased movement, occupied public spaces, and peak traffic times. For APD, this indicates maintaining consistent staffing throughout the day rather than concentrating resources at night.
 
-Upon deeper analysis of time certain crimes were committed, most of the frequent types of occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Vehicular crimes like burglary or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. APD may find it valuable to use this data to patrol for certain types of crimes during specific times of day.
+Most frequent crimes occur during daytime, consistent with the pie chart. DWI crimes peak at night when drinking is more common, while vehicular crimes like burglary and auto theft occur in later daytime hours but rarely at night. This pattern extends to criminal mischief, assault, and other disturbances. These findings could guide APD to patrol for specific crime types during targeted times of day.
 
 ## Bar Graph -- Average Response Time by Council District
 
