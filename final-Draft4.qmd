@@ -39,7 +39,7 @@ This data set is a compilation that pulls from various external sources and inte
 
 # Load in data
 #Dont forget to change to correct location on your machine.
-dcon <- dbConnect(SQLite(), dbname = "data/405FinalData.db")
+dcon <- dbConnect(SQLite(), dbname = "405FinalData.db")
 crimes <- dbGetQuery(dcon, "SELECT * FROM austin")
 econ <- dbGetQuery(dcon, "SELECT * FROM austin_econ")
 #crimes <- read.csv("austin.csv")
@@ -78,14 +78,14 @@ Our goal is to evaluate Austin crime properties and their relationship with the 
 #Pre Processing
 crimes <- crimes %>%
   mutate(
-    Occurred.Date.Time = as.POSIXct(`Occurred.Date.Time`, format = "%m/%d/%Y %H:%M"),
-    Report.Date.Time = as.POSIXct(`Report.Date.Time`, format = "%m/%d/%Y %H:%M"),
-    Report.Date = as.POSIXct(`Report.Date`, format = "%m/%d/%Y"),
-    Clearance.Date = as.POSIXct(`Clearance.Date`, format = "%m/%d/%Y"),
-    NetResponse.Date.Time = `Report.Date.Time` - `Occurred.Date.Time`,
-    NetClearance.Date.Time = `Clearance.Date` - `Report.Date`,
-    OccurMonth = format(`Occurred.Date.Time`, "%Y-%m"),
-    ReportMonth = format(`Report.Date.Time`, "%Y-%m")
+    `Occurred Date Time` = as.POSIXct(`Occurred Date Time`, format = "%m/%d/%Y %H:%M"),
+    `Report Date Time` = as.POSIXct(`Report Date Time`, format = "%m/%d/%Y %H:%M"),
+    `Report Date` = as.POSIXct(`Report Date`, format = "%m/%d/%Y"),
+    `Clearance Date` = as.POSIXct(`Clearance Date`, format = "%m/%d/%Y"),
+    `NetResponse Date Time` = `Report Date Time` - `Occurred Date Time`,
+    `NetClearance Date Time` = `Clearance Date` - `Report Date`,
+    `OccurMonth` = format(`Occurred Date Time`, "%Y-%m"),
+    `ReportMonth` = format(`Report Date Time`, "%Y-%m")
   )
 ```
 
@@ -103,68 +103,62 @@ crimes$Group <- NA
 crimes <- crimes %>%
   mutate(
     Group = case_when(
-      # PROPERTY CRIMES
-      grepl("AUTO THEFT", Highest.Offense.Description, ignore.case = TRUE) ~ "Auto Theft",
-      grepl("BURGLARY.*VEHICLE", Highest.Offense.Description, ignore.case = TRUE) ~ "Burglary - Vehicle",
-      grepl("BURGLARY", Highest.Offense.Description, ignore.case = TRUE) ~ "Burglary - Residence/Building",
-      grepl("SHOPLIFT|THEFT|PACKAGE", Highest.Offense.Description, ignore.case = TRUE) ~ "General Theft",
-      grepl("STOLEN", Highest.Offense.Description, ignore.case = TRUE) ~ "Possession of Stolen Property",
-      grepl("ARSON", Highest.Offense.Description, ignore.case = TRUE) ~ "Arson",
-      grepl("^CRIMINAL MISCHIEF", Highest.Offense.Description, ignore.case = TRUE) ~ "Criminal Mischief",
-      grepl("GRAFFITI", Highest.Offense.Description, ignore.case = TRUE) ~ "Graffiti / Vandalism",
-      grepl("DAMAGE CITY PROP", Highest.Offense.Description, ignore.case = TRUE) ~ "Damage to City Property",
+      str_detect(`Highest Offense Description`, regex("AUTO THEFT", ignore_case = TRUE)) ~ "Auto Theft",
+      str_detect(`Highest Offense Description`, regex("BURGLARY.*VEHICLE", ignore_case = TRUE)) ~ "Burglary - Vehicle",
+      str_detect(`Highest Offense Description`, regex("BURGLARY", ignore_case = TRUE)) ~ "Burglary - Residence/Building",
+      str_detect(`Highest Offense Description`, regex("SHOPLIFT|THEFT|PACKAGE", ignore_case = TRUE)) ~ "General Theft",
+      str_detect(`Highest Offense Description`, regex("STOLEN", ignore_case = TRUE)) ~ "Possession of Stolen Property",
+      str_detect(`Highest Offense Description`, regex("ARSON", ignore_case = TRUE)) ~ "Arson",
+      str_detect(`Highest Offense Description`, regex("^CRIMINAL MISCHIEF", ignore_case = TRUE)) ~ "Criminal Mischief",
+      str_detect(`Highest Offense Description`, regex("GRAFFITI", ignore_case = TRUE)) ~ "Graffiti / Vandalism",
+      str_detect(`Highest Offense Description`, regex("DAMAGE CITY PROP", ignore_case = TRUE)) ~ "Damage to City Property",
 
-      # VIOLENCE & DISTURBANCE
-      grepl("ASSAULT.*FAM|FAMILY VIOLENCE|DATE VIOL", Highest.Offense.Description, ignore.case = TRUE) ~ "Assault - Family/Domestic",
-      grepl("AGG ASLT STRANGLE|FELONY ENHANCEMENT/ASSLT|AGG ASSAULT|DEADLY CONDUCT", Highest.Offense.Description, ignore.case = TRUE) ~ "Aggravated Assault",
-      grepl("ASSAULT", Highest.Offense.Description, ignore.case = TRUE) ~ "Assault - Non-Family",
-      grepl("HOMICIDE|MURDER", Highest.Offense.Description, ignore.case = TRUE) ~ "Homicide",
-      grepl("^FAMILY DISTURBANCE|DISTURBANCE.*FAM", Highest.Offense.Description, ignore.case = TRUE) ~ "Disturbance - Family",
-      grepl("DISTURBANCE", Highest.Offense.Description, ignore.case = TRUE) ~ "Disturbance - Other",
-      grepl("HARASSMENT|THREAT", Highest.Offense.Description, ignore.case = TRUE) ~ "Harassment / Threats",
-      grepl("RESIST|INTERFERE|OBSTRUCT", Highest.Offense.Description, ignore.case = TRUE) ~ "Interference / Obstruction",
-      grepl("DOC FIGHTING", Highest.Offense.Description, ignore.case = TRUE) ~ "Disorderly Conduct - Fighting",
+      str_detect(`Highest Offense Description`, regex("ASSAULT.*FAM|FAMILY VIOLENCE|DATE VIOL", ignore_case = TRUE)) ~ "Assault - Family/Domestic",
+      str_detect(`Highest Offense Description`, regex("AGG ASLT STRANGLE|FELONY ENHANCEMENT/ASSLT|AGG ASSAULT|DEADLY CONDUCT", ignore_case = TRUE)) ~ "Aggravated Assault",
+      str_detect(`Highest Offense Description`, regex("ASSAULT", ignore_case = TRUE)) ~ "Assault - Non-Family",
+      str_detect(`Highest Offense Description`, regex("HOMICIDE|MURDER", ignore_case = TRUE)) ~ "Homicide",
+      str_detect(`Highest Offense Description`, regex("^FAMILY DISTURBANCE|DISTURBANCE.*FAM", ignore_case = TRUE)) ~ "Disturbance - Family",
+      str_detect(`Highest Offense Description`, regex("DISTURBANCE", ignore_case = TRUE)) ~ "Disturbance - Other",
+      str_detect(`Highest Offense Description`, regex("HARASSMENT|THREAT", ignore_case = TRUE)) ~ "Harassment / Threats",
+      str_detect(`Highest Offense Description`, regex("RESIST|INTERFERE|OBSTRUCT", ignore_case = TRUE)) ~ "Interference / Obstruction",
+      str_detect(`Highest Offense Description`, regex("DOC FIGHTING", ignore_case = TRUE)) ~ "Disorderly Conduct - Fighting",
 
-      # ROBBERY / FRAUD
-      grepl("ROBBERY.*INDIVIDUAL|ROBBERY", Highest.Offense.Description, ignore.case = TRUE) ~ "Robbery - Individual",
-      grepl("FRAUD|FORGERY|IDENTITY", Highest.Offense.Description, ignore.case = TRUE) ~ "Fraud / Identity Theft",
-      grepl("CRED CARD ABUSE|DEBIT CARD ABUSE", Highest.Offense.Description, ignore.case = TRUE) ~ "Credit/Debit Card Abuse",
+      str_detect(`Highest Offense Description`, regex("ROBBERY.*INDIVIDUAL|ROBBERY", ignore_case = TRUE)) ~ "Robbery - Individual",
+      str_detect(`Highest Offense Description`, regex("FRAUD|FORGERY|IDENTITY", ignore_case = TRUE)) ~ "Fraud / Identity Theft",
+      str_detect(`Highest Offense Description`, regex("CRED CARD ABUSE|DEBIT CARD ABUSE", ignore_case = TRUE)) ~ "Credit/Debit Card Abuse",
 
-      # DRUGS, ALCOHOL & WEAPONS
-      grepl("DRUG|NARCOTIC|MANUF|DELIV", Highest.Offense.Description, ignore.case = TRUE) ~ "Drug Offenses",
-      grepl("POSSESSION OF MARIJUANA", Highest.Offense.Description, ignore.case = TRUE) ~ "Possession of Marijuana",
-      grepl("DWI|DUI|INTOX", Highest.Offense.Description, ignore.case = TRUE) ~ "DWI / Alcohol",
-      grepl("WEAPON.*DISCHARGE", Highest.Offense.Description, ignore.case = TRUE) ~ "Weapons - Discharge",
-      grepl("WEAPON|UNLAWFUL CARRY", Highest.Offense.Description, ignore.case = TRUE) ~ "Weapons - Other",
-      grepl("VOCO - ALCOHOL", Highest.Offense.Description, ignore.case = TRUE) ~ "Alcohol Violation",
+      str_detect(`Highest Offense Description`, regex("DRUG|NARCOTIC|MANUF|DELIV", ignore_case = TRUE)) ~ "Drug Offenses",
+      str_detect(`Highest Offense Description`, regex("POSSESSION OF MARIJUANA", ignore_case = TRUE)) ~ "Possession of Marijuana",
+      str_detect(`Highest Offense Description`, regex("DWI|DUI|INTOX", ignore_case = TRUE)) ~ "DWI / Alcohol",
+      str_detect(`Highest Offense Description`, regex("WEAPON.*DISCHARGE", ignore_case = TRUE)) ~ "Weapons - Discharge",
+      str_detect(`Highest Offense Description`, regex("WEAPON|UNLAWFUL CARRY", ignore_case = TRUE)) ~ "Weapons - Other",
+      str_detect(`Highest Offense Description`, regex("VOCO - ALCOHOL", ignore_case = TRUE)) ~ "Alcohol Violation",
 
-      # SEXUAL & SENSITIVE
-      grepl("SEXUAL ASSAULT|RAPE", Highest.Offense.Description, ignore.case = TRUE) ~ "Sexual Assault",
-      grepl("INDECENT", Highest.Offense.Description, ignore.case = TRUE) ~ "Indecent Exposure",
-      grepl("CHILD", Highest.Offense.Description, ignore.case = TRUE) ~ "Child-Related Offenses",
-      grepl("KIDNAP", Highest.Offense.Description, ignore.case = TRUE) ~ "Kidnapping",
+      str_detect(`Highest Offense Description`, regex("SEXUAL ASSAULT|RAPE", ignore_case = TRUE)) ~ "Sexual Assault",
+      str_detect(`Highest Offense Description`, regex("INDECENT", ignore_case = TRUE)) ~ "Indecent Exposure",
+      str_detect(`Highest Offense Description`, regex("CHILD", ignore_case = TRUE)) ~ "Child-Related Offenses",
+      str_detect(`Highest Offense Description`, regex("KIDNAP", ignore_case = TRUE)) ~ "Kidnapping",
 
-      # PUBLIC ORDER / OTHER
-      grepl("DISORDERLY|CURFEW|NOISE", Highest.Offense.Description, ignore.case = TRUE) ~ "Public Disorder",
-      grepl("URINATING IN PUBLIC PLACE", Highest.Offense.Description, ignore.case = TRUE) ~ "Public Urination",
-      grepl("MISSING PERSON|RUNAWAY", Highest.Offense.Description, ignore.case = TRUE) ~ "Missing Person / Runaway",
-      grepl("TRAFFIC|ACCIDENT", Highest.Offense.Description, ignore.case = TRUE) ~ "Traffic Offense",
-      grepl("ESCAPE|FAIL TO APPEAR|WARRANT", Highest.Offense.Description, ignore.case = TRUE) ~ "Justice System Offenses",
-      grepl("FAILURE TO IDENTIFY", Highest.Offense.Description, ignore.case = TRUE) ~ "Failure to Identify",
-      grepl("FAIL STOP AND RENDER AID", Highest.Offense.Description, ignore.case = TRUE) ~ "Fail to Stop/Render Aid",
-      grepl("VIOL CITY ORDINANCE", Highest.Offense.Description, ignore.case = TRUE) ~ "City Ordinance Violation",
-      grepl("VIOL STATE LAW", Highest.Offense.Description, ignore.case = TRUE) ~ "State Law Violation",
-      grepl("CRUELTY TO ANIMALS|DOG FIGHTING", Highest.Offense.Description, ignore.case = TRUE) ~ "Animal Cruelty / Fighting",
-      grepl("PROTECTIVE ORDER", Highest.Offense.Description, ignore.case = TRUE) ~ "Protective Order",
-      grepl("VOCO SOLICITATION", Highest.Offense.Description, ignore.case = TRUE) ~ "Solicitation Violation",
-      grepl("CAMPING IN PARK", Highest.Offense.Description, ignore.case = TRUE) ~ "Camping in Park",
-      grepl("VOCO AMPLIFIED MUSIC", Highest.Offense.Description, ignore.case = TRUE) ~ "Noise Violation",
-      grepl("EVADING / FOOT", Highest.Offense.Description, ignore.case = TRUE) ~ "Evading Arrest (Foot)",
+      str_detect(`Highest Offense Description`, regex("DISORDERLY|CURFEW|NOISE", ignore_case = TRUE)) ~ "Public Disorder",
+      str_detect(`Highest Offense Description`, regex("URINATING IN PUBLIC PLACE", ignore_case = TRUE)) ~ "Public Urination",
+      str_detect(`Highest Offense Description`, regex("MISSING PERSON|RUNAWAY", ignore_case = TRUE)) ~ "Missing Person / Runaway",
+      str_detect(`Highest Offense Description`, regex("TRAFFIC|ACCIDENT", ignore_case = TRUE)) ~ "Traffic Offense",
+      str_detect(`Highest Offense Description`, regex("ESCAPE|FAIL TO APPEAR|WARRANT", ignore_case = TRUE)) ~ "Justice System Offenses",
+      str_detect(`Highest Offense Description`, regex("FAILURE TO IDENTIFY", ignore_case = TRUE)) ~ "Failure to Identify",
+      str_detect(`Highest Offense Description`, regex("FAIL STOP AND RENDER AID", ignore_case = TRUE)) ~ "Fail to Stop/Render Aid",
+      str_detect(`Highest Offense Description`, regex("VIOL CITY ORDINANCE", ignore_case = TRUE)) ~ "City Ordinance Violation",
+      str_detect(`Highest Offense Description`, regex("VIOL STATE LAW", ignore_case = TRUE)) ~ "State Law Violation",
+      str_detect(`Highest Offense Description`, regex("CRUELTY TO ANIMALS|DOG FIGHTING", ignore_case = TRUE)) ~ "Animal Cruelty / Fighting",
+      str_detect(`Highest Offense Description`, regex("PROTECTIVE ORDER", ignore_case = TRUE)) ~ "Protective Order",
+      str_detect(`Highest Offense Description`, regex("VOCO SOLICITATION", ignore_case = TRUE)) ~ "Solicitation Violation",
+      str_detect(`Highest Offense Description`, regex("CAMPING IN PARK", ignore_case = TRUE)) ~ "Camping in Park",
+      str_detect(`Highest Offense Description`, regex("VOCO AMPLIFIED MUSIC", ignore_case = TRUE)) ~ "Noise Violation",
+      str_detect(`Highest Offense Description`, regex("EVADING / FOOT", ignore_case = TRUE)) ~ "Evading Arrest (Foot)",
 
-      # fallback
       TRUE ~ "Other / Misc"
     )
   )
+
 grouped_counts <- crimes %>%
   group_by(Group) %>%
   summarise(Count = n(), .groups = "drop") %>%
@@ -270,15 +264,15 @@ Certain crimes are more severe than others, which results in a variance in crime
   
 
 ```{r,  message=FALSE, echo = FALSE}
-clearance_df <- subset(crimes, select = c(Clearance.Status, Highest.Offense.Description))
+clearance_df <- subset(crimes, select = c(Clearance.Status, `Highest Offense Description`))
 # Create a frequency table of offenses
-offense_freq <- table(clearance_df$Highest.Offense.Description)
+offense_freq <- table(clearance_df$`Highest Offense Description`)
 # Get the top 10 offense names
 top_offense_names <- names(sort(offense_freq, decreasing = TRUE)[1:10])
 # Subset the original dataframe to only include top 10 offenses
-clearance_top10 <- clearance_df[clearance_df$Highest.Offense.Description %in% top_offense_names, ]
+clearance_top10 <- clearance_df[clearance_df$`Highest Offense Description` %in% top_offense_names, ]
 offense_clearance_counts <- as.data.frame(table(
-  clearance_top10$Highest.Offense.Description,
+  clearance_top10$`Highest Offense Description`,
   clearance_top10$Clearance.Status))
 
 offense_totals <- aggregate(Freq ~ Var1, data = offense_clearance_counts, sum)
@@ -435,19 +429,19 @@ Of all the crimes, theft occurs quite frequently, leading to a variety of types 
 
 ```{r,  message=FALSE, echo = FALSE}
 # Get all theft rows
-theft_rows <- grepl("THEFT", crimes$Highest.Offense.Description, ignore.case = TRUE)
+theft_rows <- grepl("THEFT", crimes$`Highest Offense Description`, ignore.case = TRUE)
 
 
 # Create df with thefts, year
-theft_crimes_df <- crimes[theft_rows, c("Highest.Offense.Description", "year")]
-theft_crimes_df$Highest.Offense.Description[
-  theft_crimes_df$Highest.Offense.Description == "THEFT"
+theft_crimes_df <- crimes[theft_rows, c("`Highest Offense Description`", "year")]
+theft_crimes_df$`Highest Offense Description`[
+  theft_crimes_df$`Highest Offense Description` == "THEFT"
 ] <- "GENERAL THEFT"
 
 # Get Amount of thefts in each year
 theft_summary <- aggregate(
-    x = theft_crimes_df$Highest.Offense.Description,
-    by = list(year = theft_crimes_df$year, theft_type = theft_crimes_df$Highest.Offense.Description),
+    x = theft_crimes_df$`Highest Offense Description`,
+    by = list(year = theft_crimes_df$year, theft_type = theft_crimes_df$`Highest Offense Description`),
     FUN = length
 )
 colnames(theft_summary) <- c("year", "theft_type", "total_thefts")
@@ -531,8 +525,8 @@ Having identified shoplifting as one of the most stable categories within Austin
 # Linear Regression: predicting total shoplifting crimes in a given month
 
 # Get shoplifting rows
-shoplifting_rows <- grepl("THEFT BY SHOPLIFTING", crimes$Highest.Offense.Description, ignore.case = TRUE)
-shoplifting_df <- crimes[shoplifting_rows, c("Highest.Offense.Description", "year", "OccurMonth")]
+shoplifting_rows <- grepl("THEFT BY SHOPLIFTING", crimes$`Highest Offense Description`, ignore.case = TRUE)
+shoplifting_df <- crimes[shoplifting_rows, c("`Highest Offense Description`", "year", "OccurMonth")]
 shoplifting_df$OccurMonth <- as.numeric(substr(shoplifting_df$OccurMonth, 6, 7))
 names(shoplifting_df)[names(shoplifting_df) == "OccurMonth"] <- "Month"
 names(shoplifting_df)[names(shoplifting_df) == "year"] <- "Year"
@@ -550,7 +544,7 @@ shopL_unem <- merge(
 
 # Get total amount of theft per month
 summary_shopL_unem <- aggregate(
-  Highest.Offense.Description ~ Month + Year + Unemployment.TX,
+  `Highest Offense Description` ~ Month + Year + Unemployment.TX,
   data = shopL_unem,
   FUN = length
 )
@@ -585,8 +579,8 @@ Our earlier analysis showed that auto theft experienced a dramatic surge from 20
 ```{r, message=FALSE, echo = FALSE}
 
 # Get shoplifting rows
-auto_rows <- grepl("AUTO THEFT", crimes$Highest.Offense.Description, ignore.case = TRUE)
-auto_df <- crimes[auto_rows, c("Highest.Offense.Description", "year", "OccurMonth")]
+auto_rows <- grepl("AUTO THEFT", crimes$`Highest Offense Description`, ignore.case = TRUE)
+auto_df <- crimes[auto_rows, c("`Highest Offense Description`", "year", "OccurMonth")]
 auto_df$OccurMonth <- as.numeric(substr(auto_df$OccurMonth, 6, 7))
 names(auto_df)[names(auto_df) == "OccurMonth"] <- "Month"
 names(auto_df)[names(auto_df) == "year"] <- "Year"
@@ -604,7 +598,7 @@ auto_gas_merge <- merge(
 
 # Get total amount of theft per month
 summary_autogas <- aggregate(
-  Highest.Offense.Description ~ Month + Year + Retail.Gasoline.Price.TX,
+  `Highest Offense Description` ~ Month + Year + Retail.Gasoline.Price.TX,
   data = auto_gas_merge,
   FUN = length
 )
