@@ -213,7 +213,7 @@ crime_counts_table <- table(crimes_filtered$year, crimes_filtered$`Location Type
 
 # Convert to data frame
 crime_counts_df <- as.data.frame(crime_counts_table)
-colnames(crime_counts_df) <- c("year", "`Location Type`", "count")
+colnames(crime_counts_df) <- c("year", "Location Type", "count")
 
 #Calculates percentages based on total crimes 
 #(not just based on the crime locations we're focusing on)
