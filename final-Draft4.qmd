@@ -17,6 +17,7 @@ library(scales)
 library(stargazer)
 library(tidyverse)
 library(RSQLite)
+library(gt)
 ```
 
 # Group: Suhas Narra, Mert Esat Yercel, Max Basurto, Carson Khun
@@ -90,15 +91,12 @@ crimes <- crimes %>%
 ```
 
 
-## We Will Begin Our Analysis By First Looking At The Most Common Types Of Crime
+## Core Crime Concerns: Theft, Burglary, and Family Disturbances
 
 The first property we will be evaluating is the type of crimes that are most prevalent. This is a crucial factor that we must analyze as it gives us insight into what types of crimes we must analyze further. This will allow us to identify the most critical areas that the Austin Police Department needs to focus on to mitigate and respond to crime in a more timely and efficient manner.
 
 
 ```{r,  message=FALSE, echo = FALSE}
-
-# Create grouping column
-crimes$Group <- NA
 
 crimes <- crimes %>%
   mutate(
@@ -177,7 +175,7 @@ ggplot(grouped_counts, aes(label = Category, size = Count)) +
 The word cloud condenses over 440 original crime categories into about 40 broader groups, making the data easier to interpret and compare. It shows that General Theft, Burglary – Vehicle, and Family Disturbance are by far the most common reported offenses in Austin. This suggests that property-related and domestic conflicts are the most pressing daily crime concerns for the city. Offenses tied to drugs, alcohol, and fraud also appear prominently, reflecting broader social and economic dimensions of crime. Overall, the word cloud shows the diversity of crime in Austin while drawing attention to a handful of categories that may be most influential when considering their relationship with the Texas economy. This graph is a crucial starting point as our future analyses of the crimes data set will now have in context the most common types of crimes committed, and draw better conclusions as a result.
 
 
-## We Will Now Look At The Key Locations Where Crimes Occur
+## Dominant Sites of Crime: Streets and Suburbs
 
 To better understand where these crimes occur, we wanted to study the change in the proportions of the locations of crimes. There are over 30 different crime locations that the crimes dataset provides. However, to ensure that the graph is legible, we chose to focus only on the top 10 crime locations, comprising around 80% of the crimes in Austin. By understanding where crimes occur, the Austin Police force can concentrate personnel in high-risk areas to help mitigate incidents.
 
@@ -254,7 +252,7 @@ ggplot(crime_counts_df, aes(x = year, y = percentage, fill = `Location Type`)) +
 The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on residences, homes, parking lots, and garages, while the relative percentage of crime occurring on highways, roads, alleys, streets, and sidewalks has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas. There's little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
 
 
-## For A More Hollistic Understanding Of The Types And Locations Of Crimes, We Will Examine Crime Solve Rate for the Most Common Crimes
+## Citation Over Arrest: Unexpected Clearance Patterns in DWI and Family Violence Cases
 
 Certain crimes are more severe than others, which results in a variance in crime solving rate and how the crime is dealt with after it is solved. We use this graph to study how the most common crimes are solved and prosecuted over a long period of time. Such a study can help inform the Austin Police on what crimes they prosecute and where to exert more energy to yield prosecutions.
   
@@ -319,12 +317,12 @@ We see some interesting takeaways from the data in terms of how crimes are treat
 
 
 
-## Next, We Want To Gain A More Temporal Understanding Of The Conditions In Which Crime Occurs
+## Afternoon and Evening Surge in Total Offenses
 
 After examining what types of crimes occur most frequently, where they happen, and how quickly they're resolved, we now turn to understanding when crimes are most likely to occur throughout the day. It's easy to think that most crimes would be committed at night when less people will see. This pie chart allows us to visualize this and see if that assumption really is true. We want to use this analysis to inform the APD on when the most crimes are occurring as it could help them schedule the amount of on-duty cops more effectively.
 
 
-```{r, , message=FALSE, echo = FALSE}
+```{r, message=FALSE, echo = FALSE}
 pieBuckets <- c("Midnight","Dawn","Sunrise","Morning","Noon","Afternoon","Dusk","Evening")
 crimes$timeOfDay <- cut(crimes$`Occurred Time`, breaks = c(1, 300, 600, 900, 1200, 1500, 1800, 2100, 2400), 
                          labels = pieBuckets)
@@ -356,12 +354,12 @@ The distribution of crimes is generally evenly spread across the day, only decre
 Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burglary or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case. Additionally, APD may find it valuable to use this data to patrol for certain types of crimes during specific times of day.
 
 
-## Continuing Our Temporal Analsis, We Will Now Examine Average Response Time by Council District
+## Response Time Disparities Across Austin Districts
 
 Responding quickly to a crime can be the difference between catching the perpetrator and having to search for days. We want to find out whether or not there are certain districts that have significantly faster or slower response times. By identifying which districts experience faster or slower response times, the Austin Police Department can make data-driven decisions about station placement, patrol routing, and resource reallocation to ensure equitable service delivery across all communities.
 
 
-```{r, , message=FALSE, echo = FALSE}
+```{r, message=FALSE, echo = FALSE}
 
 # get numeric value in seconds
 crimes$`Response Duration Seconds` <- as.numeric(
@@ -410,12 +408,12 @@ There are some significant disparities in average response time across the distr
 In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it's reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. The darker shading in Districts 1-4 suggests these areas experience the highest crime volumes consistently throughout the year. Interestingly, the relatively uniform coloring across months indicates that seasonal variation is minimal, crime remains fairly constant year-round rather than spiking during particular seasons. This finding complements our earlier discovery that crime is evenly distributed throughout the day. For the Austin Police Department, this means maintaining consistent year-round staffing in these high-crime districts rather than adjusting seasonally. We can use this information to further explore the interactions crime has with the general economy in these areas.
 
 
-## We Will Now Transition From Examining General Patterns to Analysing Specific Crime Types
+## Analyzing the Trends of Austin's Most Common Crimes
 
 Having established the foundational patterns of crime in Austin, where it occurs, when it happens, and how quickly it's addressed, we now turn our attention to examining specific crime types. Our earlier analysis revealed that family disturbances, theft, and burglary rank among the most common offenses in Austin, making it crucial to understand how these particular categories have evolved over time. The following sections will dive deeper into specific crime trends to identify unique patterns within each crime type. We want to explore whether certain crimes follow different temporal patterns, how they've changed over the years, and what this might mean for targeted policing strategies.
 
 
-## We Will Being Analysis by Examining Total Thefts by Type & Year
+## Stable Shoplifting and the Crisis of Auto Vulnerability
 
 Of all the crimes, theft occurs quite frequently, leading to a variety of types of theft occurring. Our earlier analysis showed that General Theft and Burglary-Vehicle rank among the most common crimes in Austin. In this graph we look to better understand the most common types of theft, how often they occur, and if there are any patterns over time that might correlate with economic conditions.
 
@@ -500,13 +498,13 @@ ggplot(filtered_theft_summary, aes(x = year, y = total_thefts, group = theft_typ
 
 The graph reveals a dramatic shift in Austin's theft landscape over the past two decades. General Theft dominated from 2003 to 2008, peaking at over 15,000 incidents before a steep post-2009 decline, dropping nearly 70% by 2025 which was a reduction that may reflect genuine change or improved crime categorization. The most striking trend is the surge in Auto Theft starting around 2019, more than tripling from 2,000 to over 6,500 cases by 2023, aligning with nationwide trends linked to specific vehicle vulnerabilities and organized theft rings. The subsequent sharp decline in 2024-2025 suggests countermeasures may be working. Shoplifting, conversely, shows remarkable stability, maintaining 3,000-4,000 cases annually since 2011 despite major changes in retail and security. Smaller categories, like bicycle and license plate theft, also remain remarkably consistent (1,000–1,500 cases each), confirming the persistence of low-value, essential item theft. Overall, while total theft volumes have declined since their 2008 peak, the nature of theft has evolved, shifting from general theft toward more specific, opportunistic crimes like auto theft. This data emphasizes the need for the Austin Police Department to employ targeted approaches, such as auto theft task forces and sustained retail partnership programs.
 
-## We Will Now Examine the Economy Conditions That May Have Impacted The Occurance Of Crime
+## Uncovering the Underlying Drivers in Austin's Crime Patterns
 
 Now that we've examined specific crime types and their individual trends, we want to explore how these patterns might relate to broader economic conditions in Texas. Economic factors like unemployment, gas prices, and financial stress can influence criminal behavior in complex ways. The following sections will analyze how Austin's crime patterns correlate with key Texas economic indicators. By understanding these relationships, we can better predict when certain crimes might increase and help the Austin Police Department anticipate resource needs based on economic forecasts. This economic dimension adds another layer to our analysis, moving beyond just describing crime patterns to understanding potential underlying drivers.
 
 
 
-# Predicting Shoplifting Thefts Through Linear Regression
+# Shoplifting Trends Disconnected from Economic Indicators
 
 Having identified shoplifting as one of the most stable categories within Austin's theft landscape, maintaining consistent volumes of 3,000-4,000 cases annually, we now examine whether this crime type responds to economic pressures. We wanted to test if unemployment rates could predict shoplifting incidents, since financial stress might drive some individuals toward retail theft. By analyzing the relationship between shoplifting incidents and Texas's unemployment rate, we can determine whether economic downturns translate into measurable increases in retail theft.
 
@@ -542,9 +540,54 @@ names(summary_shopL_unem)[4] <- "Count"
 
 model_shopL_unem <- lm(Count ~ `Unemployment TX`, data = summary_shopL_unem)
 model_sum_shopunem <- summary(model_shopL_unem)
-stargazer(model_sum_shopunem$coefficients, type = "latex", 
-          title = "Regression Results",
-          single.row = TRUE)
+
+# Tidy model output
+tidy_model <- broom::tidy(model_shopL_unem, conf.int = TRUE) %>%
+  mutate(
+    term = recode(term,
+                  "(Intercept)" = "Intercept",
+                  "`Unemployment TX`" = "Unemployment (TX)"),
+    estimate = round(estimate, 3),
+    std.error = round(std.error, 3),
+    statistic = round(statistic, 3),
+    p.value = round(p.value, 4),
+    conf.low = round(conf.low, 3),
+    conf.high = round(conf.high, 3)
+  )
+
+# Create a clean gt table
+tidy_model %>%
+  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high) %>%
+  gt() %>%
+  tab_header(
+    title = md("**Linear Model Summary: Count ~ Unemployment (TX)**")
+  ) %>%
+  cols_label(
+    term = "Term",
+    estimate = "Estimate",
+    std.error = "Std. Error",
+    statistic = "t-Value",
+    p.value = "p-Value",
+    conf.low = "95% CI (Low)",
+    conf.high = "95% CI (High)"
+  ) %>%
+  fmt_number(
+    columns = c(estimate, std.error, statistic, p.value, conf.low, conf.high),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels(everything())
+  ) %>%
+  tab_options(
+    table.font.size = "small",
+    data_row.padding = px(4),
+    heading.align = "center",
+    column_labels.background.color = "#f8f9fa",
+    table.border.top.color = "white",
+    table.border.bottom.color = "white"
+  )
+
 
 # Scatterplot
 with(summary_shopL_unem, {
@@ -561,7 +604,7 @@ with(summary_shopL_unem, {
 The data confirms a negligible relationship between shoplifting and Texas unemployment rates. The regression line's near-zero slope indicates that a 1% unemployment rise corresponds to a practically insignificant increase of fewer than two shoplifting cases per month, trivial compared to Austin's 250-300 incident baseline. A high p-value of 0.708 means unemployment holds no meaningful predictive power. This is visually evidenced by the massive data spread: at 5-6% unemployment, shoplifting counts vary wildly (under 100 to over 450 cases). This inconsistency, along with shoplifting's surprising stability since 2011 despite major economic shifts, suggests the crime is fundamentally driven by opportunity rather than economic necessity.
 
 
-## Visualizing Total Auto Thefts by Gas Prices
+## Auto Theft is Independent of Gas Prices in Austin
 Our earlier analysis showed that auto theft experienced a dramatic surge from 2019 to 2023, more than tripling before declining sharply in 2024-2025. We wanted to explore whether this pattern might correlate with gas prices, since higher fuel costs could theoretically either deter theft (due to operating costs) or encourage it (if vehicles become more valuable or if economic stress increases). By examining the relationship between auto theft incidents and Texas gas prices, we can test whether fuel costs influence vehicle-related crime rates.
 
 
