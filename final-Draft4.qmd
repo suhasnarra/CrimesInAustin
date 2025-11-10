@@ -41,11 +41,6 @@ This data set is a compilation that pulls from various external sources and inte
 # Load in data
 #Dont forget to change to correct location on your machine.
 dcon <- dbConnect(SQLite(), dbname = "~/Documents/Stat405Projects/FinalProject/data/405FinalData.db")
-crimes <- dbGetQuery(dcon, "SELECT * FROM austin")
-econ <- dbGetQuery(dcon, "SELECT * FROM austin_econ")
-#crimes <- read.csv("austin.csv")
-#econ <- read.csv("austin_econ.csv")
-
 ```
 
 # Key Objective
@@ -572,6 +567,8 @@ with(summary_autogas, {
          bty = "n")
 })
 
+
+dbDisconnect(dcon)
 ```
 
 The scatter plot clearly reveals a weak positive relationship between gas prices and auto theft in Austin, a finding that is statistically and practically negligible. With an $R^2$ of 0.053, gas prices explain just 5.3% of the variation in theft rates, leaving the vast majority (94.7%) to other factors. The corresponding correlation coefficient of 0.231 confirms this is a very weak association with minimal practical significance. The data distribution makes this clear: at a price point like $3.00 per gallon, auto theft counts still ranged tremendously from under 150 to over 600 incidents per month, suggesting gas prices are simply not a meaningful predictor of behavior. Furthermore, the massive auto theft spike observed from 2019-2023 failed to align cleanly with gas price patterns during that time, strongly indicating that other factors were driving that surge. Auto theft in Austin essentially operates independently of fuel costs, and the dramatic changes were likely driven by issues like specific vehicle vulnerabilities, organized theft rings, or changes in security technology. This means monitoring gas prices is useless for the Austin Police Department; prevention strategies should focus instead on addressing the specific methods and motivations behind vehicle theft rather than broader economic conditions.
