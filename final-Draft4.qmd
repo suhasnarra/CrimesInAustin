@@ -472,11 +472,12 @@ tidy_model <- broom::tidy(model_shopL_unem, conf.int = TRUE) %>%
   )
 
 # Create a clean gt table
-tidy_model %>%
+regression_table <- tidy_model %>%
   select(term, estimate, std.error, statistic, p.value, conf.low, conf.high) %>%
   gt() %>%
-  tab_header(
-    title = md("**Linear Model Summary: Count ~ Unemployment (TX)**")
+    tab_header(
+    title = "Linear Regression Analysis",
+    subtitle = "Impact of Texas Unemployment Rate on Monthly Shoplifting Incidents"
   ) %>%
   cols_label(
     term = "Term",
@@ -503,7 +504,8 @@ tidy_model %>%
     table.border.top.color = "white",
     table.border.bottom.color = "white"
   )
-
+regression_table %>%
+  as_raw_html()
 
 # Scatterplot
 with(summary_shopL_unem, {
