@@ -2,8 +2,8 @@
 title: "Crime in Austin"
 format:
   pdf:
-    fig-width: 10
-    fig-height: 8
+    fig-width: 8
+    fig-height: 5
     fig-margin: false
     fig-align: center
 ---
@@ -36,7 +36,7 @@ This dataset is sourced directly from the Austin Police Department (APD) and is 
 
 This data set is a compilation that pulls from various external sources and integrates them into a single data frame. Specifically, the presence of data for the United States and regions other than Texas confirms that it was compiled from a variety of sources to provide a broader economic context. The inclusion of data beyond Texas simply means there are extra fields in the table that we don't need for a Texas-only analysis.
 
-```{r, message=FALSE, echo = FALSE}
+```{r, message=FALSE, echo = FALSE, warning=FALSE}
 
 # Load in data
 #Dont forget to change to correct location on your machine.
