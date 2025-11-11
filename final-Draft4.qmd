@@ -314,7 +314,7 @@ bp <- boxplot(plot_data$`NetResponse Date Time (Days)`, outline = FALSE, plot = 
         main = "Average Time to Report Crime in Austin, TX (2003-2025)",
         sub = "Zero Duration Excluded | Outliers Removed From Plot")
 
-bp$stats %>%
+bp_stats <- bp$stats %>%
   as.data.frame() %>%
   mutate(Statistic = c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")) %>%
   select(Statistic, everything()) %>%
