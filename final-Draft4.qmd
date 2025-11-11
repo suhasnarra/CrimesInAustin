@@ -18,6 +18,7 @@ library(stargazer)
 library(tidyverse)
 library(RSQLite)
 library(gt)
+library(grid)
 ```
 
 # Group: Suhas Narra, Mert Esat Yercel, Max Basurto, Carson Khun
