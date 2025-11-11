@@ -8,7 +8,7 @@ format:
     fig-align: center
 ---
 
-```{r, message=FALSE, echo = FALSE}
+```{r, message=FALSE, echo = FALSE, warning=FALSE}
 # Load any libraries used
 library(hms)
 library(ggplot2)
