@@ -1,0 +1,372 @@
+---
+title: "KillerPlot"
+author: "Suhas Narra"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(grid)
+```
+
+## R Markdown
+
+Function to invert colors as needed
+```{r}
+invert_color <- function(color) {
+  
+  # 1. Convert the input color (name or hex) to RGB values
+  # col2rgb returns a matrix, with values from 0-255
+  rgb_matrix <- col2rgb(color)
+  
+  # 2. Invert the values by subtracting from 255
+  inverted_matrix <- 255 - rgb_matrix
+  
+  # 3. Convert the new RGB values back to a hex code
+  # The rgb() function expects inputs from 0-255
+  new_hex <- rgb(
+    red = inverted_matrix[1,],
+    green = inverted_matrix[2,],
+    blue = inverted_matrix[3,],
+    maxColorValue = 255
+  )
+  
+  return(new_hex)
+}
+```
+
+Parking Sign
+```{r cars}
+drawParkingSign <- function(primary_color = "#00539F", 
+                            scale = 1.0, 
+                            font_scale = 0.20) {
+  
+  # --- 1. Define Base Size and Calculate Scaled Size ---
+  base_width <- 0.6  # The original aspect ratio
+  base_height <- 0.8 # The original aspect ratio
+  
+  # Calculate the final dimensions based on the scale
+  final_width <- base_width * scale
+  final_height <- base_height * scale
+  
+  # --- 2. Clear device and define constants ---
+  grid.newpage()
+  sign_white <- "white"
+  sign_font <- "Arial"
+  
+  # --- 3. Create the Main Viewport (using scaled dimensions) ---
+  # This viewport is already scaled according to the 'scale' argument
+  pushViewport(viewport(width = final_width, height = final_height))
+  
+  # --- 4. Draw the Background ---
+  grid.roundrect(
+    gp = gpar(
+      fill = primary_color, 
+      col = sign_white,   
+      lwd = 10           
+    ),
+    r = unit(0.05, "snpc") 
+  )
+  
+  # --- 5. Calculate Dynamic Font Size ---
+  # 'v_height_pts' measures the height (in points) of the
+  # viewport created in step 3.
+  # This value is ALREADY proportional to the 'scale' argument.
+  v_height_pts <- convertHeight(unit(1, "npc"), "points", valueOnly = TRUE)
+  
+  # The final font size is a fraction of the already-scaled height.
+  dynamic_fontsize <- v_height_pts * font_scale
+  
+  # --- 6. Draw the Main "PARKING" Text ---
+  grid.text("PARKING",
+    x = 0.5, y = 0.6,
+    gp = gpar(
+      col = sign_white,
+      fontfamily = sign_font,
+      fontface = "bold",
+      fontsize = dynamic_fontsize # Use the dynamic size
+    )
+  )
+  
+  # --- Finish ---
+  popViewport() # Exit the main sign viewport
+}
+
+drawParkingSign("red", scale = 0.8)
+```
+House
+```{r}
+drawHouse <- function(house_color = "red", scale = 1.0, show_grid = FALSE) {
+  
+  # --- 1. Define Base Size and Calculate Scaled Size ---
+  # Your original viewport used 0.8 for both width and height
+  base_size <- 0.8 
+  
+  # Calculate the final dimensions based on the scale
+  final_size <- base_size * scale
+  
+  # --- 2. Clear device and define other colors ---
+  grid.newpage()
+  door_color <- "darkgray"
+  window_color <- invert_color(house_color)
+  
+  # --- 3. Create the Main Viewport ---
+  # We establish the 10x10 coordinate system here
+  pushViewport(viewport(
+    x = 0.5, y = 0.5, 
+    width = final_size,  # Use scaled size
+    height = final_size, # Use scaled size
+    xscale = c(0, 10),   # Set coordinate limits from 0 to 10
+    yscale = c(0, 10)
+  ))
+  
+  # --- 4. Draw the Grid Lines (Optional) ---
+  if (show_grid) {
+    grid.xaxis(at = 0:10, label = FALSE, gp = gpar(col = "lightgray"))
+    grid.yaxis(at = 0:10, label = FALSE, gp = gpar(col = "lightgray"))
+  }
+  
+  # --- 5. Draw the House Elements ---
+  
+  # Main body of the house
+  grid.rect(
+    x = 5, y = 3, 
+    width = 6, height = 4,
+    default.units = "native",
+    gp = gpar(fill = house_color, col = "black", lwd = 2) # Use param
+  )
+  
+  # Roof (triangle shape)
+  x_roof <- c(2, 8, 5)
+  y_roof <- c(5, 5, 8)
+  grid.polygon(
+    x = x_roof, y = y_roof,
+    default.units = "native",
+    gp = gpar(fill = "brown", col = "black", lwd = 2) # Use param
+  )
+  
+  # Door
+  grid.rect(
+    x = 5, y = 1.75, 
+    width = 1.5, height = 1.5,
+    default.units = "native",
+    gp = gpar(fill = door_color, col = "black")
+  )
+  
+  # Window
+  grid.rect(
+    x = 3.5, y = 3.5, 
+    width = 1.5, height = 1.5,
+    default.units = "native",
+    gp = gpar(fill = window_color, col = "black")
+  )
+  
+  # --- 6. Go back to the original viewport ---
+  popViewport()
+}
+
+drawHouse("yellow", scale = 0.8)
+
+```
+
+Road
+```{r}
+drawRoad <- function(road_color = "darkgray",
+                     scale = 1.0) {
+  
+  line_color = ifelse(road_color == "yellow", "black", "yellow")
+  # --- 1. Define Base Size and Calculate Scaled Size ---
+  # Your original viewport used 0.9 for both width and height
+  base_size <- 0.9 
+  
+  # Calculate the final dimensions based on the scale
+  final_size <- base_size * scale
+  
+  # --- 2. Clear device and define other colors ---
+  grid.newpage()
+  sidewalk_color <- "lightgray"
+
+  # --- 3. Create the Main Viewport ---
+  # We establish the 10x10 coordinate system here
+  pushViewport(viewport(
+    x = 0.5, y = 0.5, 
+    width = final_size,  # Use scaled size
+    height = final_size, # Use scaled size
+    xscale = c(0, 10),   # Set coordinate limits from 0 to 10
+    yscale = c(0, 10)
+  ))
+
+  # --- 4. Draw the Main Road Surface ---
+  grid.rect(
+    x = 5, y = 4, 
+    width = 10, height = 2,
+    default.units = "native",
+    gp = gpar(fill = road_color, col = "black", lwd = 2) # Use param
+  )
+
+  # --- 5. Draw the Center Line (Dashed Segments) ---
+  line_segments_x <- seq(0.5, 9.5, by = 1) # Start X of each segment
+
+  for (start_x in line_segments_x) {
+    grid.rect(
+      x = start_x, 
+      y = 4, 
+      width = 0.5, 
+      height = 0.1,
+      just = "left", 
+      default.units = "native",
+      gp = gpar(fill = line_color, col = NA) # Use param
+    )
+  }
+
+  # --- 6. Draw a Simple Sidewalk ---
+  grid.rect(
+    x = 5, y = 5.5, width = 10, height = 1,
+    default.units = "native",
+    gp = gpar(fill = sidewalk_color, col = "black")
+  )
+
+  # --- End Viewport ---
+  popViewport()
+}
+
+drawRoad("darkgreen", 0.8)
+```
+
+
+Hotel
+```{r}
+# Hotel/Motel scene using grid
+drawHotel <- function(color = "#2B3A67", scale = 1) {
+  
+  grid.newpage()
+  
+  # === PARAMETERS ===
+  building_color <- color
+  roof_color <- "#888888"     # Simple gray for the roof
+  window_color <- "#FFD700"   # Yellow
+  door_color <- "#5a3825"     # Brown
+  sign_text_color <- "white"
+  
+  # === SCALE & POSITIONS ===
+  cx <- 0.5  # center x
+  cy <- 0.45 # center y
+  building_width  <- 0.5  * scale
+  building_height <- 0.5  * scale
+  
+  # === BUILDING (Main Block) ===
+  grid.rect(x = unit(cx, "npc"), y = unit(cy, "npc"),
+            width = unit(building_width, "npc"),
+            height = unit(building_height, "npc"),
+            gp = gpar(fill = building_color, col = "black"))
+  
+  # === ROOF (Simple Triangle) ===
+  roof_y_base <- cy + building_height/2
+  roof_y_peak <- roof_y_base + 0.15 * scale # Keep roof peak separate
+  
+  grid.polygon(
+    # Simple triangle points relative to the building
+    x = unit(c(cx - building_width/2, cx, cx + building_width/2), "npc"),
+    y = unit(c(roof_y_base, roof_y_peak, roof_y_base), "npc"),
+    gp = gpar(fill = roof_color, col = "black")
+  )
+  
+  # === ROOF (Simple Triangle) ===
+  roof_y_base <- cy + building_height/2
+  roof_y_peak <- roof_y_base + 0.15 * scale # Keep roof peak separate
+  
+  grid.polygon(
+    # Simple triangle points relative to the building
+    x = unit(c(cx - building_width/2, cx, cx + building_width/2), "npc"),
+    y = unit(c(roof_y_base, roof_y_peak, roof_y_base), "npc"),
+    gp = gpar(fill = roof_color, col = "black")
+  )
+  
+  # === DOOR ===
+  
+  door_y_center <- cy - 0.175*scale 
+  
+  grid.rect(x = unit(cx, "npc"), y = unit(door_y_center, "npc"), # <-- UPDATED
+            width = unit(0.1*scale, "npc"), height = unit(0.15*scale, "npc"),
+            gp = gpar(fill = door_color, col = "black"))
+            
+  # === WINDOWS (3x2 grid) ===
+  x_positions <- seq(cx - 0.15*scale, cx + 0.15*scale, length.out = 3)
+  y_positions <- seq(cy + 0.05*scale, cy + 0.18*scale, length.out = 2)
+  
+  for (x in x_positions) {
+    for (y in y_positions) {
+      grid.rect(x = unit(x, "npc"), y = unit(y, "npc"),
+                width = unit(0.08*scale, "npc"), height = unit(0.1*scale, "npc"),
+                gp = gpar(fill = window_color, col = "black"))
+    }
+  }
+  
+  # === SIGN (matches building color) ===
+  # Position sign slightly below the roof peak
+  sign_y_pos <- roof_y_peak - 0.05 * scale 
+  
+  grid.rect(x = unit(cx, "npc"), y = unit(sign_y_pos, "npc"),
+            width = unit(0.3*scale, "npc"), height = unit(0.07*scale, "npc"),
+            gp = gpar(fill = building_color, col = "black", lwd = 2))
+            
+  # === SIGN TEXT ===
+  grid.text("HOTEL", x = unit(cx, "npc"), y = unit(sign_y_pos, "npc"),
+            gp = gpar(col = sign_text_color, fontface = "bold", cex = 1.8 * scale))
+}
+
+drawHotel("darkgreen")
+```
+
+Office
+```{r}
+draw_office <- function(scale = 1, color = "gray80") {
+  
+  grid.newpage()
+  
+  # Base dimensions (scaled)
+  width  <- 0.25 * scale
+  height <- 0.40 * scale
+  x <- 0.5
+  y <- 0.5
+  
+  # Draw building
+  grid.rect(
+    x = x, y = y,
+    width = width, height = height,
+    gp = gpar(fill = color, col = "black")
+  )
+  
+  # Sign
+  sign_height <- height * 0.12
+  grid.rect(
+    x = x,
+    y = y + height/2 + sign_height/2,
+    width = width * 0.7,
+    height = sign_height,
+    gp = gpar(fill = "white", col = "black")
+  )
+  grid.text(
+    "OFFICE",
+    x = x,
+    y = y + height/2 + sign_height/2,
+    gp = gpar(col = "black", fontface = "bold", fontsize = 12)
+  )
+  
+  # Windows (3×3)
+  win_w <- width / 5
+  win_h <- height / 6
+  
+  for (i in 1:3) {
+    for (j in 1:3) {
+      grid.rect(
+        x = x - width/3 + (j-1)*(width/3),
+        y = y - height/4 + (i-1)*(height/4),
+        width = win_w, height = win_h,
+        gp = gpar(fill = "lightblue", col = "black")
+      )
+    }
+  }
+}
+
+```
