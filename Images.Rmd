@@ -1,6 +1,6 @@
 ---
 title: "KillerPlot"
-author: "Suhas Narra"
+author: "Suhas Narra, Mert Esat Yercel, Max Basurto, and Carson Kuhn"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -41,18 +41,22 @@ draw_parking_sign <- function(primary_color = "#00539F",
                               scale = 1.0, 
                               font_scale = 0.20) {
   
+  # Declare base variables
   base_width <- 0.5  
   base_height <- 0.5  
   
+  # Scale based on input parameter
   final_width <- base_width * scale
   final_height <- base_height * scale * 1.3  
   
+  # Create a new page and set font
   grid.newpage()
   sign_white <- "white"
   sign_font <- "Arial"
   
   pushViewport(viewport(width = final_width, height = final_height))
   
+  # Make the rectangle representing the parking sign
   grid.roundrect(
     gp = gpar(
       fill = primary_color, 
@@ -62,9 +66,11 @@ draw_parking_sign <- function(primary_color = "#00539F",
     r = unit(0.05, "snpc") 
   )
   
+  # Determines where to place the text
   v_height_pts <- convertHeight(unit(1, "npc"), "points", valueOnly = TRUE)
   dynamic_fontsize <- v_height_pts * font_scale
   
+  #Add the text to the parking sign
   grid.text("PARKING",
     x = 0.5, y = 0.6,
     gp = gpar(
@@ -84,14 +90,17 @@ House
 ```{r}
 draw_house <- function(house_color = "red", scale = 1.0, show_grid = FALSE) {
   
+  # Declare base variables
   base_size <- 0.5
   final_size <- base_size * scale
   
+  # Create a new page and set font
   grid.newpage()
   door_color <- "darkgray"
   window_color <- invert_color(house_color)
   sign_text_color <- "white"
-
+  
+  # Crates viewport
   pushViewport(viewport(
     x = 0.5, y = 0.5, 
     width = final_size,
@@ -100,11 +109,13 @@ draw_house <- function(house_color = "red", scale = 1.0, show_grid = FALSE) {
     yscale = c(0, 8)  
   ))
   
+  # Shows grid based on input
   if (show_grid) {
     grid.xaxis(at = 0:8, label = FALSE, gp = gpar(col = "lightgray"))
     grid.yaxis(at = 0:8, label = FALSE, gp = gpar(col = "lightgray"))
   }
   
+  # Make rectangle representing base of house
   grid.rect(
     x = 4, y = 2.5,    
     width = 6, height = 4,
@@ -112,6 +123,7 @@ draw_house <- function(house_color = "red", scale = 1.0, show_grid = FALSE) {
     gp = gpar(fill = house_color, col = "black", lwd = 2)
   )
   
+  # Make the roof of the house
   x_roof <- c(1, 7, 4)  
   y_roof <- c(4.5, 4.5, 7)
   grid.polygon(
@@ -120,9 +132,9 @@ draw_house <- function(house_color = "red", scale = 1.0, show_grid = FALSE) {
     gp = gpar(fill = "brown", col = "black", lwd = 2)
   )
   
+  # Make the sign on top of the house
   sign_y_pos <- 7.5  
   sign_height <- 0.8  
-  
   grid.rect(
     x = 4,
     y = sign_y_pos,
@@ -132,6 +144,7 @@ draw_house <- function(house_color = "red", scale = 1.0, show_grid = FALSE) {
     gp = gpar(fill = house_color, col = "black", lwd = 2)  
   )
   
+  # Add the text for the sign
   grid.text(
     "HOUSE",
     x = 4,
@@ -140,7 +153,7 @@ draw_house <- function(house_color = "red", scale = 1.0, show_grid = FALSE) {
     gp = gpar(col = sign_text_color, fontface = "bold", cex = 1.8 * scale)  # White text
   )
   
-  # Door
+  # Add the door to the house
   grid.rect(
     x = 4, y = 1.25,    
     width = 1.5, height = 1.5,
@@ -148,6 +161,7 @@ draw_house <- function(house_color = "red", scale = 1.0, show_grid = FALSE) {
     gp = gpar(fill = door_color, col = "black")
   )
   
+  # Add the window to the house
   grid.rect(
     x = 2.5, y = 3,      
     width = 1.5, height = 1.5,
@@ -166,14 +180,18 @@ Road
 ```{r}
 draw_road <- function(road_color = "darkgray", scale = 1.0) {
   
+  # Determine road stripe sign
   line_color <- ifelse(road_color == "yellow", "black", "yellow")
   
-  base_size <- 0.5  # Changed from 0.9 to 0.5
+  # Make road size
+  base_size <- 0.5  
   final_size <- base_size * scale
   
+  # Make new page and set sidewalk color
   grid.newpage()
   sidewalk_color <- "lightgray"
-
+  
+  # Push viewport
   pushViewport(viewport(
     x = 0.5, y = 0.5, 
     width = final_size,
@@ -181,16 +199,18 @@ draw_road <- function(road_color = "darkgray", scale = 1.0) {
     xscale = c(0, 10),
     yscale = c(0, 10)
   ))
-
+  
+  # Makes the road
   grid.rect(
     x = 5, y = 4, 
     width = 10, height = 2,
     default.units = "native",
     gp = gpar(fill = road_color, col = "black", lwd = 2)
   )
-
+  
+  # Makes the stripes on the road
   line_segments_x <- seq(0.5, 9.5, by = 1)
-
+  
   for (start_x in line_segments_x) {
     grid.rect(
       x = start_x, 
@@ -202,7 +222,8 @@ draw_road <- function(road_color = "darkgray", scale = 1.0) {
       gp = gpar(fill = line_color, col = NA)
     )
   }
-
+  
+  # Makes the sidewalk
   grid.rect(
     x = 5, y = 5.5, width = 10, height = 1,
     default.units = "native",
@@ -222,18 +243,20 @@ draw_hotel <- function(hotel_color = "#2B3A67", scale = 1.0) {
   
   grid.newpage()
   
+  # Declare base variables
   building_color <- hotel_color
   roof_color <- "#888888"
   window_color <- "#FFD700"
   door_color <- "#5a3825"
   sign_text_color <- "white"
   
-
+  # Declare hotel's size and  scale it based on input parameter
   center_x <- 0.5
   center_y <- 0.45
   building_width <- 0.5 * scale  
   building_height <- 0.5 * scale  
   
+  # Makes the hotel's rectangular center
   grid.rect(
     x = unit(center_x, "npc"), 
     y = unit(center_y, "npc"),
@@ -242,6 +265,7 @@ draw_hotel <- function(hotel_color = "#2B3A67", scale = 1.0) {
     gp = gpar(fill = building_color, col = "black")
   )
   
+  # Makes the hotel's roof
   roof_y_base <- center_y + building_height/2
   roof_y_peak <- roof_y_base + 0.15 * scale
   
@@ -251,6 +275,7 @@ draw_hotel <- function(hotel_color = "#2B3A67", scale = 1.0) {
     gp = gpar(fill = roof_color, col = "black")
   )
   
+  # Makes the hotel's door
   door_y_center <- center_y - 0.175 * scale 
   
   grid.rect(
@@ -260,7 +285,8 @@ draw_hotel <- function(hotel_color = "#2B3A67", scale = 1.0) {
     height = unit(0.15 * scale, "npc"),
     gp = gpar(fill = door_color, col = "black")
   )
-            
+  
+  # Makes the hotel's windows
   x_positions <- seq(center_x - 0.15*scale, center_x + 0.15*scale, length.out = 3)
   y_positions <- seq(center_y + 0.05*scale, center_y + 0.18*scale, length.out = 2)
   
@@ -276,6 +302,7 @@ draw_hotel <- function(hotel_color = "#2B3A67", scale = 1.0) {
     }
   }
   
+  # Makes the hotel's sign
   sign_y_pos <- roof_y_peak - 0.05 * scale 
   
   grid.rect(
@@ -285,7 +312,8 @@ draw_hotel <- function(hotel_color = "#2B3A67", scale = 1.0) {
     height = unit(0.07 * scale, "npc"),
     gp = gpar(fill = building_color, col = "black", lwd = 2)
   )
-            
+  
+  # Adds text to the sign          
   grid.text(
     "HOTEL", 
     x = unit(center_x, "npc"), 
@@ -303,17 +331,21 @@ draw_office <- function(office_color = "gray80", scale = 1.0) {
   
   grid.newpage()
   
+  # Declare base variables
   building_width <- 0.5 * scale  
   building_height <- 0.5 * scale 
   center_x <- 0.5
   center_y <- 0.5
   
+  # Make the rectangular center of the office
   grid.rect(
     x = center_x, y = center_y,
     width = building_width, height = building_height,
     gp = gpar(fill = office_color, col = "black")
   )
+    
   
+  # Makes the sign of the office
   sign_height <- building_height * 0.12
   sign_y_pos <- center_y + building_height/2 + sign_height/2
   
@@ -325,6 +357,7 @@ draw_office <- function(office_color = "gray80", scale = 1.0) {
     gp = gpar(fill = office_color, col = "black")
   )
   
+  # Adds text to the office sign
   grid.text(
     "OFFICE",
     x = center_x,
@@ -332,6 +365,7 @@ draw_office <- function(office_color = "gray80", scale = 1.0) {
     gp = gpar(col = "white", fontface = "bold", fontsize = 15 * scale)  # Scale the font
   )
   
+  # Makes the windows of the office
   window_width <- building_width / 5
   window_height <- building_height / 6
   
