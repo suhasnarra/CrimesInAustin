@@ -488,7 +488,7 @@ compose_scene_by_time <- function(scene_name = "Afternoon", df = my_data) {
       popViewport()
       
       # Draw parking sign (width 0.12, height 0.12 is likely okay)
-      pushViewport(viewport(x = 0.11, y = 0.32, width = 0.22, height = 0.22))
+      pushViewport(viewport(x = 0.18, y = 0.32, width = 0.22, height = 0.22))
       draw_parking_sign(primary_color = parking_color, scale = parking_scale * 2)
       popViewport()
       
@@ -503,7 +503,7 @@ compose_scene_by_time <- function(scene_name = "Afternoon", df = my_data) {
       popViewport()
       
       # Draw hotel (width 0.18, height 0.28 is likely okay)
-      pushViewport(viewport(x = 0.9, y = 0.33, width = 0.3, height = 0.4))
+      pushViewport(viewport(x = 0.85, y = 0.33, width = 0.3, height = 0.4))
       draw_hotel(hotel_color = hotel_color, scale = hotel_scale)
       popViewport()
     }
