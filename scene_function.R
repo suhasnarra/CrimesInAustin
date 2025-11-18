@@ -44,20 +44,20 @@ create_base_scene <- function() {
 }
 
 # function that creates sky for the given time of day
-draw_scene_by_mood <- function(scene_name = "mid-day") {
+draw_scene_by_mood <- function(scene_name = "Mid-Day") {
   
   # set the name and implement base scene that's constant no matter what
-  scene_name <- tolower(scene_name)
+  scene_name <- scene_name
   p <- create_base_scene()
   
   # midnight sky
-  if (scene_name == "midnight") {
+  if (scene_name == "Midnight") {
     sky_color <- "#191970" 
     p <- p + geom_point(
       aes(x = 5.0, y = 7.0), size = 50, shape = 16, color = "white", fill = "white", alpha = 0.8
     ) 
     # pre dawn sky
-  } else if (scene_name == "pre-dawn") {
+  } else if (scene_name == "Pre-Dawn") {
     sky_color <- "#30304D" 
     p <- p + geom_rect(
       xmin = 0, xmax = 10, ymin = 3, ymax = 4.0, fill = "#FF7F50", alpha = 0.1
@@ -66,7 +66,7 @@ draw_scene_by_mood <- function(scene_name = "mid-day") {
         aes(x = 7.5, y = 6.0), size = 50, shape = 16, color = "white", fill = "white", alpha = 0.8
       ) 
     # sunrise sky
-  } else if (scene_name == "sunrise") {
+  } else if (scene_name == "Sunrise") {
     sky_color <- "#4682B4" 
     p <- p + geom_rect(
       xmin = 0, xmax = 10, ymin = 7.5, ymax = 10, fill = "#3B5998", alpha = 0.5
@@ -75,25 +75,25 @@ draw_scene_by_mood <- function(scene_name = "mid-day") {
         aes(x = 3.0, y = 3.0), size = 70, shape = 16, color = "#FF4500", fill = "#FF4500", alpha = 0.9 
       )
     # morning sky
-  } else if (scene_name == "morning") {
+  } else if (scene_name == "Morning") {
     sky_color <- "#B0E0E6" 
     p <- p + geom_point(
       aes(x = 4.0, y = 7.0), size = 60, shape = 16, color = "yellow", fill = "yellow", alpha = 0.9
     )
     # mid day sky
-  } else if (scene_name == "mid-day") {
+  } else if (scene_name == "Mid-Day") {
     sky_color <- "#ADD8E6"
     p <- p + geom_point(
       aes(x = 5.0, y = 9.5), size = 60, shape = 16, color = "yellow", fill = "yellow", alpha = 0.9
     )
     # afternoon sky  
-  } else if (scene_name == "afternoon") {
+  } else if (scene_name == "Afternoon") {
     sky_color <- "#C0E0E6" 
     p <- p + geom_point(
       aes(x = 6.0, y = 7.0), size = 60, shape = 16, color = "#FFD700", fill = "#FFD700", alpha = 0.9
     )
     # sunset sky  
-  } else if (scene_name == "sunset") {
+  } else if (scene_name == "Sunset") {
     sky_color <- "#FFDAB9" 
     p <- p + geom_rect(
       xmin = 0, xmax = 10, ymin = 3, ymax = 10, fill = "#FF6347", alpha = 0.5
@@ -102,7 +102,7 @@ draw_scene_by_mood <- function(scene_name = "mid-day") {
         aes(x = 7.0, y = 3.0), size = 60, shape = 16, color = "#FF4500", fill = "#FF4500", alpha = 0.9
       )
     # nightfall sky
-  } else if (scene_name == "nightfall") {
+  } else if (scene_name == "Nightfall") {
     sky_color <- "#284664" 
     p <- p + geom_point(
       aes(x = 2.5, y = 6.0), size = 50, shape = 16, color = "#D3D3D3", fill = "#D3D3D3", alpha = 0.7
@@ -117,7 +117,7 @@ draw_scene_by_mood <- function(scene_name = "mid-day") {
   )
   
   # lable the scence for clarity
-  p <- p + labs(title = paste("Scene:", toupper(scene_name)))
+  p <- p + labs(title = paste("Scene:", scene_name))
   
   return(p)
 }
@@ -150,13 +150,13 @@ draw_parking_sign <- function(primary_color = "#00539F",
   )
   
   v_height_pts <- convertHeight(unit(1, "npc"), "points", valueOnly = TRUE)
-  dynamic_fontsize <- v_height_pts * font_scale
+  dynamic_fontsize <- .8 * v_height_pts * font_scale
   
   # parking label
   grid.text("PARKING",
             x = 0.5, y = 0.6,
             gp = gpar(
-              col = sign_white,
+              col = "black",
               fontfamily = sign_font,
               fontface = "bold",
               fontsize = dynamic_fontsize
@@ -224,7 +224,7 @@ draw_house <- function(house_color = "red", scale = 1.0, show_grid = FALSE) {
     x = 4,
     y = sign_y_pos,
     default.units = "native",
-    gp = gpar(col = sign_text_color, fontface = "bold", cex = 1.32 * scale)
+    gp = gpar(col = "black", fontface = "bold", cex = .88 * scale)
   )
   
   # create door
@@ -251,7 +251,7 @@ draw_road <- function(road_color = "darkgray", scale = 1.0) {
   
   # main design details
   line_color <- ifelse(road_color == "yellow", "black", "yellow")
-  base_size <- 0.4
+  base_size <- 0.5
   final_size <- base_size * scale
   
   # color for the sidewalk
@@ -363,7 +363,7 @@ draw_hotel <- function(hotel_color = "#2B3A67", scale = 1.0) {
     y = unit(sign_y_pos, "npc"),
     width = unit(0.3 * scale, "npc"), 
     height = unit(0.07 * scale, "npc"),
-    gp = gpar(fill = building_color, col = "black", lwd = 2)
+    gp = gpar(fill = building_color, col = "white", lwd = 2)
   )
   
   # label hotel
@@ -371,7 +371,7 @@ draw_hotel <- function(hotel_color = "#2B3A67", scale = 1.0) {
     "HOTEL", 
     x = unit(center_x, "npc"), 
     y = unit(sign_y_pos, "npc"),
-    gp = gpar(col = sign_text_color, fontface = "bold", cex = 1.4 * scale)
+    gp = gpar(col = "black", fontface = "bold", cex = 1.4 * scale)
   )
 }
 
@@ -407,7 +407,7 @@ draw_office <- function(office_color = "gray80", scale = 1.0) {
     "OFFICE",
     x = center_x,
     y = sign_y_pos,
-    gp = gpar(col = "white", fontface = "bold", fontsize = 14 * scale)
+    gp = gpar(col = "black", fontface = "bold", fontsize = 14 * scale)
   )
   
   # window dimensions
@@ -433,7 +433,7 @@ draw_office <- function(office_color = "gray80", scale = 1.0) {
 
 
 # Main function to combine everything into one scene
-compose_scene_by_time <- function(scene_name = "afternoon", df = my_data) {
+compose_scene_by_time <- function(scene_name = "Afternoon", df = my_data) {
   
   # gets color and scale for an object
   get_object_value <- function(obj_name, column_name) {
@@ -483,27 +483,27 @@ compose_scene_by_time <- function(scene_name = "afternoon", df = my_data) {
     draw_calls = function() {
       # Draw road
       # FIX: Reduced width from 1.5 to 0.8 and height to 0.2 to prevent bleed
-      pushViewport(viewport(x = 0.5, y = 0.15, width = 0.9, height = 0.3)) 
+      pushViewport(viewport(x = 0.5, y = 0.15, width = 1.2, height = 0.4)) 
       draw_road(road_color = road_color, scale = road_scale)
       popViewport()
       
       # Draw parking sign (width 0.12, height 0.12 is likely okay)
-      pushViewport(viewport(x = 0.11, y = 0.32, width = 0.12, height = 0.12))
+      pushViewport(viewport(x = 0.11, y = 0.32, width = 0.22, height = 0.22))
       draw_parking_sign(primary_color = parking_color, scale = parking_scale * 2)
       popViewport()
       
       # Draw house (width 0.18, height 0.25 is likely okay)
-      pushViewport(viewport(x = 0.4, y = 0.34, width = 0.2, height = 0.26))
+      pushViewport(viewport(x = 0.4, y = 0.34, width = 0.3, height = 0.36))
       draw_house(house_color = house_color, scale = house_scale)
       popViewport()
       
       # Draw office (width 0.18, height 0.28 is likely okay)
-      pushViewport(viewport(x = 0.7, y = 0.32, width = 0.2, height = 0.3))
+      pushViewport(viewport(x = 0.7, y = 0.32, width = 0.3, height = 0.4))
       draw_office(office_color = office_color, scale = office_scale)
       popViewport()
       
       # Draw hotel (width 0.18, height 0.28 is likely okay)
-      pushViewport(viewport(x = 0.9, y = 0.33, width = 0.2, height = 0.3))
+      pushViewport(viewport(x = 0.9, y = 0.33, width = 0.3, height = 0.4))
       draw_hotel(hotel_color = hotel_color, scale = hotel_scale)
       popViewport()
     }
@@ -516,8 +516,8 @@ compose_scene_by_time <- function(scene_name = "afternoon", df = my_data) {
 run_crime_scene_app <- function(df_data) {
   
   word_levels <- c(
-    "pre-dawn" = 1, "sunrise" = 2, "morning" = 3, "mid-day" = 4, 
-    "afternoon" = 5, "sunset" = 6, "nightfall" = 7, "midnight" = 8
+    "Pre-Dawn" = 1, "Sunrise" = 2, "Morning" = 3, "Mid-Day" = 4, 
+    "Afternoon" = 5, "Sunset" = 6, "Nightfall" = 7, "Midnight" = 8
   )
   word_names <- names(word_levels)
   num_levels <- length(word_levels)
@@ -548,7 +548,7 @@ run_crime_scene_app <- function(df_data) {
                label = "Select a time:",
                min = min(word_levels),
                max = max(word_levels),
-               value = word_levels["afternoon"], 
+               value = word_levels["Pre-Dawn"], 
                step = 1,
                # CRITICAL: Hides the default numeric ticks/labels
                ticks = FALSE, 
@@ -617,4 +617,6 @@ run_crime_scene_app <- function(df_data) {
   shinyApp(ui = ui, server = server)
 }
 
+my_data <- read.csv("killerDF.csv")
 run_crime_scene_app(df_data = my_data)
+
