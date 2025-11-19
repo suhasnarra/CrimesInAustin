@@ -1092,9 +1092,11 @@ run_crime_scene_app <- function(df_data) {
   shinyApp(ui = ui, server = server)
 }
 
-# Load data and run app
+# Load data
 my_data <- read.csv("data/killerDF.csv")
-run_crime_scene_app(df_data = my_data)
+
+#Code to run App
+#run_crime_scene_app(df_data = my_data)
 
 ```
 
