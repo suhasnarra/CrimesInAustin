@@ -22,6 +22,7 @@ library(RSQLite)
 library(gt)
 library(shiny)
 library(grid)
+library(extrafont)
 ```
 
 # Group: Suhas Narra, Mert Esat Yercel, Max Basurto, Carson Khun
@@ -478,7 +479,7 @@ draw_parking_sign <- function(primary_color = "#00539F", scale = 1.0, font_scale
   
   sign_white <- "white"
   sign_black <- "black"
-  sign_font <- "Arial"
+  sign_font <- "sans"
   
   pushViewport(viewport(width = final_width, height = final_height))
   
