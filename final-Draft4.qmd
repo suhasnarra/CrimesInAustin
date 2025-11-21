@@ -995,8 +995,6 @@ with(summary_autogas, {
          bty = "n")
 })
 
-
-dbDisconnect(dcon)
 ```
 
 The scatter plot clearly reveals a weak positive relationship between gas prices and auto theft in Austin, a finding that is statistically and practically negligible. With an $R^2$ of 0.053, gas prices explain just 5.3% of the variation in theft rates, leaving the vast majority (94.7%) to other factors. The corresponding correlation coefficient of 0.231 confirms this is a very weak association with minimal practical significance. The data distribution makes this clear: at a price point like $3.00 per gallon, auto theft counts still ranged tremendously from under 150 to over 600 incidents per month, suggesting gas prices are simply not a meaningful predictor of behavior. Furthermore, the massive auto theft spike observed from 2019-2023 failed to align cleanly with gas price patterns during that time, strongly indicating that other factors were driving that surge. Auto theft in Austin essentially operates independently of fuel costs, and the dramatic changes were likely driven by issues like specific vehicle vulnerabilities, organized theft rings, or changes in security technology. This means monitoring gas prices is useless for the Austin Police Department; prevention strategies should focus instead on addressing the specific methods and motivations behind vehicle theft rather than broader economic conditions.
@@ -1004,3 +1002,104 @@ The scatter plot clearly reveals a weak positive relationship between gas prices
 # Key Findings
 
 Our analysis made significant progress in better understanding crime in Austin. We found it's a misconception that crime occurs more after sundown, occurrences were close to evenly split between day and night, with only early morning (3-9 AM) showing reduced activity. An overwhelming majority of crimes happen at residences and on streets. While report times are generally fast (74% within 48 hours), response times vary wildly, District 9 responds in 6.7 days while Districts 6 and 10 take over 13 days, on average. Family violence cases have increased by over 50% as a proportion of total crime since 2003. Auto theft surged dramatically from 2019-2023 (tripling in volume) before rapidly declining in 2024-2025. General theft has dropped 70% since 2008, while shoplifting remains steady at 3,000-4,000 cases annually. Surprisingly, we found minimal relationships between crime and economic indicators. Shoplifting doesn't correlate with unemployment (p-value = 0.708), and auto theft shows negligible connection to gas prices (R² = 0.045). This suggests Austin crime is driven more by opportunity and enforcement than economic conditions. These findings provide the Austin Police Department with actionable insights: addressing response time disparities across districts, maintaining consistent daytime staffing, and focusing prevention strategies on opportunity reduction rather than economic monitoring.
+
+# Appendix
+
+These are graphs that do not provide significant findings on their own. However, they provide supplemental data that has helped our analysis above.
+
+## Frequent Crimes by Time of Day
+
+```{r, message=FALSE, echo = FALSE, fig.width=20, fig.height=12}
+# Query to get crime types and time of day
+crime_time_query <- dbGetQuery(dcon, "SELECT \"Highest Offense Description\", timeOfDay, COUNT(*) as Count
+                                      FROM austin
+                                      WHERE timeOfDay != 'Unknown'
+                                      AND timeOfDay IS NOT NULL
+                                      GROUP BY \"Highest Offense Description\", timeOfDay")
+
+# Get top 10 offenses
+top_offenses_query <- dbGetQuery(dcon, "SELECT \"Highest Offense Description\", COUNT(*) as total_count
+                                        FROM austin
+                                        GROUP BY \"Highest Offense Description\"
+                                        ORDER BY total_count DESC
+                                        LIMIT 10")
+
+# Filter for top offenses and create table 
+crime_time_filtered <- crime_time_query %>%
+  filter(`Highest Offense Description` %in% top_offenses_query$`Highest Offense Description`)
+
+# Work for the mosaic plot
+tab_top <- crime_time_filtered %>%
+  pivot_wider(names_from = timeOfDay, 
+              values_from = Count, 
+              values_fill = 0) %>%
+  column_to_rownames("Highest Offense Description") %>%
+  as.matrix()
+
+wrapped_names <- sapply(rownames(tab_top), function(x) {
+  x_clean <- gsub("-", " - ", x)  
+  paste(strwrap(x_clean, width = 12), collapse = "\n")
+})
+rownames(tab_top) <- wrapped_names
+rownames(tab_top)[grepl("ASSAULT.*FAM", rownames(tab_top))] <- "ASSAULT"
+
+# Make the actual plot
+par(mar = c(6, 6, 6, 6))
+
+mosaicplot(tab_top,
+           main = "Most Frequent Crime Types by Time of Day (Austin, TX)",
+           xlab = "",
+           ylab = "",
+           col = c("darkblue", "darkgoldenrod2", "gold1", "forestgreen",
+                  "indianred3", "khaki2", "palegreen1", "steelblue2"),
+           las = 2,
+           cex.axis = 0.7)
+```
+
+## Crime by Month and District
+```{r, message=FALSE, echo = FALSE}
+# Query to get crimes by month and district
+heatmap_query <- dbGetQuery(dcon, "SELECT month, \"APD District\", COUNT(*) as Count
+                                   FROM austin
+                                   WHERE \"APD District\" IS NOT NULL 
+                                   AND \"APD District\" != ''
+                                   AND month IS NOT NULL
+                                   GROUP BY month, \"APD District\"")
+
+# Create month labels
+month_labels <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+# Work for the heat map
+heatmap_data <- heatmap_query %>%
+  mutate(month = factor(month, levels = 1:12, labels = month_labels)) %>%
+  pivot_wider(names_from = `APD District`, 
+              values_from = Count, 
+              values_fill = 0)
+
+# Make a matrix with the data
+count_matrix <- heatmap_data %>%
+  column_to_rownames("month") %>%
+  as.matrix()
+
+# Filter for districts and months with at least 1500 crimes
+count_matrix <- count_matrix[rowSums(count_matrix) >= 1500, 
+                            colSums(count_matrix) >= 1500]
+
+# Reverse month order for it to display properly on graph
+count_matrix <- count_matrix[rev(rownames(count_matrix)), ]
+
+par(mar = c(7, 6, 8, 6))  # Increased margins
+
+# Mmake the heatmap
+heatmap(count_matrix, 
+        Colv = NA, 
+        Rowv = NA,
+        col = colorRampPalette(c("pink", "red"))(50),
+        ylab = "Month",
+        xlab = "Austin, TX | District | Min. 1500 Reported Crimes | 2003-2025",
+        main = "Crime by Month and District",
+        cex.main = 0.6)
+
+dbDisconnect(dcon)
+```
