@@ -329,6 +329,10 @@ The distribution of crimes is generally evenly spread across the day, only decre
 
 Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burglary or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case. Additionally, APD may find it valuable to use this data to patrol for certain types of crimes during specific times of day.
 
+## Residential Crimes Highlight Crimes During Nightfall
+
+The plot below is a non-numeric visualization of crime frequency at five key locations during nightfall. The five locations are residential areas (the house), streets and highways (the road), offices and workplaces (the office building), parking lots and garages (the parking sign), and hotels/motels (the hotel). The bigger the locations are the more frequent crime is there. The colors of the buildings also represent crime frequency where red is most frequent, tan is moderate, and green is infrequent. We used this graph as a very simple way for out non-technical stakeholders to get key information without much effort.
+
 
 ```{r, message=FALSE, echo = FALSE}
 # killer plot
