@@ -323,7 +323,14 @@ bp_stats <- bp$stats %>%
   mutate(Statistic = c("Lower Whisker", "Q1 (25%)", "Median", "Q3 (75%)", "Upper Whisker")) %>%
   select(Statistic, everything()) %>%
   summary()
+```
 
+The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occurred after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes. This even distribution suggests that Austin's crime patterns are driven more by opportunity and population activity levels than by darkness alone. The higher crime rates during afternoon and early evening likely correlate with increased population movement, more occupied public spaces, and peak traffic times—aligning with our earlier finding that streets and residences are primary crime locations. For the Austin Police Department, this means maintaining consistent staffing levels throughout most of the day rather than concentrating resources solely during nighttime hours.
+
+Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burglary or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case. Additionally, APD may find it valuable to use this data to patrol for certain types of crimes during specific times of day.
+
+
+```{r, message=FALSE, echo = FALSE}
 # killer plot
 # Load data
 my_data <- read.csv("killerDF.csv")
@@ -708,9 +715,7 @@ compose_scene_by_time(scene_name = "Nightfall", df = my_data)()
 
 ```
 
-The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occurred after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes. This even distribution suggests that Austin's crime patterns are driven more by opportunity and population activity levels than by darkness alone. The higher crime rates during afternoon and early evening likely correlate with increased population movement, more occupied public spaces, and peak traffic times—aligning with our earlier finding that streets and residences are primary crime locations. For the Austin Police Department, this means maintaining consistent staffing levels throughout most of the day rather than concentrating resources solely during nighttime hours.
-
-Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burglary or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case. Additionally, APD may find it valuable to use this data to patrol for certain types of crimes during specific times of day.
+The APD should be focusing their resources and patrols heavily on residential neighborhoods during nightfall. They should start boosting regular patrols specifically in residential zones. Since the house is the busiest spot, it clearly suggests that opportunity-driven crimes like burglaries, thefts, or public disturbances are peaking there. The APD could launch community programs that teach people about home security and help set up neighborhood watch groups to make homes harder targets. Also, since the hotel and office have little amount of crime, the APD can afford to transfer some of the units around these areas to residential areas. The other top area for crimes during this time is streets and alleys. This continues the pattern of opportunity-driven crime as it's much easier to get away with outdoor crimes when its dark and the roads are less populated. Overall, the message is that crime during the night is mostly about targeting people and their property inside buildings, so the police need to use proactive, location-specific plans to deal with it.
 
 
 ## Response Time Disparities Across Austin Districts
