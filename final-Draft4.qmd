@@ -337,7 +337,9 @@ The plot below is a non-numeric visualization of crime frequency at five key loc
 ```{r, message=FALSE, echo = FALSE}
 # killer plot
 # Load data
-my_data <- read.csv("killerDF.csv")
+my_data <- dbGetQuery(dcon, "
+    SELECT * FROM killerDF                  
+                      ")
 
 # --- Helper Functions ---
 
