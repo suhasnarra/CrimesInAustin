@@ -2,6 +2,7 @@
 library(shiny)
 library(grid)
 library(dplyr)
+library(RSQLite)
 
 # --- Helper Functions (Provided by User) ---
 
@@ -770,6 +771,12 @@ run_crime_scene_app <- function(df_data) {
   shinyApp(ui = ui, server = server)
 }
 
+
+dcon <- dbConnect(SQLite(), dbname = "~/Documents/Stat405/405FinalData.db")
 # Load data and run app
-my_data <- read.csv("killerDF.csv")
+my_data <- dbGetQuery(dcon, "
+    SELECT * FROM killerDF                  
+                      ")
 run_crime_scene_app(df_data = my_data)
+
+dbDisconnect(dcon)
