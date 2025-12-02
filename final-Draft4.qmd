@@ -297,7 +297,7 @@ After examining what types of crimes occur most frequently, where they happen, a
 
 
 ```{r, message=FALSE, echo = FALSE}
-pieBuckets <- c("Afternoon", "Dawn", "Dusk","Evening", "Midnight","Morning","Noon","Sunrise")
+pieBuckets <- c("Afternoon", "Pre-Dawn", "Sunset","Nightfall", "Midnight","Morning","Mid-Day","Sunrise")
 
 time_query <- dbGetQuery(dcon, "SELECT timeOfDay, COUNT(*) as Count
 FROM austin
