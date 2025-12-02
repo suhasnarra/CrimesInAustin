@@ -38,7 +38,7 @@ This dataset is sourced directly from the Austin Police Department (APD) and is 
 
 ### Source: https://catalog.data.gov/dataset/key-economic-indicators
 
-This data set is a compilation that pulls from various external sources and integrates them into a single data frame. Specifically, the presence of data for the United States and regions other than Texas confirms that it was compiled from a variety of sources to provide a broader economic context. The inclusion of data beyond Texas simply means there are extra fields in the table that we don't need for a Texas-only analysis.
+This data set is a compilation that pulls from various external sources and integrates them into a single data frame. Specifically, the presence of data for the United States and regions other than Texas confirms that it was compiled from a variety of sources to provide a broader economic context. The inclusion of data beyond Texas simply means there are extra fields in the table that we don't need for a Texas-only analysis. The data is compiled by the City of Austin.
 
 ```{r, message=FALSE, echo = FALSE, warning=FALSE}
 
