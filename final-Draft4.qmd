@@ -331,7 +331,7 @@ Most of the frequent crime types occur during the daytime, which is consistent w
 
 ## Residential Crimes Highlight Crimes During Nightfall
 
-The plot below is a non-numeric visualization of crime frequency at five key locations during nightfall. The five locations are residential areas (the house), streets and highways (the road), offices and workplaces (the office building), parking lots and garages (the parking sign), and hotels/motels (the hotel). The bigger the locations are the more frequent crime is there. The colors of the buildings also represent crime frequency where red is most frequent, tan is moderate, and green is infrequent. We used this graph as a very simple way for out non-technical stakeholders to get key information without much effort.
+The plot below is a non-numeric visualization of crime frequency at five key locations during nightfall. The five locations are residential areas (the house), streets and highways (the road), offices and workplaces (the office building), parking lots and garages (the parking sign), and hotels/motels (the hotel). The bigger the locations are the more frequent crime is there. The colors of the buildings also represent crime frequency where red is most frequent, tan is moderate, and green is infrequent. We used this graph as a very simple way for our non-technical stakeholders to get key information without much effort.
 
 
 ```{r, message=FALSE, echo = FALSE}
