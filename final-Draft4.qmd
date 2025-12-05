@@ -34,15 +34,18 @@ library(extrafont)
 
 This data set is sourced directly from the Austin Police Department (APD) and is updated weekly. It is a record of every crime report filed by APD officers, with the data being entered online by the officers and subsequently stored in this database.
 
+
 ## Secondary Dataset: Key Economic Indicators in Austin 2007-2025
 
 ### Source: https://catalog.data.gov/dataset/key-economic-indicators
 
 This data set is a compilation that pulls from various external sources and integrates them into a single data frame. Specifically, the presence of data for the United States and regions other than Texas confirms that it was compiled from a variety of sources to provide a broader economic context. The inclusion of data beyond Texas simply means there are extra fields in the table that we don't need for a Texas-only analysis. The data is compiled by the City of Austin.
 
+
 ## Why Austin
 
 We selected Austin, Texas as our study location due to several factors that make it ideal for analyzing crime by itself and also in context of the local and federal economy. First, Austin's rapid population growth, nearly doubling since 2000 to over 1 million residents, has transformed it into a major tech hub known as "Silicon Hills," creating unique pressures on public safety infrastructure, which are further compounded by the fact that it is the Texas state capitol. Second, the availability of comprehensive and up to date data was crucial. The Austin Police Department provides over 20 years of crime reports updated weekly, while the City of Austin compiles extensive economic indicators from multiple sources, enabling robust spatial and temporal analysis. Third, Austin's diverse economic landscape mixing government, technology, university influence, arts, finance, and healthcare sectors allows us to examine how varied economic forces influence crime patterns. The city's documented challenges with affordability and infrastructure strain, combined with significant response time disparities across its 10 council districts (ranging from 7.1 to 13+ days), present clear opportunities for data driven improvements. Finally, Austin serves as a representative case study for other rapidly growing American cities experiencing similar tech driven expansion, making our findings broadly applicable beyond Texas. These characteristics positioned Austin as our primary choice to investigate the complex relationships between economic indicators and crime patterns while generating actionable insights for law enforcement.
+
 
 ```{r, message=FALSE, echo = FALSE, warning=FALSE}
 
@@ -51,9 +54,11 @@ We selected Austin, Texas as our study location due to several factors that make
 dcon <- dbConnect(SQLite(), dbname = "~/Documents/Stat405/405FinalData.db")
 ```
 
+
 # Key Objective
 
 Our goal is to evaluate Austin crime properties and their relationship with the Texas economy, focusing on key characteristics like time of day/year, offense types, and geographic location. By identifying patterns and relationships among these characteristics, we aim to gain a deeper understanding of crime to inform the Austin Police Department's strategies for timely and efficient crime mitigation and response. A significant part of our work involves strategically grouping variables—such as analyzing offenses by broader categories and focusing on specific times of day, rather than by the minute—to simplify data visualization. These groupings will ensure our evaluation captures general patterns and yields actionable insights for the city.
+
 
 ## Key Variables
 
@@ -65,7 +70,9 @@ Our goal is to evaluate Austin crime properties and their relationship with the 
 -   **Unemployment in Texas**: Informs on the state of the economy in Texas, allowing us to search for patterns in how crime changes when the economy does.
 -   **Retail Gas Price**: Another economic indicator allowing us to understand how crime changes when the economy does.
 
+
 ## Pre-Processing
+
 
 ### Main Dataset:
 -   Grouping times, so instead of looking at specific times we can analyze times of day. 
@@ -75,8 +82,10 @@ Our goal is to evaluate Austin crime properties and their relationship with the 
 -   Created a new column, timeOfDay, which uses the "Occured Time" column and sorts the crimes into 8 buckets, and assigns the correct label. 12am-3am is Midnight, 3am-6am is Dawn, 6am-9am is Sunrise, 9am-12pm is Morning, 12pm-3pm is Noon, 3pm-6pm is Afternoon, 6pm-9pm is Dusk, and 9pm-12pm is Evening. 
 -   Created a new column, Year, which takes Occurred Date Time and extracts the year from it as a date variable. 
 
+
 ### Secondary Dataset:
 -   Created a new column, date, which turns the values stored in the "Month" and "Year" columns from characters into the Date format.
+
 
 ## Core Crime Concerns: Theft, Burglary, and Family Disturbances
 
@@ -163,6 +172,7 @@ ggplot(grouped_counts, aes(label = Category, size = Count)) +
 
 ```
 
+
 The word cloud condenses over 440 original crime categories into about 40 broader groups, making the data easier to interpret and compare. It shows that General Theft, Burglary – Vehicle, and Family Disturbance are by far the most common reported offenses in Austin. This suggests that property-related and domestic conflicts are the most pressing daily crime concerns for the city. Offenses tied to drugs, alcohol, and fraud also appear prominently, reflecting broader social and economic dimensions of crime. Overall, the word cloud shows the diversity of crime in Austin while drawing attention to a handful of categories that may be most influential when considering their relationship with the Texas economy. This graph is a crucial starting point as our future analyses of the crimes data set will now have in context the most common types of crimes committed, and draw better conclusions as a result.
 
 
@@ -230,6 +240,7 @@ ggplot(crime_counts_df, aes(x = year, y = percentage, fill = `Location Type`)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+
 The data clearly shows that most crime is happening at people's houses and on the streets. Specifically, crime reports are increasingly centered on residences, homes, parking lots, and garages, while the relative percentage of crime occurring on highways, roads, alleys, streets, and sidewalks has been dropping since about 2013. It's notable that these three locations consistently account for the overwhelming majority of selected crimes over the entire period, indicating that most issues stem from incidents occurring in immediate personal spaces or public transport areas. There's little change observed in crimes at commercial spots like restaurants or convenience stores. This lets the Austin Police Department know that they need to be best prepared to get to neighborhoods quickly so they can respond to reports as quickly as possible.
 
 
@@ -289,6 +300,7 @@ ggplot(plot_data, aes(x = `Highest Offense Description`, y = percentage, fill = 
 
 ```
 
+
 In order to understand this graph, we must understand the different crime clearance types. "Open/Not Cleared" indicates that a crime has not been solved. "Cleared by Arrest" means that the crime was solved and an arrest was made. "Cleared by Citation" means that the crime was solved and the offender was given a citation rather than being arrested. "Exceptional Clearance" indicates that a crime was solved with enough evidence to make an arrest, but the victim did not want to prosecute the offender.
 
 We see some interesting takeaways from the data in terms of how crimes are treated when they are solved. DWI offenses are very frequently issued a citation, which likely stems from how the law dictates they be handled. Contrarily, assault with injury in family and date violence cases being issued citations at such a high rate is very surprising. We would assume that assault causing injuries would be prosecuted more heavily, but it's possible that these cases have a lower arrest rate due to victims not wanting to prosecute further. We would have to look further into the data to understand if this lack of arrests is specific to family violence or if all assault cases are treated similarly. The most surprising statistic overall is the general lack of prosecution across all crimes. One would think that auto theft, burglary of vehicles, and harassment would warrant prosecution, so it's interesting to see so many victims opt to not seek prosecution for these crimes.
@@ -329,9 +341,11 @@ bp_stats <- bp$stats %>%
   summary()
 ```
 
+
 The distribution of crimes is generally evenly spread across the day, only decreasing significantly during the times of dawn and sunrise (3-9AM). The three periods of time with the greatest amount of crime are afternoon, dusk, and evening. This was quite surprising, as we expected the data to show that most crimes occurred after sundown, however the split of crime between when it was light (dawn to afternoon) and dark (dusk to midnight) is nearly 50/50, with the light portion of the day having a majority of the crimes. This even distribution suggests that Austin's crime patterns are driven more by opportunity and population activity levels than by darkness alone. The higher crime rates during afternoon and early evening likely correlate with increased population movement, more occupied public spaces, and peak traffic times—aligning with our earlier finding that streets and residences are primary crime locations. For the Austin Police Department, this means maintaining consistent staffing levels throughout most of the day rather than concentrating resources solely during nighttime hours.
 
 Most of the frequent crime types occur during the daytime, which is consistent with the pie chart. Intuitively, DWI crimes typically occur during nighttime since people are more likely to drink at night. Interestingly, vehicular crimes like burglary or auto theft typically occur in the later parts of the day, but not very often at nighttime. This is consistent with other crimes like criminal mischief, assault, and other disturbances, but not to the same extent. This finding could serve as a jumping point into further questions about why that may be the case. Additionally, APD may find it valuable to use this data to patrol for certain types of crimes during specific times of day.
+
 
 ## Residential Crimes Highlight Crimes During Nightfall
 
@@ -725,6 +739,7 @@ compose_scene_by_time(scene_name = "Nightfall", df = my_data)()
 
 ```
 
+
 The APD should be focusing their resources and patrols heavily on residential neighborhoods during nightfall. They should start boosting regular patrols specifically in residential zones. Since the house is the busiest spot, it clearly suggests that opportunity-driven crimes like burglaries, thefts, or public disturbances are peaking there. The APD could launch community programs that teach people about home security and help set up neighborhood watch groups to make homes harder targets. Also, since the hotel and office have little amount of crime, the APD can afford to transfer some of the units around these areas to residential areas. The other top area for crimes during this time is streets and alleys. This continues the pattern of opportunity-driven crime as it's much easier to get away with outdoor crimes when its dark and the roads are less populated. Overall, the message is that crime during the night is mostly about targeting people and their property inside buildings, so the police need to use proactive, location-specific plans to deal with it.
 
 
@@ -763,9 +778,12 @@ ggplot(data = crimes_summary, aes(x = factor(District), y = `Average Response Ti
 
 ```
 
+
 There are some significant disparities in average response time across the districts, with times ranging from approximately 7.1 days in District 9 to over 13 days in Districts 6 and 10. District 9 stands out, responding to crimes significantly faster than any other, nearly half that of the slowest districts. Districts 3 and 4 also demonstrate relatively quick response times, around 9 days. External research strongly correlates faster response times with much higher crime resolution rates. This key finding suggests that District 9 is exceptionally well-positioned to effectively solve and address crimes. The geographic clustering of slow-response districts may indicate these areas are underserved by current police infrastructure, potentially located farther from stations or experiencing higher call volumes relative to available units. The Austin Police Department should consider these disparities when planning patrol routes and station locations.
 
-In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it's reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. The darker shading in Districts 1-4 suggests these areas experience the highest crime volumes consistently throughout the year. Interestingly, the relatively uniform coloring across months indicates that seasonal variation is minimal, crime remains fairly constant year-round rather than spiking during particular seasons. This finding complements our earlier discovery that crime is evenly distributed throughout the day. For the Austin Police Department, this means maintaining consistent year-round staffing in these high-crime districts rather than adjusting seasonally. We can use this information to further explore the interactions crime has with the general economy in these areas.
+In general, the displayed districts are the only districts in Austin with any significant crime. All districts not displayed have at most an average of 5.68 crimes per month reported. While this seems moderately high, the dataset includes crimes like petty theft, false alarms, and civil disturbance which are ultimately not that serious compared to widespread crime. Thus, it's reasonable to say that the highest concentration of crime in Austin is in districts 1-8, 88, D, and S. 
+
+The darker shading in Districts 1-4 suggests these areas experience the highest crime volumes consistently throughout the year. Interestingly, the relatively uniform coloring across months indicates that seasonal variation is minimal, crime remains fairly constant year-round rather than spiking during particular seasons. This finding complements our earlier discovery that crime is evenly distributed throughout the day. For the Austin Police Department, this means maintaining consistent year-round staffing in these high-crime districts rather than adjusting seasonally. We can use this information to further explore the interactions crime has with the general economy in these areas.
 
 
 ## Analyzing the Trends of Austin's Most Common Crimes
@@ -776,6 +794,7 @@ Having established the foundational patterns of crime in Austin, where it occurs
 ## Stable Shoplifting and the Crisis of Auto Vulnerability
 
 Of all the crimes, theft occurs quite frequently, leading to a variety of types of theft occurring. Our earlier analysis showed that General Theft and Burglary-Vehicle rank among the most common crimes in Austin. In this graph we look to better understand the most common types of theft, how often they occur, and if there are any patterns over time that might correlate with economic conditions.
+
 
 ```{r,  message=FALSE, echo = FALSE}
 filtered_theft_summary <- dbGetQuery(dcon, "SELECT year, \"Highest Offense Description\" as theft_type, COUNT(*) as total_thefts
@@ -850,12 +869,14 @@ ggplot(combined_theft_data, aes(x = year, y = total_thefts, group = theft_type, 
 
 ```
 
-The graph reveals a dramatic shift in Austin's theft landscape over the past two decades. General Theft dominated from 2003 to 2008, peaking at over 15,000 incidents before a steep post-2009 decline, dropping nearly 70% by 2025 which was a reduction that may reflect genuine change or improved crime categorization. The most striking trend is the surge in Auto Theft starting around 2019, more than tripling from 2,000 to over 6,500 cases by 2023, aligning with nationwide trends linked to specific vehicle vulnerabilities and organized theft rings. The subsequent sharp decline in 2024-2025 suggests countermeasures may be working. Shoplifting, conversely, shows remarkable stability, maintaining 2,000-4,000 cases annually since 2011 despite major changes in retail and security. Smaller categories, like bicycle and license plate theft, also remain remarkably consistent (1,000–1,500 cases each), confirming the persistence of low-value, essential item theft. Overall, while total theft volumes have declined since their 2008 peak, the nature of theft has evolved, shifting from general theft toward more specific, opportunistic crimes like auto theft. This data emphasizes the need for the Austin Police Department to employ targeted approaches, such as auto theft task forces and sustained retail partnership programs.
+
+The graph reveals a dramatic shift in Austin's theft landscape over the past two decades. General Theft dominated from 2003 to 2008, peaking at over 15,000 incidents before a steep post-2009 decline, dropping nearly 70% by 2025 which was a reduction that may reflect genuine change or improved crime categorization. The most striking trend is the surge in Auto Theft starting around 2019, more than tripling from 2,000 to over 6,500 cases by 2023, aligning with nationwide trends linked to specific vehicle vulnerabilities and organized theft rings. The subsequent sharp decline in 2024-2025 suggests countermeasures may be working. 
+
+Shoplifting, conversely, shows remarkable stability, maintaining 2,000-4,000 cases annually since 2011 despite major changes in retail and security. Smaller categories, like bicycle and license plate theft, also remain remarkably consistent (1,000–1,500 cases each), confirming the persistence of low-value, essential item theft. Overall, while total theft volumes have declined since their 2008 peak, the nature of theft has evolved, shifting from general theft toward more specific, opportunistic crimes like auto theft. This data emphasizes the need for the Austin Police Department to employ targeted approaches, such as auto theft task forces and sustained retail partnership programs.
 
 ## Uncovering the Underlying Drivers in Austin's Crime Patterns
 
 Now that we've examined specific crime types and their individual trends, we want to explore how these patterns might relate to broader economic conditions in Texas. Economic factors like unemployment, gas prices, and financial stress can influence criminal behavior in complex ways. The following sections will analyze how Austin's crime patterns correlate with key Texas economic indicators. By understanding these relationships, we can better predict when certain crimes might increase and help the Austin Police Department anticipate resource needs based on economic forecasts. This economic dimension adds another layer to our analysis, moving beyond just describing crime patterns to understanding potential underlying drivers.
-
 
 
 # Shoplifting Trends Disconnected from Economic Indicators
@@ -951,10 +972,12 @@ with(summary_shopL_unem, {
 
 ```
 
+
 The data confirms a negligible relationship between shoplifting and Texas unemployment rates. The regression line's near-zero slope indicates that a 1% unemployment rise corresponds to a practically insignificant increase of fewer than two shoplifting cases per month, trivial compared to Austin's 250-300 incident baseline. A high p-value of 0.917 means unemployment holds no meaningful predictive power. This is visually evidenced by the massive data spread: at 5-6% unemployment, shoplifting counts vary wildly (under 100 to over 450 cases). This inconsistency, along with shoplifting's surprising stability since 2011 despite major economic shifts, suggests the crime is fundamentally driven by opportunity rather than economic necessity.
 
 
 ## Auto Theft is Independent of Gas Prices in Austin
+
 Our earlier analysis showed that auto theft experienced a dramatic surge from 2019 to 2023, more than tripling before declining sharply in 2024-2025. We wanted to explore whether this pattern might correlate with gas prices, since higher fuel costs could theoretically either deter theft (due to operating costs) or encourage it (if vehicles become more valuable or if economic stress increases). By examining the relationship between auto theft incidents and Texas gas prices, we can test whether fuel costs influence vehicle-related crime rates.
 
 
@@ -1003,16 +1026,30 @@ with(summary_autogas, {
 
 ```
 
-The scatter plot clearly reveals a weak positive relationship between gas prices and auto theft in Austin, a finding that is statistically and practically negligible. With an $R^2$ of 0.053, gas prices explain just 5.3% of the variation in theft rates, leaving the vast majority (94.7%) to other factors. The corresponding correlation coefficient of 0.231 confirms this is a very weak association with minimal practical significance. The data distribution makes this clear: at a price point like $3.00 per gallon, auto theft counts still ranged tremendously from under 150 to over 600 incidents per month, suggesting gas prices are simply not a meaningful predictor of behavior. Furthermore, the massive auto theft spike observed from 2019-2023 failed to align cleanly with gas price patterns during that time, strongly indicating that other factors were driving that surge. Auto theft in Austin essentially operates independently of fuel costs, and the dramatic changes were likely driven by issues like specific vehicle vulnerabilities, organized theft rings, or changes in security technology. This means monitoring gas prices is useless for the Austin Police Department; prevention strategies should focus instead on addressing the specific methods and motivations behind vehicle theft rather than broader economic conditions.
+
+The scatter plot clearly reveals a weak positive relationship between gas prices and auto theft in Austin, a finding that is statistically and practically negligible. With an $R^2$ of 0.053, gas prices explain just 5.3% of the variation in theft rates, leaving the vast majority (94.7%) to other factors. The corresponding correlation coefficient of 0.231 confirms this is a very weak association with minimal practical significance. The data distribution makes this clear: at a price point like $3.00 per gallon, auto theft counts still ranged tremendously from under 150 to over 600 incidents per month, suggesting gas prices are simply not a meaningful predictor of behavior. 
+
+Furthermore, the massive auto theft spike observed from 2019-2023 failed to align cleanly with gas price patterns during that time, strongly indicating that other factors were driving that surge. Auto theft in Austin essentially operates independently of fuel costs, and the dramatic changes were likely driven by issues like specific vehicle vulnerabilities, organized theft rings, or changes in security technology. This means monitoring gas prices is useless for the Austin Police Department; prevention strategies should focus instead on addressing the specific methods and motivations behind vehicle theft rather than broader economic conditions.
+
 
 # Key Findings
 
-Our analysis made significant progress in better understanding crime in Austin. We found it's a misconception that crime occurs more after sundown, occurrences were close to evenly split between day and night, with only early morning (3-9 AM) showing reduced activity. An overwhelming majority of crimes happen at residences and on streets. While report times are generally fast (74% within 48 hours), response times vary wildly, District 9 responds in 7.1 days while Districts 6 and 10 take over 13 days, on average. Family violence cases have increased by over 50% as a proportion of total crime since 2003. Auto theft surged dramatically from 2019-2023 (tripling in volume) before rapidly declining in 2024-2025. General theft has dropped 70% since 2008, while shoplifting remains steady at 3,000-4,000 cases annually. Surprisingly, we found minimal relationships between crime and economic indicators. Shoplifting doesn't correlate with unemployment (p-value = 0.708), and auto theft shows negligible connection to gas prices (R² = 0.045). This suggests Austin crime is driven more by opportunity and enforcement than economic conditions. These findings provide the Austin Police Department with actionable insights: addressing response time disparities across districts, maintaining consistent daytime staffing, and focusing prevention strategies on opportunity reduction rather than economic monitoring. By understanding that crime patterns are largely independent of economic fluctuations, the APD can allocate resources more efficiently and develop targeted interventions based on location, time, and crime type rather than reactive economic-based strategies. Ultimately, our analysis demonstrates that effective crime prevention in Austin requires addressing structural factors like patrol coverage and response infrastructure rather than waiting for economic indicators to signal potential crime waves.
+Our analysis made significant progress in better understanding crime in Austin. We found it's a misconception that crime occurs more after sundown, occurrences were close to evenly split between day and night, with only early morning (3-9 AM) showing reduced activity. An overwhelming majority of crimes happen at residences and on streets. While report times are generally fast (74% within 48 hours), response times vary wildly, District 9 responds in 7.1 days while Districts 6 and 10 take over 13 days, on average. Family violence cases have increased by over 50% as a proportion of total crime since 2003. Auto theft surged dramatically from 2019-2023 (tripling in volume) before rapidly declining in 2024-2025. General theft has dropped 70% since 2008, while shoplifting remains steady at 3,000-4,000 cases annually. 
+
+Surprisingly, we found minimal relationships between crime and economic indicators. Shoplifting doesn't correlate with unemployment (p-value = 0.708), and auto theft shows negligible connection to gas prices (R² = 0.045). This suggests Austin crime is driven more by opportunity and enforcement than economic conditions. These findings provide the Austin Police Department with actionable insights: addressing response time disparities across districts, maintaining consistent daytime staffing, and focusing prevention strategies on opportunity reduction rather than economic monitoring. 
+
+By understanding that crime patterns are largely independent of economic fluctuations, the APD can allocate resources more efficiently and develop targeted interventions based on location, time, and crime type rather than reactive economic-based strategies. Ultimately, our analysis demonstrates that effective crime prevention in Austin requires addressing structural factors like patrol coverage and response infrastructure rather than waiting for economic indicators to signal potential crime waves.
+
 
 # Recommendations for Austin Police Department
 
-Based on our findings, we recommend the Austin Police Department implement three strategic initiatives to optimize resource allocation and improve public safety outcomes. First, address the significant response time disparities between districts by reassessing station placement and patrol routing, particularly in Districts 6 and 10 where response times exceed 13 days compared to District 9's 7.1-day average. This could involve redistributing resources from lower-crime districts or establishing satellite stations in underserved areas. Second, maintain consistent staffing levels throughout daytime hours rather than concentrating resources during nighttime, as our data shows crime is evenly distributed across day and night with peak activity during afternoon and evening hours. Third, shift prevention strategies from economic monitoring to opportunity reduction, focusing on environmental design and situational crime prevention in high-risk locations like residential areas and streets. Since our analysis found negligible correlation between crime and economic indicators (unemployment, gas prices), resources currently allocated to economic-based prediction models should be redirected toward targeted interventions such as enhanced neighborhood watch programs, improved street lighting, and increased visibility patrols in residential zones. These evidence-based adjustments would enable the APD to proactively address crime patterns rather than reactively responding to incidents, ultimately improving both crime prevention and community safety across all Austin districts.
+Based on our findings, we recommend the Austin Police Department implement three strategic initiatives to optimize resource allocation and improve public safety outcomes. First, address the significant response time disparities between districts by reassessing station placement and patrol routing, particularly in Districts 6 and 10 where response times exceed 13 days compared to District 9's 7.1-day average. This could involve redistributing resources from lower-crime districts or establishing satellite stations in underserved areas. 
 
+Second, maintain consistent staffing levels throughout daytime hours rather than concentrating resources during nighttime, as our data shows crime is evenly distributed across day and night with peak activity during afternoon and evening hours. 
+
+Third, shift prevention strategies from economic monitoring to opportunity reduction, focusing on environmental design and situational crime prevention in high-risk locations like residential areas and streets. Since our analysis found negligible correlation between crime and economic indicators (unemployment, gas prices), resources currently allocated to economic-based prediction models should be redirected toward targeted interventions such as enhanced neighborhood watch programs, improved street lighting, and increased visibility patrols in residential zones. These evidence-based adjustments would enable the APD to proactively address crime patterns rather than reactively responding to incidents, ultimately improving both crime prevention and community safety across all Austin districts.
+
+\newpage
 # Appendix
 
 These are graphs that do not provide significant findings on their own. However, they provide supplemental data that has helped our analysis above.
